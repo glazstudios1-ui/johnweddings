@@ -77,10 +77,10 @@ if(f){
     fetch('https://api.web3forms.com/submit',{method:'POST',body:fd,headers:{'Accept':'application/json'}})
       .then(function(r){return r.json()})
       .then(function(d){
-        if(!d.success)throw 0;
+        if(!d.success)throw new Error(d.message||'rejected');
         f.reset();msg.textContent='Thank you for contacting me!';msg.style.display='block';
       })
-      .catch(function(){msg.textContent='Something went wrong. Please WhatsApp me on +201066600848.';msg.style.display='block'})
+      .catch(function(err){msg.textContent='Something went wrong ('+(err&&err.message?err.message:'network')+'). Please WhatsApp me on +201066600848.';msg.style.display='block'})
       .then(function(){btn.disabled=false});
   });
 }
