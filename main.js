@@ -65,15 +65,21 @@ if(gal){
   document.addEventListener('keydown',function(e){if(!lb.classList.contains('on'))return;if(e.key==='Escape')lb.classList.remove('on');if(e.key==='ArrowLeft')open(li-1);if(e.key==='ArrowRight')open(li+1)});
 }
 
-/* booking form */
+/* booking form (Web3Forms) */
 var f=$('#booking-form');
 if(f){
   f.addEventListener('submit',function(e){
     e.preventDefault();
-    var body=new URLSearchParams(new FormData(f)).toString(),msg=$('.form-msg');
-    var btn=$('button',f);btn.disabled=true;
-    fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
-      .then(function(r){if(!r.ok)throw 0;f.reset();msg.textContent='Thank you for contacting me!';msg.style.display='block'})
+    var msg=$('.form-msg'),btn=$('button',f);
+    if(f.elements['surname']&&f.elements['surname'].value){return}
+    btn.disabled=true;
+    var fd=new FormData(f);fd.delete('surname');
+    fetch('https://api.web3forms.com/submit',{method:'POST',body:fd,headers:{'Accept':'application/json'}})
+      .then(function(r){return r.json()})
+      .then(function(d){
+        if(!d.success)throw 0;
+        f.reset();msg.textContent='Thank you for contacting me!';msg.style.display='block';
+      })
       .catch(function(){msg.textContent='Something went wrong. Please WhatsApp me on +201066600848.';msg.style.display='block'})
       .then(function(){btn.disabled=false});
   });
