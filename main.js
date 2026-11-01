@@ -95,8 +95,7 @@ if(f){
   if(n&&nameEl)nameEl.value=n;
   if(ph&&phEl)phEl.value=ph;
   if(!pkg)return;
-  var opt=[].slice.call(pk.options).filter(function(o){return o.value===pkg})[0];
-  if(opt)pk.value=pkg;
+  pk.value='Photography — '+pkg;
   var labels={hour:'Extra hour',photographer:'Extra photographer'},ex=[];
   (q.get('extras')||'').split(',').forEach(function(x){var p=x.split(':');if(labels[p[0]]&&+p[1]>0)ex.push((+p[1]>1?p[1]+'× ':'')+labels[p[0]])});
   var egp=function(v){return 'EGP '+Number(v||0).toLocaleString('en-US')},tot=q.get('total'),dep=q.get('deposit');
