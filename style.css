@@ -204,3 +204,28 @@ a{color:inherit;text-decoration:none}
  .pk .grid{grid-template-columns:1fr}
 }
 @media(min-width:769px){.car-nav{display:none}}
+
+/* ---- booking (professional form) ---- */
+.book .bsub{margin:14px auto 0;max-width:520px;color:#b9b9b9;font-size:13px}
+.sel{width:640px;max-width:100%;margin:36px auto 0;border:1px solid #3d3d3d;background:#262626;padding:20px 24px;text-align:left}
+.sel .t{font-family:Montserrat,sans-serif;font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;color:#a9a9a9;margin-bottom:10px}
+.sel .r{display:flex;justify-content:space-between;gap:20px;padding:7px 0;border-bottom:1px solid #353535;font-size:13px}
+.sel .r:last-child{border-bottom:0}
+.sel .r b{font-weight:400;color:#fff}.sel .r span{color:#b5b5b5}
+.sel .tot{font-size:15px}
+.bform{width:640px;max-width:100%;margin:28px auto 0;text-align:left;padding:38px 40px 42px;border:1px solid #333;background:#262626}
+.sel+.bform{margin-top:14px}
+.bform .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px 22px}
+.bform .full{grid-column:1/-1}
+.bform .fld{margin:0}
+.bform .fld label{display:flex;justify-content:space-between;align-items:baseline;text-align:left;font-family:Montserrat,sans-serif;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:#b3b3b3;margin-bottom:8px;line-height:16px}
+.bform .fld label i{font-style:normal;color:#888}
+.bform .fld label em{font-style:normal;color:#777;letter-spacing:.5px;text-transform:none;font-family:Lora,serif;font-size:11px}
+.bform .fld input,.bform .fld select,.bform .fld textarea{display:block;width:100%;height:48px;background:#1c1c1c;border:1px solid #3d3d3d;border-radius:3px;color:#fff;font-family:Lora,serif;font-size:14px;text-align:left;padding:0 14px;outline:none;transition:border-color .2s;color-scheme:dark}
+.bform .fld textarea{height:auto;padding:12px 14px;resize:vertical;line-height:1.5}
+.bform .fld select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%23999' stroke-width='1.5'%3E%3Cpath d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px}
+.bform .fld input:focus,.bform .fld select:focus,.bform .fld textarea:focus{border-color:#fff}
+.bform .fld input::placeholder,.bform .fld textarea::placeholder{color:#707070}
+.bform .btn{margin-top:30px;width:100%;height:52px}
+.bform .form-msg{text-align:center}
+@media(max-width:640px){.bform{padding:26px 20px 30px}.bform .grid2{grid-template-columns:1fr}.sel{padding:16px 18px}}

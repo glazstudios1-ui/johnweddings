@@ -84,4 +84,32 @@ if(f){
       .then(function(){btn.disabled=false});
   });
 }
+
+/* booking: pre-fill from the package page */
+(function(){
+  var sel=document.getElementById('sel'),pk=document.getElementById('f-package');
+  if(!sel||!pk)return;
+  var q=new URLSearchParams(location.search),pkg=q.get('package');
+  var n=q.get('name'),ph=q.get('phone');
+  var nameEl=document.getElementById('f-Groom-Bride'),phEl=document.getElementById('f-Number-phone');
+  if(n&&nameEl)nameEl.value=n;
+  if(ph&&phEl)phEl.value=ph;
+  if(!pkg)return;
+  var opt=[].slice.call(pk.options).filter(function(o){return o.value===pkg})[0];
+  if(opt)pk.value=pkg;
+  var labels={hour:'Extra hour',photographer:'Extra photographer'},ex=[];
+  (q.get('extras')||'').split(',').forEach(function(x){var p=x.split(':');if(labels[p[0]]&&+p[1]>0)ex.push((+p[1]>1?p[1]+'× ':'')+labels[p[0]])});
+  var egp=function(v){return 'EGP '+Number(v||0).toLocaleString('en-US')},tot=q.get('total'),dep=q.get('deposit');
+  var esc=function(v){return String(v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+  sel.innerHTML='<div class="t">Your selection</div>'
+    +'<div class="r"><span>Package</span><b>Photography — '+esc(pkg)+'</b></div>'
+    +'<div class="r"><span>Add-ons</span><b>'+(ex.length?esc(ex.join(', ')):'None')+'</b></div>'
+    +(tot?'<div class="r tot"><span>Estimated total</span><b>'+egp(tot)+'</b></div>':'')
+    +(dep?'<div class="r"><span>Deposit (50%)</span><b>'+egp(dep)+'</b></div>':'');
+  sel.hidden=false;
+  document.getElementById('f-extras').value=ex.length?ex.join(', '):'None';
+  document.getElementById('f-total').value=tot?egp(tot):'';
+  document.getElementById('f-deposit').value=dep?egp(dep):'';
+  document.getElementById('f-ref').value=q.get('ref')||'';
+})();
 })();
