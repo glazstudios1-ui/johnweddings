@@ -72,8 +72,7 @@ if(f){
   var hasPkg=!!Q.get('package'),proofEl=document.getElementById('f-proof');
   /* deposit box */
   if(hasPkg&&Q.get('deposit')){document.getElementById('pamt-wrap').hidden=false;document.getElementById('pamt').textContent='EGP '+Number(Q.get('deposit')).toLocaleString('en-US');}
-  else document.getElementById('pay-desc').textContent='Transfer the 50% deposit through InstaPay and upload the screenshot. If you have not chosen a package yet, we will confirm the exact amount with you first.';
-  if(hasPkg){proofEl.required=true;document.getElementById('proof-req').textContent='required';}
+  else document.getElementById('pay-desc').textContent='To reserve your date, transfer the 50% deposit through InstaPay and upload the screenshot. Your date is only held once the deposit is paid. If you have not chosen a package yet or would like to talk first, send the form without it and we will call you.';
   var cpb=document.getElementById('ipa-copy');
   if(cpb)cpb.addEventListener('click',function(){var t=document.getElementById('ipa').textContent;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){cpb.textContent='Copied'},function(){window.prompt('Copy',t)});setTimeout(function(){cpb.textContent='Copy'},1600)});
 
@@ -104,11 +103,11 @@ if(f){
         .then(function(r){if(!r.ok)throw new Error('save');return r.json()}).then(function(id){bookingId=id});
     });
     step.then(function(){
-      fd.set('Payment screenshot',proofUrl||'(not uploaded)');fd.set('Booking ID',bookingId);
+      fd.set('Payment screenshot',proofUrl||'(not uploaded)');fd.set('Payment status',proofUrl?'Deposit screenshot uploaded - please verify':'NO DEPOSIT YET - client may want a call first');fd.set('Booking ID',bookingId);
       return fetch('https://api.web3forms.com/submit',{method:'POST',body:fd,headers:{'Accept':'application/json'}}).catch(function(){});
     }).then(function(){
       f.reset();document.getElementById('f-package').value=hasPkg?Q.get('package')?'Photography — '+Q.get('package'):'':'No package selected (booked directly)';
-      msg.textContent='Thank you! We received your request. Your date is confirmed as soon as we verify your deposit, and we will contact you shortly.';
+      msg.textContent=proofUrl?'Thank you! We received your request and your payment screenshot. Your date is confirmed as soon as we verify the deposit, and we will contact you shortly.':'Thank you! We received your request and will contact you shortly. Please note that your date is only reserved once the 50% deposit is paid.';
     }).catch(function(err){
       msg.textContent='Something went wrong ('+(err&&err.message?err.message:'network')+'). Please WhatsApp me on +201066600848.';
     }).then(function(){btn.disabled=false});

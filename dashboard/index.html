@@ -214,7 +214,7 @@ $('#t-calendar').addEventListener('click', function (e) {
 function drawRequests() {
   var list = D.bookings.filter(function (b) { return b.status === 'pending'; }).sort(function (a, b) { return a.created_at < b.created_at ? 1 : -1; });
   $('#t-requests').innerHTML = '<h2>Waiting for deposit confirmation (' + list.length + ')</h2>' + (list.length ? list.map(function (b) {
-    return '<div class="card req">' + (b.proof_url ? '<img class="shot" src="' + esc(b.proof_url) + '" alt="Payment screenshot" data-zoom="' + esc(b.proof_url) + '">' : '<div class="noshot">No payment screenshot</div>') +
+    return '<div class="card req">' + (b.proof_url ? '<img class="shot" src="' + esc(b.proof_url) + '" alt="Payment screenshot" data-zoom="' + esc(b.proof_url) + '">' : '<div class="noshot">No payment yet<br>(may want a call first)</div>') +
       '<div><h3>' + esc(b.couple) + '</h3><div class="muted">Sent ' + new Date(b.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</div>' +
       '<div class="kv"><span>Wedding date</span><b>' + fmtDate(b.wedding_date) + '</b><span>Venue</span><b>' + esc(b.venue || '—') + '</b>' +
       '<span>Phone</span><b><a href="tel:' + esc(b.phone) + '">' + esc(b.phone || '—') + '</a> · <a href="' + waLink(b.phone) + '" target="_blank" rel="noopener">WhatsApp</a></b>' +
