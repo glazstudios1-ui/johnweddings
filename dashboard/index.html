@@ -162,10 +162,11 @@ async function load() {
   var r = await Promise.all([
     sb.from('bookings').select('*').order('wedding_date', { ascending: true }),
     sb.from('payments').select('*').order('paid_at', { ascending: true }),
-    sb.from('package_links').select('*').order('created_at', { ascending: false })
+    sb.from('package_links').select('*').order('created_at', { ascending: false }),
+    sb.from('wedding_details').select('*')
   ]);
   if (r[0].error) { toast('Could not load data: ' + r[0].error.message); }
-  D.bookings = r[0].data || []; D.payments = r[1].data || []; D.links = r[2].data || [];
+  D.bookings = r[0].data || []; D.payments = r[1].data || []; D.links = r[2].data || []; D.details = r[3] && r[3].data ? r[3].data : [];
 }
 
 /* ---------- tabs ---------- */
@@ -238,6 +239,65 @@ function modal(html) { var m = $('#mask'); m.innerHTML = '<div class="modal">' +
 function closeModal() { $('#mask').hidden = true; $('#mask').innerHTML = ''; }
 $('#mask').addEventListener('click', function (e) { if (e.target === this || e.target.closest('[data-close]')) closeModal(); });
 
+
+/* ---------- wedding details link ---------- */
+async function detailsCall(id, send) {
+  var r = await sb.functions.invoke('send-thanks', { body: { action: 'details', booking_id: String(id), send: !!send } });
+  if (r.error) {
+    var m = r.error.message || 'failed';
+    try { var j = await r.error.context.json(); m = (j.error || m) + (j.detail ? ': ' + String(j.detail).slice(0, 120) : ''); } catch (e) {}
+    throw new Error(m);
+  }
+  return r.data;
+}
+function copyText(t, ok) { (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { toast(ok || 'Copied'); }, function () { window.prompt('Copy:', t); }); }
+function wdOf(id) { return (D.details || []).find(function (x) { return String(x.booking_id) === String(id); }); }
+function wdState(w) { return !w ? 'Not created yet' : w.submitted_at ? 'Client filled it in' : w.link_sent_at ? 'Email sent, waiting for the client' : 'Link created, not emailed'; }
+function igs(d) {
+  var a = [];
+  if (d.bride && d.bride.ig) a.push(['Bride' + (d.bride.name ? ' ' + d.bride.name : ''), d.bride.ig]);
+  if (d.groom && d.groom.ig) a.push(['Groom' + (d.groom.name ? ' ' + d.groom.name : ''), d.groom.ig]);
+  (d.vendors || []).forEach(function (v) { if (v.ig) a.push([(v.role || '') + (v.name ? ' · ' + v.name : ''), v.ig]); });
+  return a;
+}
+function detailsView(w) {
+  var d = w.data || {}; if (!w.submitted_at) return '';
+  var tl = (d.timeline || []).map(function (h, i) {
+    var t = d.start ? (function () { var p = d.start.split(':'), hh = (parseInt(p[0], 10) + i) % 24; return ('0' + hh).slice(-2) + ':' + p[1]; })() : 'Hour ' + (i + 1);
+    return (h.what || h.where) ? '<div class="pay-row"><span><b>' + esc(t) + '</b> · ' + esc(h.what || '') + (h.where ? ' <span class="muted">@ ' + esc(h.where) + '</span>' : '') + '</span></div>' : '';
+  }).join('');
+  var ig = igs(d);
+  return '<div style="margin:6px 0 20px"><label>Instagram accounts to tag</label>' +
+    (ig.length ? ig.map(function (x) { return '<div class="pay-row"><span>' + esc(x[0]) + '</span><span><a href="https://www.instagram.com/' + esc(x[1]) + '" target="_blank" rel="noopener">@' + esc(x[1]) + '</a></span></div>'; }).join('') : '<div class="muted" style="padding:8px 0">None yet.</div>') +
+    (ig.length ? '<div class="acts" style="margin-top:8px"><button class="btn ghost sm" id="w-copyig">Copy all @accounts</button></div>' : '') +
+    '<label style="margin-top:14px">Hour by hour</label>' + (tl || '<div class="muted" style="padding:8px 0">Nothing filled in.</div>') +
+    (d.notes ? '<label style="margin-top:14px">Notes from the client</label><div style="white-space:pre-wrap;padding:6px 0">' + esc(d.notes) + '</div>' : '') + '</div>';
+}
+function detailsSection(b) {
+  if (b.status !== 'confirmed') return '';
+  var w = wdOf(b.id);
+  return '<label>Wedding details link — ' + esc(wdState(w)) + '</label>' +
+    '<div class="acts" style="margin:6px 0 14px"><button class="btn sm" id="w-send">' + (w && w.link_sent_at ? 'Email the link again' : 'Email the link to the client') + '</button>' +
+    '<button class="btn ghost sm" id="w-copy">Copy link</button>' +
+    (w ? '<button class="btn ghost sm" id="w-lock">' + (w.locked ? 'Unlock editing' : 'Lock editing') + '</button>' : '') + '</div>' +
+    (w ? detailsView(w) : '');
+}
+function wireDetails(b) {
+  var id = b.id, s = $('#w-send'), c = $('#w-copy'), l = $('#w-lock'), ci = $('#w-copyig');
+  if (s) s.onclick = async function () {
+    if (!b.email) return toast('This booking has no email.');
+    this.disabled = true;
+    try { await detailsCall(id, true); toast('Email sent to ' + b.email); await load(); render(); openBooking(id); }
+    catch (e) { this.disabled = false; toast('Could not send: ' + e.message); }
+  };
+  if (c) c.onclick = async function () { try { var r = await detailsCall(id, false); copyText(r.link, 'Link copied'); await load(); } catch (e) { toast('Error: ' + e.message); } };
+  if (l) l.onclick = async function () {
+    var w = wdOf(id); var u = await sb.from('wedding_details').update({ locked: !w.locked }).eq('booking_id', String(id));
+    if (u.error) return toast('Error: ' + u.error.message); await load(); openBooking(id);
+  };
+  if (ci) ci.onclick = function () { var w = wdOf(id); copyText(igs(w.data || {}).map(function (x) { return '@' + x[1]; }).join(' '), 'Accounts copied'); };
+}
+
 function confirmModal(id) {
   var b = D.bookings.find(function (x) { return x.id === id; });
   var clash = D.bookings.filter(function (x) { return x.id !== id && x.status === 'confirmed' && x.wedding_date && x.wedding_date === b.wedding_date; });
@@ -245,6 +305,7 @@ function confirmModal(id) {
     (clash.length ? '<p style="color:var(--warn);margin-bottom:14px">Careful: ' + esc(clash[0].couple) + ' is already confirmed on this date.</p>' : '') +
     '<div class="g"><div><label>Deposit you received (EGP)</label><input id="c-amt" type="number" min="1" value="' + (b.deposit_due || '') + '"></div>' +
     '<div><label>Total price (EGP)</label><input id="c-tot" type="number" min="0" value="' + (b.total_amount || '') + '"></div></div>' +
+    '<label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:14px;margin:6px 0 14px"><input id="c-mail" type="checkbox" checked style="width:auto"> Email the client the wedding-details link</label>' +
     '<div class="acts"><button class="btn ok" id="c-go">Confirm &amp; add to calendar</button><button class="btn ghost" data-close>Cancel</button></div>');
   $('#c-go').onclick = async function () {
     var amt = parseInt($('#c-amt').value, 10), tot = parseInt($('#c-tot').value, 10);
@@ -255,7 +316,9 @@ function confirmModal(id) {
     if (p.error) { this.disabled = false; return toast('Error: ' + p.error.message); }
     var u = await sb.from('bookings').update({ status: 'confirmed', confirmed_at: new Date().toISOString(), total_amount: tot || b.total_amount }).eq('id', id);
     if (u.error) { this.disabled = false; return toast('Error: ' + u.error.message); }
-    closeModal(); toast('Confirmed. Added to your calendar.'); await load(); render();
+    var sendMail = $('#c-mail') && $('#c-mail').checked, note = 'Confirmed. Added to your calendar.';
+    if (sendMail && b.email) { try { await detailsCall(id, true); note += ' Details link emailed.'; } catch (e) { note += ' (Email not sent: ' + e.message + ')'; } }
+    closeModal(); toast(note); await load(); render();
   };
 }
 async function setStatus(id, status, ask) {
@@ -282,6 +345,7 @@ function openBooking(id) {
     '<div><label>Wedding date</label><input id="d-date" type="date" value="' + esc(b.wedding_date || '') + '"></div>' +
     '<div class="full"><label>Notes</label><textarea id="d-notes" rows="2">' + esc(b.notes || '') + '</textarea></div></div>' +
     '<div class="acts" style="margin-bottom:20px"><button class="btn sm" id="d-save">Save changes</button></div>' +
+    detailsSection(b) +
     '<label>Payments — paid ' + egp(pd) + ' · remaining <span class="' + (rem > 0 ? 'rem' : 'done') + '">' + egp(Math.max(rem, 0)) + '</span></label>' +
     (pays.map(function (p) { return '<div class="pay-row"><span>' + fmtDate(p.paid_at) + ' · ' + esc(p.kind) + (p.note ? ' · ' + esc(p.note) : '') + '</span><span><b>' + egp(p.amount) + '</b> <button class="btn ghost sm" data-delpay="' + p.id + '">✕</button></span></div>'; }).join('') || '<div class="muted" style="padding:8px 0">No payments recorded.</div>') +
     '<div class="g" style="margin-top:14px"><div><label>Add payment (EGP)</label><input id="d-amt" type="number" min="1"></div><div><label>Note</label><input id="d-note" placeholder="e.g. second payment"></div></div>' +
@@ -301,6 +365,7 @@ function openBooking(id) {
     if (p.error) return toast('Error: ' + p.error.message);
     await load(); render(); openBooking(id);
   };
+  wireDetails(b);
   var cb = $('[data-c2]'); if (cb) cb.onclick = function () { confirmModal(id); };
   var cn = $('#d-cancel'); if (cn) cn.onclick = function () { setStatus(id, 'cancelled', 'Cancel this booking?'); };
   var ro = $('#d-reopen'); if (ro) ro.onclick = function () { setStatus(id, 'pending'); };

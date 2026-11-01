@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Your wedding day — John Emad</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#f3efe9">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@400;500;600&display=swap">
+<style>
+:root{--brand:#705947;--ink:#2b2420;--muted:#8a7f75;--line:#e8e0d6;--bg:#f3efe9;--soft:#faf7f3;--serif:'Lora',Georgia,serif;--sans:'Montserrat',Arial,sans-serif}
+*{box-sizing:border-box}[hidden]{display:none!important}
+html{background:var(--bg)}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:28px 16px 120px}
+.logo{display:block;margin:10px auto 26px;width:210px;max-width:70%;height:auto}
+.card{background:#fff;border-radius:8px;padding:26px 22px;margin-bottom:18px;box-shadow:0 1px 0 rgba(0,0,0,.02)}
+h1{font-family:var(--serif);font-weight:500;font-size:28px;line-height:1.25;margin:0 0 8px;text-align:center}
+.sub{text-align:center;color:var(--muted);font-size:14px;margin:0}
+h2{font-family:var(--serif);font-weight:500;font-size:21px;margin:0 0 4px}
+.hint{color:var(--muted);font-size:13px;margin:0 0 16px}
+label{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--brand);font-weight:600;margin:14px 0 6px}
+input,textarea,select{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:12px 12px}
+textarea{resize:vertical;min-height:66px}
+input:focus,textarea:focus,select:focus{outline:2px solid rgba(112,89,71,.35);border-color:var(--brand)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.g2{grid-template-columns:1fr}}
+.ig{position:relative}.ig::before{content:'@';position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px}
+.ig input{padding-left:30px}
+.hour{border:1px solid var(--line);border-radius:6px;padding:14px;margin-bottom:12px;background:var(--soft)}
+.hour .t{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--brand);font-weight:600}
+.hour .t button{background:none;border:0;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:0 4px}
+.hour textarea{margin-top:8px;min-height:56px;background:#fff}.hour input{margin-top:8px;background:#fff}
+.vend{border:1px solid var(--line);border-radius:6px;padding:14px;margin-bottom:12px;background:var(--soft)}
+.vend .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.vend .row{grid-template-columns:1fr}}
+.vend input,.vend select{background:#fff}
+.vend .rm{display:block;margin:10px 0 0 auto;background:none;border:0;color:var(--muted);font:inherit;font-size:12px;cursor:pointer;text-decoration:underline}
+.btn{display:inline-block;background:var(--brand);color:#fff;border:0;border-radius:3px;padding:14px 26px;font:inherit;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--brand)}
+.btn:disabled{opacity:.5;cursor:default}
+.bar{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));z-index:5}
+.bar-in{max-width:720px;margin:0 auto;display:flex;gap:14px;align-items:center}
+.bar .st{flex:1;font-size:13px;color:var(--muted)}.bar .st.ok{color:#2f6b3b}.bar .st.er{color:#b3261e}
+.msg{text-align:center;padding:60px 20px}.msg h1{margin-bottom:12px}
+.lockn{background:#fbf3e4;border:1px solid #efd9a8;color:#6b5320;border-radius:6px;padding:12px 14px;font-size:14px;margin-bottom:18px}
+</style></head>
+<body>
+<div class="wrap">
+  <img class="logo" src="../img/email-logo.png" alt="John Emad Wedding">
+  <div id="state" class="card msg"><p class="sub">Loading…</p></div>
+
+  <form id="form" hidden autocomplete="off">
+    <div class="card">
+      <h1 id="hi">Your wedding day</h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <div id="lockn" class="lockn" hidden>Your details are locked now, so we can plan the day. If you need to change something, please message us on WhatsApp.</div>
+
+    <div class="card">
+      <h2>The couple</h2>
+      <p class="hint">So we can tag you when we share your story.</p>
+      <div class="g2">
+        <div><label>Bride name</label><input id="bride-n" maxlength="60"></div>
+        <div><label>Bride Instagram</label><div class="ig"><input id="bride-ig" maxlength="60" placeholder="username" autocapitalize="none" autocorrect="off"></div></div>
+        <div><label>Groom name</label><input id="groom-n" maxlength="60"></div>
+        <div><label>Groom Instagram</label><div class="ig"><input id="groom-ig" maxlength="60" placeholder="username" autocapitalize="none" autocorrect="off"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Your day, hour by hour</h2>
+      <p class="hint" id="hint-h">Tell us what happens and where. Short is fine.</p>
+      <label>First hour starts at</label>
+      <input id="start" type="time" style="max-width:180px">
+      <div id="hours" style="margin-top:16px"></div>
+      <button type="button" class="btn ghost" id="add-h">+ Add an hour</button>
+    </div>
+
+    <div class="card">
+      <h2>Everyone who worked on your wedding</h2>
+      <p class="hint">Makeup, dress, venue, planner, flowers, DJ, cake… We will mention them with your photos.</p>
+      <div id="vend"></div>
+      <button type="button" class="btn ghost" id="add-v">+ Add someone</button>
+    </div>
+
+    <div class="card">
+      <h2>Anything else?</h2>
+      <p class="hint">People we must photograph, special moments, things to avoid.</p>
+      <textarea id="notes" rows="4" maxlength="2000"></textarea>
+    </div>
+  </form>
+</div>
+
+<div class="bar" id="bar" hidden><div class="bar-in"><div class="st" id="st">Not saved yet</div><button class="btn" id="save" type="button">Save</button></div></div>
+
+<script>
+(function () {
+  var SU = 'https://vzunjnrosrmvtlipqpsa.supabase.co', SK = 'sb_publishable_3jb0Y2sDRHAcCesFcKzyZw_iDquPZwj';
+  var $ = function (s) { return document.querySelector(s); };
+  var token = new URLSearchParams(location.search).get('t') || '';
+  var info = null, locked = false, dirty = false;
+  var ROLES = ['Makeup artist', 'Hair stylist', 'Dress / designer', 'Suit / groom wear', 'Venue', 'Wedding planner', 'Florist / decor', 'DJ / band', 'Cake / catering', 'Videographer', 'Other'];
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function rpc(fn, body) {
+    return fetch(SU + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: SK, Authorization: 'Bearer ' + SK, 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); });
+  }
+  function handle(v) {
+    v = String(v || '').trim();
+    if (!v) return '';
+    v = v.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/[/?#].*$/, '').replace(/^@+/, '').toLowerCase();
+    return v;
+  }
+  function validHandle(h) { return !h || /^[a-z0-9._]{1,30}$/.test(h); }
+
+  function hoursFrom(i) {
+    var m = /(\d+)\s*hour/i.exec(i.package || ''), h = m ? parseInt(m[1], 10) : 8;
+    var ex = String(i.extras || ''), e = /extra hour/i.test(ex) ? 1 : 0;
+    var q = /(\d+)\s*[×x]\s*extra hour/i.exec(ex); if (q) e = parseInt(q[1], 10);
+    return Math.min(Math.max(h + e, 1), 24);
+  }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function label(i) {
+    var s = $('#start').value;
+    if (!s) return 'Hour ' + (i + 1);
+    var p = s.split(':'), h = (parseInt(p[0], 10) + i) % 24, h2 = (h + 1) % 24;
+    return 'Hour ' + (i + 1) + ' · ' + pad(h) + ':' + pad(parseInt(p[1], 10)) + ' – ' + pad(h2) + ':' + pad(parseInt(p[1], 10));
+  }
+
+  function hourRow(d) {
+    var el = document.createElement('div'); el.className = 'hour';
+    el.innerHTML = '<div class="t"><span class="lb"></span><button type="button" class="rm" aria-label="Remove">×</button></div>' +
+      '<textarea class="w" rows="2" maxlength="500" placeholder="What happens (getting ready, first look, ceremony…)"></textarea>' +
+      '<input class="p" maxlength="120" placeholder="Where (venue / room / address)">';
+    el.querySelector('.w').value = (d && d.what) || ''; el.querySelector('.p').value = (d && d.where) || '';
+    return el;
+  }
+  function relabel() { [].forEach.call(document.querySelectorAll('#hours .hour'), function (el, i) { el.querySelector('.lb').textContent = label(i); }); }
+  function vendRow(d) {
+    var el = document.createElement('div'); el.className = 'vend';
+    el.innerHTML = '<div class="row"><div><label>What they did</label><select class="r">' + ROLES.map(function (r) { return '<option>' + esc(r) + '</option>'; }).join('') + '</select></div>' +
+      '<div><label>Name / business</label><input class="n" maxlength="80"></div></div>' +
+      '<label>Instagram</label><div class="ig"><input class="i" maxlength="60" placeholder="username" autocapitalize="none" autocorrect="off"></div>' +
+      '<button type="button" class="rm">Remove</button>';
+    if (d) { el.querySelector('.r').value = ROLES.indexOf(d.role) > -1 ? d.role : 'Other'; el.querySelector('.n').value = d.name || ''; el.querySelector('.i').value = d.ig || ''; }
+    return el;
+  }
+
+  function fill(i) {
+    var d = i.data || {};
+    $('#hi').textContent = i.couple ? 'Hi ' + i.couple + ' 🤍' : 'Your wedding day';
+    $('#sub').textContent = (i.wedding_date ? new Date(i.wedding_date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + ' · ' : '') + 'Tell us about your day so we can be ready for every moment.';
+    $('#bride-n').value = (d.bride && d.bride.name) || ''; $('#bride-ig').value = (d.bride && d.bride.ig) || '';
+    $('#groom-n').value = (d.groom && d.groom.name) || ''; $('#groom-ig').value = (d.groom && d.groom.ig) || '';
+    $('#start').value = d.start || ''; $('#notes').value = d.notes || '';
+    var n = hoursFrom(i), tl = d.timeline || [];
+    n = Math.max(n, tl.length);
+    for (var k = 0; k < n; k++) $('#hours').appendChild(hourRow(tl[k]));
+    $('#hint-h').textContent = 'Your package covers ' + hoursFrom(i) + ' hours. Tell us what happens and where. Short is fine.';
+    (d.vendors && d.vendors.length ? d.vendors : [null, null, null]).forEach(function (v) { $('#vend').appendChild(vendRow(v)); });
+    relabel();
+    if (locked) { [].forEach.call(document.querySelectorAll('input,textarea,select,.btn,.rm'), function (x) { if (x.id !== 'save') x.disabled = true; }); $('#save').hidden = true; $('#lockn').hidden = false; $('#st').textContent = 'Locked'; }
+  }
+
+  function collect() {
+    var bad = '';
+    var out = {
+      bride: { name: $('#bride-n').value.trim(), ig: handle($('#bride-ig').value) },
+      groom: { name: $('#groom-n').value.trim(), ig: handle($('#groom-ig').value) },
+      start: $('#start').value, notes: $('#notes').value.trim(), timeline: [], vendors: []
+    };
+    [out.bride.ig, out.groom.ig].forEach(function (h) { if (!validHandle(h)) bad = h; });
+    [].forEach.call(document.querySelectorAll('#hours .hour'), function (el) { out.timeline.push({ what: el.querySelector('.w').value.trim(), where: el.querySelector('.p').value.trim() }); });
+    [].forEach.call(document.querySelectorAll('#vend .vend'), function (el) {
+      var v = { role: el.querySelector('.r').value, name: el.querySelector('.n').value.trim(), ig: handle(el.querySelector('.i').value) };
+      if (!validHandle(v.ig)) bad = v.ig;
+      if (v.name || v.ig) out.vendors.push(v);
+    });
+    return { data: out, bad: bad };
+  }
+
+  function setSt(t, c) { var s = $('#st'); s.textContent = t; s.className = 'st ' + (c || ''); }
+  document.addEventListener('input', function () { if (!locked) { dirty = true; setSt('Not saved yet'); } });
+  $('#start').addEventListener('input', relabel);
+  $('#add-h').onclick = function () { $('#hours').appendChild(hourRow()); relabel(); };
+  $('#add-v').onclick = function () { $('#vend').appendChild(vendRow()); };
+  document.addEventListener('click', function (e) {
+    var rm = e.target.closest('.rm'); if (!rm || locked) return;
+    var box = rm.closest('.hour,.vend'); if (box) { box.remove(); relabel(); dirty = true; setSt('Not saved yet'); }
+  });
+  window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+  $('#save').onclick = function () {
+    var c = collect();
+    if (c.bad) return setSt('Please check the Instagram username: "' + c.bad + '"', 'er');
+    var b = this; b.disabled = true; setSt('Saving…');
+    rpc('save_wedding_details', { p_token: token, p_data: c.data }).then(function (ok) {
+      if (!ok) throw new Error('locked');
+      dirty = false; setSt('Saved. You can come back and edit it anytime.', 'ok');
+    }).catch(function () { setSt('Could not save. Please try again or WhatsApp us.', 'er'); }).then(function () { b.disabled = false; });
+  };
+
+  function msg(h, p) { $('#state').innerHTML = '<h1>' + esc(h) + '</h1><p class="sub">' + esc(p) + '</p>'; }
+  if (!token) return msg('This link is not valid', 'Please use the link we sent you by email.');
+  rpc('get_wedding_details', { p_token: token }).then(function (i) {
+    if (!i) return msg('This link is not valid', 'Please use the link we sent you by email, or message us on WhatsApp.');
+    info = i; locked = !!i.locked;
+    $('#state').hidden = true; $('#form').hidden = false; $('#bar').hidden = false;
+    fill(i);
+  }).catch(function () { msg('Something went wrong', 'Please refresh the page, or message us on WhatsApp +20 106 660 0848.'); });
+})();
+</script>
+</body></html>
