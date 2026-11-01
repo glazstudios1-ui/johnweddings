@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>John Emad — Dashboard</title>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="referrer" content="no-referrer">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1d1d1d;--card:#262626;--line:#3a3a3a;--mut:#a8a8a8;--ok:#7fd1a0;--warn:#e8c46a;--bad:#e5877e}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:#fff;font-family:Lora,serif;font-size:14px;line-height:1.5;min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+.mont{font-family:Montserrat,sans-serif}
+.btn{font-family:Montserrat,sans-serif;font-size:10.5px;font-weight:500;letter-spacing:1px;text-transform:uppercase;background:#fff;color:#1a1a1a;border:0;border-radius:4px;padding:11px 16px;cursor:pointer}
+.btn.ghost{background:transparent;color:#fff;border:1px solid var(--line)}
+.btn.ok{background:var(--ok)}.btn.bad{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+.btn.sm{padding:7px 11px;font-size:9.5px}.btn:disabled{opacity:.5;cursor:default}
+input,select,textarea{background:#1a1a1a;border:1px solid var(--line);border-radius:4px;padding:10px 12px;width:100%;outline:none;color-scheme:dark}
+input:focus,select:focus,textarea:focus{border-color:#fff}
+label{display:block;font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--mut);margin:0 0 6px}
+a{color:#fff}
+/* login */
+#login{max-width:360px;margin:14vh auto 0;padding:0 20px;text-align:center}
+#login h1{font-family:Montserrat,sans-serif;font-weight:300;font-size:26px;text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px}
+#login p{color:var(--mut);margin-bottom:26px;font-size:13px}
+#login .f{text-align:left;margin-bottom:16px}
+#login .btn{width:100%;height:46px}
+.err{color:var(--bad);font-size:13px;margin-top:14px;min-height:20px}
+/* app */
+header.top{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:18px 24px;border-bottom:1px solid var(--line)}
+header.top h1{font-family:Montserrat,sans-serif;font-weight:300;font-size:18px;text-transform:uppercase;margin-right:auto}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tabs button{background:none;border:1px solid transparent;border-radius:4px;padding:8px 14px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--mut)}
+.tabs button[aria-selected=true]{color:#fff;border-color:var(--line);background:var(--card)}
+.tabs .badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:6px;border-radius:9px;background:var(--warn);color:#111;font-size:10px;text-align:center}
+main{max-width:1100px;margin:0 auto;padding:26px 24px 80px}
+h2{font-family:Montserrat,sans-serif;font-weight:300;font-size:20px;text-transform:uppercase;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px 20px}
+.muted{color:var(--mut)}
+/* calendar */
+.calbar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.calbar h2{margin:0;flex:1}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.cal .h{background:#222;padding:8px;font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--mut);text-align:center}
+.cal .d{background:var(--card);min-height:96px;padding:6px;font-size:12px}
+.cal .d.o{background:#212121;color:#666}
+.cal .d.t{outline:1px solid #fff;outline-offset:-1px}
+.cal .d .n{color:var(--mut);font-size:11px;margin-bottom:4px}
+.chip{display:block;width:100%;text-align:left;border:0;border-radius:3px;padding:4px 6px;margin-top:3px;font-size:11.5px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip.c{background:#e9e7e2;color:#111}.chip.p{background:transparent;border:1px dashed var(--warn);color:var(--warn)}
+.legend{display:flex;gap:18px;margin:12px 0 26px;color:var(--mut);font-size:12px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.list .row{display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.list .row:last-child{border:0}
+.list .row .a{flex:1;min-width:180px}
+/* requests */
+.req{display:grid;grid-template-columns:150px 1fr;gap:18px;margin-bottom:14px}
+.req .shot{width:150px;height:190px;border-radius:4px;border:1px solid var(--line);object-fit:cover;background:#1a1a1a;cursor:zoom-in}
+.req .noshot{width:150px;height:190px;border:1px dashed var(--line);border-radius:4px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--mut);font-size:12px;padding:10px}
+.req h3{font-family:Montserrat,sans-serif;font-weight:400;font-size:16px;text-transform:uppercase;margin-bottom:4px}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:4px 12px;margin:10px 0 14px;font-size:13px}
+.kv span{color:var(--mut)}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:640px){.req{grid-template-columns:1fr}.req .shot,.req .noshot{width:100%;height:220px}.cal .d{min-height:70px;padding:3px}.chip{font-size:10px;padding:3px}.kv{grid-template-columns:100px 1fr}}
+/* finance */
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:26px}
+.sum .card b{display:block;font-family:Montserrat,sans-serif;font-weight:300;font-size:26px;margin-top:6px}
+.sum .card.hl b{color:var(--warn)}
+table{width:100%;border-collapse:collapse}
+th{font-family:Montserrat,sans-serif;font-weight:400;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--mut);text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
+td{padding:12px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.n,th.n{text-align:right;white-space:nowrap}
+.tw{overflow-x:auto}
+.rem{color:var(--warn)}.done{color:var(--ok)}
+/* links */
+.lform{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;margin-bottom:22px}
+@media(max-width:640px){.lform{grid-template-columns:1fr}}
+.url{font-size:12px;color:var(--mut);word-break:break-all}
+/* modal */
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow:auto;z-index:50}
+.modal{background:var(--card);border:1px solid var(--line);border-radius:8px;width:560px;max-width:100%;padding:24px}
+.modal h3{font-family:Montserrat,sans-serif;font-weight:400;font-size:17px;text-transform:uppercase;margin-bottom:14px}
+.modal .g{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.modal .full{grid-column:1/-1}
+.pay-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#fff;color:#111;padding:12px 18px;border-radius:6px;font-size:13px;z-index:99}
+.tag{display:inline-block;font-family:Montserrat,sans-serif;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;border:1px solid;border-radius:3px;padding:2px 7px}
+.tag.p{color:var(--warn)}.tag.c{color:var(--ok)}.tag.x{color:var(--bad)}
+</style>
+</head><body>
+
+<div id="login" hidden>
+  <h1>John Emad</h1>
+  <p>Dashboard — sign in</p>
+  <form id="lf">
+    <div class="f"><label for="em">Email</label><input id="em" type="email" autocomplete="username" required></div>
+    <div class="f"><label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required></div>
+    <button class="btn" type="submit">Sign in</button>
+    <div class="err" id="lerr" role="alert"></div>
+  </form>
+</div>
+
+<div id="app" hidden>
+  <header class="top">
+    <h1>John Emad · Dashboard</h1>
+    <nav class="tabs" id="tabs">
+      <button data-t="calendar" aria-selected="true">Calendar</button>
+      <button data-t="requests" aria-selected="false">Requests<span class="badge" id="rb" hidden>0</span></button>
+      <button data-t="finance" aria-selected="false">Money</button>
+      <button data-t="links" aria-selected="false">Package links</button>
+    </nav>
+    <button class="btn ghost sm" id="out">Sign out</button>
+  </header>
+  <main>
+    <section id="t-calendar"></section>
+    <section id="t-requests" hidden></section>
+    <section id="t-finance" hidden></section>
+    <section id="t-links" hidden></section>
+  </main>
+</div>
+<div id="mask" class="mask" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function () {
+var SITE = location.origin;
+var PACKAGE_PATH = 'package-k7x2m9qd4v';
+var sb = window.supabase.createClient('https://vzunjnrosrmvtlipqpsa.supabase.co', 'sb_publishable_3jb0Y2sDRHAcCesFcKzyZw_iDquPZwj', { auth: { persistSession: true, autoRefreshToken: true } });
+var $ = function (s, c) { return (c || document).querySelector(s); };
+var esc = function (v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+var egp = function (n) { return 'EGP ' + Number(n || 0).toLocaleString('en-US'); };
+var D = { bookings: [], payments: [], links: [] };
+var cal = { y: new Date().getFullYear(), m: new Date().getMonth() };
+var tab = 'calendar';
+
+function toast(t) { var e = document.createElement('div'); e.className = 'toast'; e.textContent = t; document.body.appendChild(e); setTimeout(function () { e.remove(); }, 2600); }
+function paid(b) { return D.payments.filter(function (p) { return p.booking_id === b.id; }).reduce(function (a, p) { return a + p.amount; }, 0); }
+function fmtDate(s) { if (!s) return 'No date'; var d = new Date(s + 'T00:00:00'); return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }); }
+function waLink(ph) { var n = String(ph || '').replace(/[^\d]/g, ''); if (n.indexOf('0') === 0) n = '2' + n; return 'https://wa.me/' + n; }
+function tagOf(s) { return { pending: '<span class="tag p">Waiting</span>', confirmed: '<span class="tag c">Confirmed</span>', cancelled: '<span class="tag x">Cancelled</span>' }[s] || ''; }
+
+/* ---------- auth ---------- */
+async function start() {
+  var s = (await sb.auth.getSession()).data.session;
+  s ? enter() : ($('#login').hidden = false, $('#app').hidden = true);
+}
+$('#lf').addEventListener('submit', async function (e) {
+  e.preventDefault(); $('#lerr').textContent = '';
+  var r = await sb.auth.signInWithPassword({ email: $('#em').value.trim(), password: $('#pw').value });
+  if (r.error) { $('#lerr').textContent = 'Wrong email or password.'; return; }
+  enter();
+});
+$('#out').addEventListener('click', async function () { await sb.auth.signOut(); location.reload(); });
+async function enter() { $('#login').hidden = true; $('#app').hidden = false; await load(); render(); }
+
+async function load() {
+  var r = await Promise.all([
+    sb.from('bookings').select('*').order('wedding_date', { ascending: true }),
+    sb.from('payments').select('*').order('paid_at', { ascending: true }),
+    sb.from('package_links').select('*').order('created_at', { ascending: false })
+  ]);
+  if (r[0].error) { toast('Could not load data: ' + r[0].error.message); }
+  D.bookings = r[0].data || []; D.payments = r[1].data || []; D.links = r[2].data || [];
+}
+
+/* ---------- tabs ---------- */
+$('#tabs').addEventListener('click', function (e) {
+  var b = e.target.closest('button'); if (!b) return; tab = b.dataset.t; render();
+});
+function render() {
+  [].forEach.call(document.querySelectorAll('#tabs button'), function (b) { b.setAttribute('aria-selected', String(b.dataset.t === tab)); });
+  ['calendar', 'requests', 'finance', 'links'].forEach(function (t) { $('#t-' + t).hidden = t !== tab; });
+  var pend = D.bookings.filter(function (b) { return b.status === 'pending'; }).length;
+  $('#rb').hidden = !pend; $('#rb').textContent = pend;
+  if (tab === 'calendar') drawCalendar();
+  if (tab === 'requests') drawRequests();
+  if (tab === 'finance') drawFinance();
+  if (tab === 'links') drawLinks();
+}
+
+/* ---------- calendar (week starts on Saturday) ---------- */
+function drawCalendar() {
+  var first = new Date(cal.y, cal.m, 1), days = new Date(cal.y, cal.m + 1, 0).getDate();
+  var offset = (first.getDay() + 1) % 7;
+  var names = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+  var today = new Date(), tk = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+  var html = '<div class="calbar"><h2>' + first.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) + '</h2>' +
+    '<button class="btn ghost sm" data-m="-1">‹ Prev</button><button class="btn ghost sm" data-m="0">Today</button><button class="btn ghost sm" data-m="1">Next ›</button></div>';
+  html += '<div class="cal">' + names.map(function (n) { return '<div class="h">' + n + '</div>'; }).join('');
+  for (var i = 0; i < offset; i++) html += '<div class="d o"></div>';
+  for (var d = 1; d <= days; d++) {
+    var key = cal.y + '-' + String(cal.m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    var ev = D.bookings.filter(function (b) { return b.wedding_date === key && b.status !== 'cancelled'; });
+    html += '<div class="d' + (key === tk ? ' t' : '') + '"><div class="n">' + d + '</div>' +
+      ev.map(function (b) { return '<button class="chip ' + (b.status === 'confirmed' ? 'c' : 'p') + '" data-b="' + b.id + '">' + esc(b.couple) + '</button>'; }).join('') + '</div>';
+  }
+  var rest = (7 - ((offset + days) % 7)) % 7; for (var j = 0; j < rest; j++) html += '<div class="d o"></div>';
+  html += '</div><div class="legend"><span><i style="background:#e9e7e2"></i>Confirmed</span><span><i style="border:1px dashed var(--warn)"></i>Waiting for deposit</span></div>';
+  var up = D.bookings.filter(function (b) { return b.status === 'confirmed' && b.wedding_date >= tk; });
+  html += '<h2>Upcoming weddings (' + up.length + ')</h2><div class="card list">' + (up.length ? up.map(function (b) {
+    return '<div class="row"><div class="a"><b>' + esc(b.couple) + '</b><div class="muted">' + fmtDate(b.wedding_date) + ' · ' + esc(b.venue || '') + '</div></div><div class="muted">' + esc(b.package || '') + '</div><button class="btn ghost sm" data-b="' + b.id + '">Open</button></div>';
+  }).join('') : '<div class="muted">No confirmed weddings yet.</div>') + '</div>';
+  $('#t-calendar').innerHTML = html;
+}
+$('#t-calendar').addEventListener('click', function (e) {
+  var m = e.target.closest('[data-m]'); if (m) { var v = +m.dataset.m; if (v === 0) { cal.y = new Date().getFullYear(); cal.m = new Date().getMonth(); } else { cal.m += v; if (cal.m < 0) { cal.m = 11; cal.y--; } if (cal.m > 11) { cal.m = 0; cal.y++; } } return drawCalendar(); }
+  var b = e.target.closest('[data-b]'); if (b) openBooking(b.dataset.b);
+});
+
+/* ---------- requests ---------- */
+function drawRequests() {
+  var list = D.bookings.filter(function (b) { return b.status === 'pending'; }).sort(function (a, b) { return a.created_at < b.created_at ? 1 : -1; });
+  $('#t-requests').innerHTML = '<h2>Waiting for deposit confirmation (' + list.length + ')</h2>' + (list.length ? list.map(function (b) {
+    return '<div class="card req">' + (b.proof_url ? '<img class="shot" src="' + esc(b.proof_url) + '" alt="Payment screenshot" data-zoom="' + esc(b.proof_url) + '">' : '<div class="noshot">No payment screenshot</div>') +
+      '<div><h3>' + esc(b.couple) + '</h3><div class="muted">Sent ' + new Date(b.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</div>' +
+      '<div class="kv"><span>Wedding date</span><b>' + fmtDate(b.wedding_date) + '</b><span>Venue</span><b>' + esc(b.venue || '—') + '</b>' +
+      '<span>Phone</span><b><a href="tel:' + esc(b.phone) + '">' + esc(b.phone || '—') + '</a> · <a href="' + waLink(b.phone) + '" target="_blank" rel="noopener">WhatsApp</a></b>' +
+      (b.phone2 ? '<span>Phone 2</span><b>' + esc(b.phone2) + '</b>' : '') + '<span>Email</span><b>' + esc(b.email || '—') + '</b>' +
+      '<span>Package</span><b>' + esc(b.package || '—') + '</b><span>Add-ons</span><b>' + esc(b.extras || '—') + '</b>' +
+      '<span>Total</span><b>' + (b.total_amount ? egp(b.total_amount) : 'Not set') + '</b><span>Deposit due</span><b>' + (b.deposit_due ? egp(b.deposit_due) : '—') + '</b>' +
+      (b.message ? '<span>Message</span><b>' + esc(b.message) + '</b>' : '') + '</div>' +
+      '<div class="acts"><button class="btn ok sm" data-confirm="' + b.id + '">Confirm deposit received</button><button class="btn bad sm" data-cancel="' + b.id + '">Reject</button></div></div></div>';
+  }).join('') : '<div class="card muted">No requests waiting.</div>');
+}
+$('#t-requests').addEventListener('click', function (e) {
+  var z = e.target.closest('[data-zoom]'); if (z) return window.open(z.dataset.zoom, '_blank', 'noopener');
+  var c = e.target.closest('[data-confirm]'); if (c) return confirmModal(c.dataset.confirm);
+  var x = e.target.closest('[data-cancel]'); if (x) return setStatus(x.dataset.cancel, 'cancelled', 'Reject this request?');
+});
+
+function modal(html) { var m = $('#mask'); m.innerHTML = '<div class="modal">' + html + '</div>'; m.hidden = false; }
+function closeModal() { $('#mask').hidden = true; $('#mask').innerHTML = ''; }
+$('#mask').addEventListener('click', function (e) { if (e.target === this || e.target.closest('[data-close]')) closeModal(); });
+
+function confirmModal(id) {
+  var b = D.bookings.find(function (x) { return x.id === id; });
+  var clash = D.bookings.filter(function (x) { return x.id !== id && x.status === 'confirmed' && x.wedding_date && x.wedding_date === b.wedding_date; });
+  modal('<h3>Confirm deposit</h3><p class="muted" style="margin-bottom:14px">' + esc(b.couple) + ' · ' + fmtDate(b.wedding_date) + '</p>' +
+    (clash.length ? '<p style="color:var(--warn);margin-bottom:14px">Careful: ' + esc(clash[0].couple) + ' is already confirmed on this date.</p>' : '') +
+    '<div class="g"><div><label>Deposit you received (EGP)</label><input id="c-amt" type="number" min="1" value="' + (b.deposit_due || '') + '"></div>' +
+    '<div><label>Total price (EGP)</label><input id="c-tot" type="number" min="0" value="' + (b.total_amount || '') + '"></div></div>' +
+    '<div class="acts"><button class="btn ok" id="c-go">Confirm &amp; add to calendar</button><button class="btn ghost" data-close>Cancel</button></div>');
+  $('#c-go').onclick = async function () {
+    var amt = parseInt($('#c-amt').value, 10), tot = parseInt($('#c-tot').value, 10);
+    if (!amt || amt < 1) return toast('Enter the deposit amount');
+    if (!b.wedding_date) return toast('This request has no wedding date. Open it from the calendar and add one first.');
+    this.disabled = true;
+    var p = await sb.from('payments').insert({ booking_id: id, amount: amt, kind: 'deposit', note: 'Deposit (InstaPay)' });
+    if (p.error) { this.disabled = false; return toast('Error: ' + p.error.message); }
+    var u = await sb.from('bookings').update({ status: 'confirmed', confirmed_at: new Date().toISOString(), total_amount: tot || b.total_amount }).eq('id', id);
+    if (u.error) { this.disabled = false; return toast('Error: ' + u.error.message); }
+    closeModal(); toast('Confirmed. Added to your calendar.'); await load(); render();
+  };
+}
+async function setStatus(id, status, ask) {
+  if (ask && !confirm(ask)) return;
+  var u = await sb.from('bookings').update({ status: status }).eq('id', id);
+  if (u.error) return toast('Error: ' + u.error.message);
+  closeModal(); await load(); render();
+}
+
+/* ---------- booking detail ---------- */
+function openBooking(id) {
+  var b = D.bookings.find(function (x) { return x.id === id; }); if (!b) return;
+  var pays = D.payments.filter(function (p) { return p.booking_id === id; });
+  var pd = paid(b), rem = (b.total_amount || 0) - pd;
+  modal('<h3>' + esc(b.couple) + ' ' + tagOf(b.status) + '</h3>' +
+    '<div class="kv"><span>Date</span><b>' + fmtDate(b.wedding_date) + '</b><span>Venue</span><b>' + esc(b.venue || '—') + '</b>' +
+    '<span>Phone</span><b><a href="tel:' + esc(b.phone) + '">' + esc(b.phone || '—') + '</a> · <a href="' + waLink(b.phone) + '" target="_blank" rel="noopener">WhatsApp</a></b>' +
+    (b.phone2 ? '<span>Phone 2</span><b>' + esc(b.phone2) + '</b>' : '') + '<span>Email</span><b>' + esc(b.email || '—') + '</b>' +
+    '<span>Package</span><b>' + esc(b.package || '—') + '</b><span>Add-ons</span><b>' + esc(b.extras || '—') + '</b>' +
+    (b.message ? '<span>Message</span><b>' + esc(b.message) + '</b>' : '') +
+    (b.proof_url ? '<span>Screenshot</span><b><a href="' + esc(b.proof_url) + '" target="_blank" rel="noopener">Open</a></b>' : '') + '</div>' +
+    '<div class="g"><div><label>Total price (EGP)</label><input id="d-tot" type="number" min="0" value="' + (b.total_amount || '') + '"></div>' +
+    '<div><label>Wedding date</label><input id="d-date" type="date" value="' + esc(b.wedding_date || '') + '"></div>' +
+    '<div class="full"><label>Notes</label><textarea id="d-notes" rows="2">' + esc(b.notes || '') + '</textarea></div></div>' +
+    '<div class="acts" style="margin-bottom:20px"><button class="btn sm" id="d-save">Save changes</button></div>' +
+    '<label>Payments — paid ' + egp(pd) + ' · remaining <span class="' + (rem > 0 ? 'rem' : 'done') + '">' + egp(Math.max(rem, 0)) + '</span></label>' +
+    (pays.map(function (p) { return '<div class="pay-row"><span>' + fmtDate(p.paid_at) + ' · ' + esc(p.kind) + (p.note ? ' · ' + esc(p.note) : '') + '</span><span><b>' + egp(p.amount) + '</b> <button class="btn ghost sm" data-delpay="' + p.id + '">✕</button></span></div>'; }).join('') || '<div class="muted" style="padding:8px 0">No payments recorded.</div>') +
+    '<div class="g" style="margin-top:14px"><div><label>Add payment (EGP)</label><input id="d-amt" type="number" min="1"></div><div><label>Note</label><input id="d-note" placeholder="e.g. second payment"></div></div>' +
+    '<div class="acts"><button class="btn sm" id="d-pay">Add payment</button>' +
+    (b.status === 'pending' ? '<button class="btn ok sm" data-c2="' + id + '">Confirm deposit…</button>' : '') +
+    (b.status !== 'cancelled' ? '<button class="btn bad sm" id="d-cancel">Cancel booking</button>' : '<button class="btn ghost sm" id="d-reopen">Reopen</button>') +
+    '<button class="btn ghost sm" data-close>Close</button></div>');
+  $('#d-save').onclick = async function () {
+    var t = parseInt($('#d-tot').value, 10);
+    var u = await sb.from('bookings').update({ total_amount: isNaN(t) ? null : t, wedding_date: $('#d-date').value || null, notes: $('#d-notes').value || null }).eq('id', id);
+    if (u.error) return toast('Error: ' + u.error.message);
+    toast('Saved'); await load(); render(); openBooking(id);
+  };
+  $('#d-pay').onclick = async function () {
+    var a = parseInt($('#d-amt').value, 10); if (!a || a < 1) return toast('Enter an amount');
+    var p = await sb.from('payments').insert({ booking_id: id, amount: a, kind: 'payment', note: $('#d-note').value || null });
+    if (p.error) return toast('Error: ' + p.error.message);
+    await load(); render(); openBooking(id);
+  };
+  var cb = $('[data-c2]'); if (cb) cb.onclick = function () { confirmModal(id); };
+  var cn = $('#d-cancel'); if (cn) cn.onclick = function () { setStatus(id, 'cancelled', 'Cancel this booking?'); };
+  var ro = $('#d-reopen'); if (ro) ro.onclick = function () { setStatus(id, 'pending'); };
+  [].forEach.call(document.querySelectorAll('[data-delpay]'), function (x) {
+    x.onclick = async function () { if (!confirm('Delete this payment?')) return; var r = await sb.from('payments').delete().eq('id', x.dataset.delpay); if (r.error) return toast('Error: ' + r.error.message); await load(); render(); openBooking(id); };
+  });
+}
+
+/* ---------- money ---------- */
+function drawFinance() {
+  var conf = D.bookings.filter(function (b) { return b.status === 'confirmed'; });
+  var total = 0, got = 0, owed = 0, noprice = 0;
+  conf.forEach(function (b) { var p = paid(b); got += p; if (b.total_amount) { total += b.total_amount; owed += Math.max(b.total_amount - p, 0); } else noprice++; });
+  var rows = conf.slice().sort(function (a, b) { return (a.wedding_date || '') < (b.wedding_date || '') ? -1 : 1; }).map(function (b) {
+    var p = paid(b), r = b.total_amount ? Math.max(b.total_amount - p, 0) : null;
+    return '<tr><td>' + fmtDate(b.wedding_date) + '</td><td><b>' + esc(b.couple) + '</b></td><td class="n">' + (b.total_amount ? egp(b.total_amount) : '<span class="muted">not set</span>') + '</td><td class="n">' + egp(p) + '</td><td class="n ' + (r ? 'rem' : 'done') + '">' + (r == null ? '—' : r ? egp(r) : 'Paid in full') + '</td><td class="n"><button class="btn ghost sm" data-b="' + b.id + '">Open</button></td></tr>';
+  }).join('');
+  $('#t-finance').innerHTML = '<h2>Money</h2><div class="sum">' +
+    '<div class="card"><label>Confirmed weddings</label><b>' + conf.length + '</b></div>' +
+    '<div class="card"><label>Total contracts</label><b>' + egp(total) + '</b></div>' +
+    '<div class="card"><label>Received so far</label><b>' + egp(got) + '</b></div>' +
+    '<div class="card hl"><label>Still owed by clients</label><b>' + egp(owed) + '</b></div></div>' +
+    (noprice ? '<p class="muted" style="margin:-8px 0 18px">' + noprice + ' confirmed booking(s) have no total price yet, so they are not in the numbers above.</p>' : '') +
+    '<div class="card tw"><table><thead><tr><th>Date</th><th>Couple</th><th class="n">Total</th><th class="n">Paid</th><th class="n">Remaining</th><th></th></tr></thead><tbody>' +
+    (rows || '<tr><td colspan="6" class="muted">Nothing here yet.</td></tr>') + '</tbody></table></div>';
+}
+$('#t-finance').addEventListener('click', function (e) { var b = e.target.closest('[data-b]'); if (b) openBooking(b.dataset.b); });
+
+/* ---------- package links ---------- */
+function token() { var a = new Uint8Array(18); crypto.getRandomValues(a); return Array.prototype.map.call(a, function (x) { return 'abcdefghjkmnpqrstuvwxyz23456789'[x % 31]; }).join(''); }
+function linkUrl(t) { return SITE + '/' + PACKAGE_PATH + '/?t=' + t; }
+function drawLinks() {
+  $('#t-links').innerHTML = '<h2>Package links</h2><p class="muted" style="margin-bottom:16px">Make one link per client. A link opens on the first phone or browser that uses it and stays locked to it. Forwarding it to someone else will not work.</p>' +
+    '<div class="card"><div class="lform"><div><label>Client name</label><input id="l-name" placeholder="e.g. Mariam &amp; Ahmed"></div><div><label>Phone (optional)</label><input id="l-phone"></div><button class="btn" id="l-new">Create link</button></div>' +
+    (D.links.length ? D.links.map(function (l) {
+      return '<div class="row" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--line)"><div style="flex:1;min-width:220px"><b>' + esc(l.client_name || 'Client') + '</b> ' +
+        (l.active ? (l.device ? '<span class="tag c">Opened</span>' : '<span class="tag p">Not opened yet</span>') : '<span class="tag x">Off</span>') +
+        '<div class="url">' + esc(linkUrl(l.token)) + '</div></div>' +
+        '<button class="btn ghost sm" data-copy="' + esc(l.token) + '">Copy</button>' +
+        (l.device ? '<button class="btn ghost sm" data-reset="' + esc(l.token) + '">Unlock phone</button>' : '') +
+        '<button class="btn ghost sm" data-toggle="' + esc(l.token) + '">' + (l.active ? 'Turn off' : 'Turn on') + '</button>' +
+        '<button class="btn bad sm" data-del="' + esc(l.token) + '">Delete</button></div>';
+    }).join('') : '<div class="muted" style="padding-top:8px">No links yet.</div>') + '</div>';
+}
+$('#t-links').addEventListener('click', async function (e) {
+  var t = e.target.closest('button'); if (!t) return;
+  if (t.id === 'l-new') {
+    var tk = token();
+    var r = await sb.from('package_links').insert({ token: tk, client_name: $('#l-name').value.trim() || null, phone: $('#l-phone').value.trim() || null });
+    if (r.error) return toast('Error: ' + r.error.message);
+    try { await navigator.clipboard.writeText(linkUrl(tk)); toast('Link created and copied'); } catch (x) { toast('Link created'); }
+    await load(); return render();
+  }
+  if (t.dataset.copy) { try { await navigator.clipboard.writeText(linkUrl(t.dataset.copy)); toast('Copied'); } catch (x) { prompt('Copy this link', linkUrl(t.dataset.copy)); } return; }
+  var tkn = t.dataset.reset || t.dataset.toggle || t.dataset.del; if (!tkn) return;
+  var l = D.links.find(function (x) { return x.token === tkn; }), q;
+  if (t.dataset.reset) { if (!confirm('Let this link open on a new phone? The old phone will be locked out.')) return; q = sb.from('package_links').update({ device: null, first_opened_at: null }).eq('token', tkn); }
+  else if (t.dataset.toggle) q = sb.from('package_links').update({ active: !l.active }).eq('token', tkn);
+  else { if (!confirm('Delete this link?')) return; q = sb.from('package_links').delete().eq('token', tkn); }
+  var r2 = await q; if (r2.error) return toast('Error: ' + r2.error.message);
+  await load(); render();
+});
+
+start();
+})();
+</script>
+</body></html>

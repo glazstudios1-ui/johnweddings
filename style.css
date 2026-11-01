@@ -229,3 +229,17 @@ a{color:inherit;text-decoration:none}
 .bform .btn{margin-top:30px;width:100%;height:52px}
 .bform .form-msg{text-align:center}
 @media(max-width:640px){.bform{padding:26px 20px 30px}.bform .grid2{grid-template-columns:1fr}.sel{padding:16px 18px}}
+
+/* payment block */
+.bform .pay{margin-top:30px;padding-top:26px;border-top:1px solid #3a3a3a}
+.bform .pay .pt{font-family:Montserrat,sans-serif;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:#fff;margin-bottom:8px}
+.bform .pay .pd{font-size:13px;color:#b9b9b9;margin-bottom:16px}
+.bform .pbox{border:1px solid #3d3d3d;background:#1c1c1c;border-radius:3px;margin-bottom:18px}
+.bform .pbox>div{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #333;font-size:13px}
+.bform .pbox>div:last-child{border-bottom:0}
+.bform .pbox span{color:#9a9a9a;min-width:140px}
+.bform .pbox b{font-weight:400;color:#fff;flex:1;word-break:break-all}
+.bform .pbox .cp{background:none;border:1px solid #4a4a4a;color:#fff;border-radius:3px;padding:5px 10px;font-family:Montserrat,sans-serif;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;cursor:pointer}
+.bform .fld input[type=file]{height:auto;padding:10px 12px;font-size:12px}
+.bform .fld input[type=file]::file-selector-button{background:#fff;color:#111;border:0;border-radius:3px;padding:6px 12px;margin-right:12px;font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer}
+@media(max-width:640px){.bform .pbox>div{flex-wrap:wrap}.bform .pbox span{min-width:100%}}

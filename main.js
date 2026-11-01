@@ -65,23 +65,53 @@ if(gal){
   document.addEventListener('keydown',function(e){if(!lb.classList.contains('on'))return;if(e.key==='Escape')lb.classList.remove('on');if(e.key==='ArrowLeft')open(li-1);if(e.key==='ArrowRight')open(li+1)});
 }
 
-/* booking form (Web3Forms) */
+/* booking form: save to the database, upload the payment screenshot, then email the details */
 var f=$('#booking-form');
 if(f){
+  var SU='https://vzunjnrosrmvtlipqpsa.supabase.co',SK='sb_publishable_3jb0Y2sDRHAcCesFcKzyZw_iDquPZwj',Q=new URLSearchParams(location.search);
+  var hasPkg=!!Q.get('package'),proofEl=document.getElementById('f-proof');
+  /* deposit box */
+  if(hasPkg&&Q.get('deposit')){document.getElementById('pamt-wrap').hidden=false;document.getElementById('pamt').textContent='EGP '+Number(Q.get('deposit')).toLocaleString('en-US');}
+  else document.getElementById('pay-desc').textContent='Transfer the 50% deposit through InstaPay and upload the screenshot. If you have not chosen a package yet, we will confirm the exact amount with you first.';
+  if(hasPkg){proofEl.required=true;document.getElementById('proof-req').textContent='required';}
+  var cpb=document.getElementById('ipa-copy');
+  if(cpb)cpb.addEventListener('click',function(){var t=document.getElementById('ipa').textContent;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){cpb.textContent='Copied'},function(){window.prompt('Copy',t)});setTimeout(function(){cpb.textContent='Copy'},1600)});
+
   f.addEventListener('submit',function(e){
     e.preventDefault();
-    var msg=$('.form-msg'),btn=$('button',f);
-    if(f.elements['surname']&&f.elements['surname'].value){return}
-    btn.disabled=true;
+    var msg=$('.form-msg'),btn=$('button[type=submit]',f);
+    if(f.elements['surname']&&f.elements['surname'].value)return;
+    var file=proofEl.files&&proofEl.files[0];
+    if(file&&file.size>8*1024*1024){msg.textContent='The screenshot is too large (max 8 MB).';msg.style.display='block';return}
+    btn.disabled=true;msg.textContent='Sending…';msg.style.display='block';
     var fd=new FormData(f);fd.delete('surname');
-    fetch('https://api.web3forms.com/submit',{method:'POST',body:fd,headers:{'Accept':'application/json'}})
-      .then(function(r){return r.json()})
-      .then(function(d){
-        if(!d.success)throw new Error(d.message||'rejected');
-        f.reset();msg.textContent='Thank you for contacting me!';msg.style.display='block';
-      })
-      .catch(function(err){msg.textContent='Something went wrong ('+(err&&err.message?err.message:'network')+'). Please WhatsApp me on +201066600848.';msg.style.display='block'})
-      .then(function(){btn.disabled=false});
+    var proofUrl='',bookingId='';
+    var step=Promise.resolve();
+    if(file){
+      step=step.then(function(){
+        var ext=(file.type.split('/')[1]||'jpg').replace('jpeg','jpg').replace(/[^a-z0-9]/gi,'');
+        var name=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2))+'.'+ext;
+        return fetch(SU+'/storage/v1/object/proofs/'+name,{method:'POST',headers:{apikey:SK,Authorization:'Bearer '+SK,'Content-Type':file.type||'image/jpeg'},body:file})
+          .then(function(r){if(!r.ok)throw new Error('upload');proofUrl=SU+'/storage/v1/object/public/proofs/'+name});
+      });
+    }
+    step=step.then(function(){
+      var num=function(k){var v=parseInt(Q.get(k),10);return isNaN(v)?null:v};
+      return fetch(SU+'/rest/v1/rpc/create_booking',{method:'POST',headers:{apikey:SK,Authorization:'Bearer '+SK,'Content-Type':'application/json'},body:JSON.stringify({
+        p_couple:fd.get('Groom&Bride')||'',p_date:fd.get('Date')||null,p_venue:fd.get('venue')||null,p_phone:fd.get('Number phone')||null,p_phone2:fd.get('Number phone 2')||null,
+        p_email:fd.get('email')||null,p_message:fd.get('Message')||null,p_package:hasPkg?fd.get('Package'):null,p_extras:fd.get('Extras')||null,
+        p_total:num('total'),p_deposit:num('deposit'),p_proof:proofUrl||null,p_ref:Q.get('ref')||null})})
+        .then(function(r){if(!r.ok)throw new Error('save');return r.json()}).then(function(id){bookingId=id});
+    });
+    step.then(function(){
+      fd.set('Payment screenshot',proofUrl||'(not uploaded)');fd.set('Booking ID',bookingId);
+      return fetch('https://api.web3forms.com/submit',{method:'POST',body:fd,headers:{'Accept':'application/json'}}).catch(function(){});
+    }).then(function(){
+      f.reset();document.getElementById('f-package').value=hasPkg?Q.get('package')?'Photography — '+Q.get('package'):'':'No package selected (booked directly)';
+      msg.textContent='Thank you! We received your request. Your date is confirmed as soon as we verify your deposit, and we will contact you shortly.';
+    }).catch(function(err){
+      msg.textContent='Something went wrong ('+(err&&err.message?err.message:'network')+'). Please WhatsApp me on +201066600848.';
+    }).then(function(){btn.disabled=false});
   });
 }
 
