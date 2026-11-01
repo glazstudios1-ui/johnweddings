@@ -199,13 +199,13 @@ function drawCalendar() {
     var key = cal.y + '-' + String(cal.m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
     var ev = D.bookings.filter(function (b) { return b.wedding_date === key && b.status !== 'cancelled'; });
     html += '<div class="d' + (key === tk ? ' t' : '') + '"><div class="n">' + d + '</div>' +
-      ev.map(function (b) { return '<button class="chip ' + (b.status === 'confirmed' ? 'c' : 'p') + '" data-b="' + b.id + '">' + esc(b.couple) + '</button>'; }).join('') + '</div>';
+      ev.map(function (b) { var w = wdOf(b.id); return '<button class="chip ' + (b.status === 'confirmed' ? 'c' : 'p') + '" data-b="' + b.id + '">' + esc(b.couple) + (w && w.submitted_at ? ' ✓' : '') + '</button>'; }).join('') + '</div>';
   }
   var rest = (7 - ((offset + days) % 7)) % 7; for (var j = 0; j < rest; j++) html += '<div class="d o"></div>';
-  html += '</div><div class="legend"><span><i style="background:#e9e7e2"></i>Confirmed</span><span><i style="border:1px dashed var(--warn)"></i>Waiting for deposit</span></div>';
+  html += '</div><div class="legend"><span><i style="background:#e9e7e2"></i>Confirmed</span><span><i style="border:1px dashed var(--warn)"></i>Waiting for deposit</span><span>✓ = client filled in the day plan</span></div>';
   var up = D.bookings.filter(function (b) { return b.status === 'confirmed' && b.wedding_date >= tk; });
   html += '<h2>Upcoming weddings (' + up.length + ')</h2><div class="card list">' + (up.length ? up.map(function (b) {
-    return '<div class="row"><div class="a"><b>' + esc(b.couple) + '</b><div class="muted">' + fmtDate(b.wedding_date) + ' · ' + esc(b.venue || '') + '</div></div><div class="muted">' + esc(b.package || '') + '</div><button class="btn ghost sm" data-b="' + b.id + '">Open</button></div>';
+    return '<div class="row"><div class="a"><b>' + esc(b.couple) + '</b><div class="muted">' + fmtDate(b.wedding_date) + ' · ' + esc(b.venue || '') + '</div></div><div class="muted">' + esc(b.package || '') + '</div><div class="muted">' + (function () { var w = wdOf(b.id); return w && w.submitted_at ? 'Day plan ✓' : 'Day plan: waiting'; })() + '</div><button class="btn ghost sm" data-b="' + b.id + '">Open</button></div>';
   }).join('') : '<div class="muted">No confirmed weddings yet.</div>') + '</div>';
   $('#t-calendar').innerHTML = html;
 }
@@ -252,7 +252,7 @@ async function detailsCall(id, send) {
 }
 function copyText(t, ok) { (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { toast(ok || 'Copied'); }, function () { window.prompt('Copy:', t); }); }
 function wdOf(id) { return (D.details || []).find(function (x) { return String(x.booking_id) === String(id); }); }
-function wdState(w) { return !w ? 'Not created yet' : w.submitted_at ? 'Client filled it in' : w.link_sent_at ? 'Email sent, waiting for the client' : 'Link created, not emailed'; }
+function wdState(w) { return !w ? 'Not created yet' : w.submitted_at ? 'Filled in · last change ' + new Date(w.updated_at || w.submitted_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : w.link_sent_at ? 'Email sent, waiting for the client' : 'Link created, not emailed'; }
 function igs(d) {
   var a = [];
   if (d.bride && d.bride.ig) a.push(['Bride' + (d.bride.name ? ' ' + d.bride.name : ''), d.bride.ig]);
@@ -260,17 +260,32 @@ function igs(d) {
   (d.vendors || []).forEach(function (v) { if (v.ig) a.push([(v.role || '') + (v.name ? ' · ' + v.name : ''), v.ig]); });
   return a;
 }
-function detailsView(w) {
+function fmt12(t) { var m = /^(\d{1,2}):(\d{2})/.exec(t || ''); if (!m) return ''; var h = parseInt(m[1], 10), ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return h + ':' + m[2] + ' ' + ap; }
+function planOf(d) {
+  var st = d.start ? d.start.split(':') : null;
+  return (d.timeline || []).map(function (h, i) {
+    var t = h.time || (st ? ('0' + ((parseInt(st[0], 10) + i) % 24)).slice(-2) + ':' + st[1] : '');
+    return { t: t, what: h.what || '', where: h.where || '' };
+  }).filter(function (x) { return x.what || x.where; }).sort(function (a, b) { return (a.t || '99') < (b.t || '99') ? -1 : 1; });
+}
+function planText(b, d) {
+  var L = [b.couple + ' · ' + fmtDate(b.wedding_date) + (b.venue ? ' · ' + b.venue : '')];
+  planOf(d).forEach(function (x) { L.push(fmt12(x.t) + ' — ' + x.what + (x.where ? ' @ ' + x.where : '')); });
+  igs(d).forEach(function (x, i) { if (i === 0) L.push('', 'Instagram:'); L.push(x[0] + ': @' + x[1]); });
+  if (d.notes) L.push('', 'Notes: ' + d.notes);
+  return L.join('\n');
+}
+function detailsView(w, b) {
   var d = w.data || {}; if (!w.submitted_at) return '';
-  var tl = (d.timeline || []).map(function (h, i) {
-    var t = d.start ? (function () { var p = d.start.split(':'), hh = (parseInt(p[0], 10) + i) % 24; return ('0' + hh).slice(-2) + ':' + p[1]; })() : 'Hour ' + (i + 1);
-    return (h.what || h.where) ? '<div class="pay-row"><span><b>' + esc(t) + '</b> · ' + esc(h.what || '') + (h.where ? ' <span class="muted">@ ' + esc(h.where) + '</span>' : '') + '</span></div>' : '';
+  var tl = planOf(d).map(function (x) {
+    return '<div class="pay-row"><span><b>' + esc(fmt12(x.t) || '—') + '</b> · ' + esc(x.what) + (x.where ? ' <span class="muted">@ ' + esc(x.where) + '</span>' : '') + '</span></div>';
   }).join('');
   var ig = igs(d);
-  return '<div style="margin:6px 0 20px"><label>Instagram accounts to tag</label>' +
+  return '<div style="margin:6px 0 20px"><label>The day, by the clock</label>' + (tl || '<div class="muted" style="padding:8px 0">Nothing filled in yet.</div>') +
+    '<div class="acts" style="margin:8px 0 14px"><button class="btn ghost sm" id="w-copyplan">Copy the schedule</button></div>' +
+    '<label>Instagram accounts to tag</label>' +
     (ig.length ? ig.map(function (x) { return '<div class="pay-row"><span>' + esc(x[0]) + '</span><span><a href="https://www.instagram.com/' + esc(x[1]) + '" target="_blank" rel="noopener">@' + esc(x[1]) + '</a></span></div>'; }).join('') : '<div class="muted" style="padding:8px 0">None yet.</div>') +
     (ig.length ? '<div class="acts" style="margin-top:8px"><button class="btn ghost sm" id="w-copyig">Copy all @accounts</button></div>' : '') +
-    '<label style="margin-top:14px">Hour by hour</label>' + (tl || '<div class="muted" style="padding:8px 0">Nothing filled in.</div>') +
     (d.notes ? '<label style="margin-top:14px">Notes from the client</label><div style="white-space:pre-wrap;padding:6px 0">' + esc(d.notes) + '</div>' : '') + '</div>';
 }
 function detailsSection(b) {
@@ -280,7 +295,7 @@ function detailsSection(b) {
     '<div class="acts" style="margin:6px 0 14px"><button class="btn sm" id="w-send">' + (w && w.link_sent_at ? 'Email the link again' : 'Email the link to the client') + '</button>' +
     '<button class="btn ghost sm" id="w-copy">Copy link</button>' +
     (w ? '<button class="btn ghost sm" id="w-lock">' + (w.locked ? 'Unlock editing' : 'Lock editing') + '</button>' : '') + '</div>' +
-    (w ? detailsView(w) : '');
+    (w ? detailsView(w, b) : '');
 }
 function wireDetails(b) {
   var id = b.id, s = $('#w-send'), c = $('#w-copy'), l = $('#w-lock'), ci = $('#w-copyig');
@@ -295,6 +310,7 @@ function wireDetails(b) {
     var w = wdOf(id); var u = await sb.from('wedding_details').update({ locked: !w.locked }).eq('booking_id', String(id));
     if (u.error) return toast('Error: ' + u.error.message); await load(); openBooking(id);
   };
+  var cp = $('#w-copyplan'); if (cp) cp.onclick = function () { var w = wdOf(id); copyText(planText(b, w.data || {}), 'Schedule copied'); };
   if (ci) ci.onclick = function () { var w = wdOf(id); copyText(igs(w.data || {}).map(function (x) { return '@' + x[1]; }).join(' '), 'Accounts copied'); };
 }
 
@@ -341,11 +357,11 @@ function openBooking(id) {
     (b.message ? '<span>Message</span><b>' + esc(b.message) + '</b>' : '') +
     '<span>Offers OK</span><b>' + (b.marketing_ok ? 'Yes' : 'No') + '</b>' +
     (b.proof_url ? '<span>Screenshot</span><b><a href="' + esc(b.proof_url) + '" target="_blank" rel="noopener">Open</a></b>' : '') + '</div>' +
+    detailsSection(b) +
     '<div class="g"><div><label>Total price (EGP)</label><input id="d-tot" type="number" min="0" value="' + (b.total_amount || '') + '"></div>' +
     '<div><label>Wedding date</label><input id="d-date" type="date" value="' + esc(b.wedding_date || '') + '"></div>' +
     '<div class="full"><label>Notes</label><textarea id="d-notes" rows="2">' + esc(b.notes || '') + '</textarea></div></div>' +
     '<div class="acts" style="margin-bottom:20px"><button class="btn sm" id="d-save">Save changes</button></div>' +
-    detailsSection(b) +
     '<label>Payments — paid ' + egp(pd) + ' · remaining <span class="' + (rem > 0 ? 'rem' : 'done') + '">' + egp(Math.max(rem, 0)) + '</span></label>' +
     (pays.map(function (p) { return '<div class="pay-row"><span>' + fmtDate(p.paid_at) + ' · ' + esc(p.kind) + (p.note ? ' · ' + esc(p.note) : '') + '</span><span><b>' + egp(p.amount) + '</b> <button class="btn ghost sm" data-delpay="' + p.id + '">✕</button></span></div>'; }).join('') || '<div class="muted" style="padding:8px 0">No payments recorded.</div>') +
     '<div class="g" style="margin-top:14px"><div><label>Add payment (EGP)</label><input id="d-amt" type="number" min="1"></div><div><label>Note</label><input id="d-note" placeholder="e.g. second payment"></div></div>' +
