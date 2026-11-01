@@ -110,6 +110,7 @@ td.n,th.n{text-align:right;white-space:nowrap}
       <button data-t="calendar" aria-selected="true">Calendar</button>
       <button data-t="requests" aria-selected="false">Requests<span class="badge" id="rb" hidden>0</span></button>
       <button data-t="finance" aria-selected="false">Money</button>
+      <button data-t="contacts" aria-selected="false">Contacts</button>
       <button data-t="links" aria-selected="false">Package links</button>
     </nav>
     <button class="btn ghost sm" id="out">Sign out</button>
@@ -118,6 +119,7 @@ td.n,th.n{text-align:right;white-space:nowrap}
     <section id="t-calendar"></section>
     <section id="t-requests" hidden></section>
     <section id="t-finance" hidden></section>
+    <section id="t-contacts" hidden></section>
     <section id="t-links" hidden></section>
   </main>
 </div>
@@ -172,12 +174,13 @@ $('#tabs').addEventListener('click', function (e) {
 });
 function render() {
   [].forEach.call(document.querySelectorAll('#tabs button'), function (b) { b.setAttribute('aria-selected', String(b.dataset.t === tab)); });
-  ['calendar', 'requests', 'finance', 'links'].forEach(function (t) { $('#t-' + t).hidden = t !== tab; });
+  ['calendar', 'requests', 'finance', 'contacts', 'links'].forEach(function (t) { $('#t-' + t).hidden = t !== tab; });
   var pend = D.bookings.filter(function (b) { return b.status === 'pending'; }).length;
   $('#rb').hidden = !pend; $('#rb').textContent = pend;
   if (tab === 'calendar') drawCalendar();
   if (tab === 'requests') drawRequests();
   if (tab === 'finance') drawFinance();
+  if (tab === 'contacts') drawContacts();
   if (tab === 'links') drawLinks();
 }
 
@@ -273,6 +276,7 @@ function openBooking(id) {
     (b.phone2 ? '<span>Phone 2</span><b>' + esc(b.phone2) + '</b>' : '') + '<span>Email</span><b>' + esc(b.email || '—') + '</b>' +
     '<span>Package</span><b>' + esc(b.package || '—') + '</b><span>Add-ons</span><b>' + esc(b.extras || '—') + '</b>' +
     (b.message ? '<span>Message</span><b>' + esc(b.message) + '</b>' : '') +
+    '<span>Offers OK</span><b>' + (b.marketing_ok ? 'Yes' : 'No') + '</b>' +
     (b.proof_url ? '<span>Screenshot</span><b><a href="' + esc(b.proof_url) + '" target="_blank" rel="noopener">Open</a></b>' : '') + '</div>' +
     '<div class="g"><div><label>Total price (EGP)</label><input id="d-tot" type="number" min="0" value="' + (b.total_amount || '') + '"></div>' +
     '<div><label>Wedding date</label><input id="d-date" type="date" value="' + esc(b.wedding_date || '') + '"></div>' +
@@ -324,6 +328,43 @@ function drawFinance() {
     (rows || '<tr><td colspan="6" class="muted">Nothing here yet.</td></tr>') + '</tbody></table></div>';
 }
 $('#t-finance').addEventListener('click', function (e) { var b = e.target.closest('[data-b]'); if (b) openBooking(b.dataset.b); });
+
+
+/* ---------- contacts (emails and phones of everyone who booked or asked) ---------- */
+var cf = { q: '', offers: false };
+function contactRows() {
+  var map = {};
+  D.bookings.forEach(function (b) {
+    var key = (b.email || '').trim().toLowerCase() || ('phone:' + (b.phone || b.id));
+    var c = map[key] || (map[key] = { name: b.couple, email: (b.email || '').trim(), phone: b.phone || '', date: b.wedding_date, status: b.status, offers: false, n: 0, at: b.created_at });
+    c.n++; if (b.marketing_ok) c.offers = true;
+    if (b.created_at >= c.at) { c.at = b.created_at; c.name = b.couple; c.phone = b.phone || c.phone; c.date = b.wedding_date; c.status = b.status; }
+  });
+  return Object.keys(map).map(function (k) { return map[k]; }).filter(function (c) {
+    var q = cf.q.toLowerCase();
+    return (!cf.offers || c.offers) && (!q || (c.name + ' ' + c.email + ' ' + c.phone).toLowerCase().indexOf(q) > -1);
+  }).sort(function (a, b) { return a.at < b.at ? 1 : -1; });
+}
+function drawContacts() {
+  var rows = contactRows(), all = D.bookings.length;
+  $('#t-contacts').innerHTML = '<h2>Contacts (' + rows.length + ')</h2>' +
+    '<p class="muted" style="margin-bottom:16px">Everyone who sent the booking form. “Offers OK” means they ticked the box to get news and offers. Only use those for promotions and ads.</p>' +
+    '<div class="card" style="margin-bottom:14px;display:flex;gap:14px;flex-wrap:wrap;align-items:center"><input id="ct-q" placeholder="Search name, email or phone" value="' + esc(cf.q) + '" style="flex:1;min-width:200px"><label style="margin:0;display:flex;align-items:center;gap:8px;cursor:pointer"><input id="ct-o" type="checkbox" style="width:auto"' + (cf.offers ? ' checked' : '') + '> Offers OK only</label><button class="btn sm" id="ct-csv">Download CSV</button></div>' +
+    '<div class="card tw"><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Wedding</th><th>Status</th><th>Offers OK</th></tr></thead><tbody>' +
+    (rows.map(function (c) { return '<tr><td><b>' + esc(c.name) + '</b></td><td>' + esc(c.email || '—') + '</td><td>' + esc(c.phone || '—') + '</td><td>' + (c.date ? fmtDate(c.date) : '—') + '</td><td>' + tagOf(c.status) + '</td><td>' + (c.offers ? '<span class="done">Yes</span>' : '<span class="muted">No</span>') + '</td></tr>'; }).join('') || '<tr><td colspan="6" class="muted">No contacts yet.</td></tr>') + '</tbody></table></div>';
+  var q = $('#ct-q'); if (q && document.activeElement !== q && cf.q) { /* keep focus behaviour simple */ }
+}
+$('#t-contacts').addEventListener('input', function (e) {
+  if (e.target.id === 'ct-q') { cf.q = e.target.value; var pos = e.target.selectionStart; drawContacts(); var q = $('#ct-q'); q.focus(); q.setSelectionRange(pos, pos); }
+});
+$('#t-contacts').addEventListener('change', function (e) { if (e.target.id === 'ct-o') { cf.offers = e.target.checked; drawContacts(); } });
+$('#t-contacts').addEventListener('click', function (e) {
+  if (e.target.id !== 'ct-csv') return;
+  var q = function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
+  var lines = [['Name', 'Email', 'Phone', 'Wedding date', 'Status', 'Offers OK'].map(q).join(',')].concat(contactRows().map(function (c) { return [c.name, c.email, c.phone, c.date || '', c.status, c.offers ? 'yes' : 'no'].map(q).join(','); }));
+  var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + lines.join('\n')], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'john-emad-contacts.csv'; document.body.appendChild(a); a.click(); a.remove();
+});
 
 /* ---------- package links ---------- */
 function token() { var a = new Uint8Array(18); crypto.getRandomValues(a); return Array.prototype.map.call(a, function (x) { return 'abcdefghjkmnpqrstuvwxyz23456789'[x % 31]; }).join(''); }

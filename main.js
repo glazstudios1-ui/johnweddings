@@ -99,12 +99,20 @@ if(f){
       return fetch(SU+'/rest/v1/rpc/create_booking',{method:'POST',headers:{apikey:SK,Authorization:'Bearer '+SK,'Content-Type':'application/json'},body:JSON.stringify({
         p_couple:fd.get('Groom&Bride')||'',p_date:fd.get('Date')||null,p_venue:fd.get('venue')||null,p_phone:fd.get('Number phone')||null,p_phone2:fd.get('Number phone 2')||null,
         p_email:fd.get('email')||null,p_message:fd.get('Message')||null,p_package:hasPkg?fd.get('Package'):null,p_extras:fd.get('Extras')||null,
-        p_total:num('total'),p_deposit:num('deposit'),p_proof:proofUrl||null,p_ref:Q.get('ref')||null})})
+        p_total:num('total'),p_deposit:num('deposit'),p_proof:proofUrl||null,p_ref:Q.get('ref')||null,p_marketing:!!(f.elements['marketing']&&f.elements['marketing'].checked)})})
         .then(function(r){if(!r.ok)throw new Error('save');return r.json()}).then(function(id){bookingId=id});
     });
     step.then(function(){
       fd.set('Payment screenshot',proofUrl||'(not uploaded)');fd.set('Payment status',proofUrl?'Deposit screenshot uploaded - please verify':'NO DEPOSIT YET - client may want a call first');fd.set('Booking ID',bookingId);
-      return fetch('https://api.web3forms.com/submit',{method:'POST',body:fd,headers:{'Accept':'application/json'}}).catch(function(){});
+      var notify=fetch('https://api.web3forms.com/submit',{method:'POST',body:fd,headers:{'Accept':'application/json'}}).catch(function(){});
+      var EJ={s:'',t:'',k:''},em=fd.get('email');
+      var thanks=(EJ.s&&EJ.t&&EJ.k&&em)?fetch('https://api.emailjs.com/api/v1.0/email/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+        service_id:EJ.s,template_id:EJ.t,user_id:EJ.k,template_params:{
+          to_email:em,to_name:fd.get('Groom&Bride')||'',package:hasPkg?fd.get('Package'):'Not chosen yet',extras:fd.get('Extras')||'None',
+          total:fd.get('Estimated total')||'',deposit:fd.get('Deposit (50%)')||'',wedding_date:fd.get('Date')||'',
+          instapay:document.getElementById('ipa').textContent,pay_instructions:proofUrl?'':('To reserve your date, transfer the deposit through InstaPay: '+document.getElementById('ipa').textContent+'\nThen send the screenshot of the transfer on WhatsApp: https://wa.me/201066600848'),
+          status_text:proofUrl?'We received your payment screenshot. We will verify it and confirm your date very soon.':'Your request is received. Your date is only reserved once the 50% deposit is paid through InstaPay. If you would like to talk first, we will call you shortly.'}})}).catch(function(){}):Promise.resolve();
+      return Promise.all([notify,thanks]);
     }).then(function(){
       f.reset();document.getElementById('f-package').value=hasPkg?Q.get('package')?'Photography — '+Q.get('package'):'':'No package selected (booked directly)';
       msg.textContent=proofUrl?'Thank you! We received your request and your payment screenshot. Your date is confirmed as soon as we verify the deposit, and we will contact you shortly.':'Thank you! We received your request and will contact you shortly. Please note that your date is only reserved once the 50% deposit is paid.';
