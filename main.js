@@ -105,7 +105,7 @@ if(f){
     step.then(function(){
       fd.set('Payment screenshot',proofUrl||'(not uploaded)');fd.set('Payment status',proofUrl?'Deposit screenshot uploaded - please verify':'NO DEPOSIT YET - client may want a call first');fd.set('Booking ID',bookingId);
       var notify=fetch('https://api.web3forms.com/submit',{method:'POST',body:fd,headers:{'Accept':'application/json'}}).catch(function(){});
-      var EJ={s:'',t:'',k:''},em=fd.get('email');
+      var EJ={s:'service_7bfemti',t:'template_w9375v7',k:'kvcaRDR0PR-Ssk3N_'},em=fd.get('email');
       var thanks=(EJ.s&&EJ.t&&EJ.k&&em)?fetch('https://api.emailjs.com/api/v1.0/email/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
         service_id:EJ.s,template_id:EJ.t,user_id:EJ.k,template_params:{
           to_email:em,to_name:fd.get('Groom&Bride')||'',package:hasPkg?fd.get('Package'):'Not chosen yet',extras:fd.get('Extras')||'None',
