@@ -494,3 +494,5 @@ html{scroll-behavior:smooth}
  .bform .grid2 .fld:nth-child(2),.bform .grid2 .fld:nth-child(3),.bform .grid2 .fld:nth-child(4){grid-column:1/-1}
  .seg{gap:6px}.seg span{height:44px;font-size:14px}
 }
+.book-bg img{object-position:50% 58%}
+@media(max-width:768px){.book-bg img{object-position:50% 52%}}
