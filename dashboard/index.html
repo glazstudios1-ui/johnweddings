@@ -308,6 +308,7 @@ function detailsSection(b) {
   var w = wdOf(b.id);
   return '<label>Wedding details link — ' + esc(wdState(w)) + '</label>' +
     '<div class="acts" style="margin:6px 0 14px"><button class="btn sm" id="w-send">' + (w && w.link_sent_at ? 'Email the link again' : 'Email the link to the client') + '</button>' +
+    '<button class="btn ghost sm" id="w-wa">Send on WhatsApp</button>' +
     '<button class="btn ghost sm" id="w-copy">Copy link</button>' +
     (w ? '<button class="btn ghost sm" id="w-lock">' + (w.locked ? 'Unlock editing' : 'Lock editing') + '</button>' : '') + '</div>' +
     (w ? detailsView(w, b) : '');
@@ -319,6 +320,20 @@ function wireDetails(b) {
     this.disabled = true;
     try { await detailsCall(id, true); toast('Email sent to ' + b.email); await load(); render(); openBooking(id); }
     catch (e) { this.disabled = false; toast('Could not send: ' + e.message); }
+  };
+  var wa = $('#w-wa');
+  if (wa) wa.onclick = async function () {
+    if (!b.phone) return toast('This booking has no phone number.');
+    var tab = window.open('', '_blank'); this.disabled = true;
+    try {
+      var r = await detailsCall(id, false);
+      var msg = 'Hi ' + (b.couple || '') + ',\nThis is John Emad. Your date' + (b.wedding_date ? ' (' + fmtDate(b.wedding_date) + ')' : '') + ' is confirmed. Thank you for trusting us with your day.\n\nThis is your private link to tell us about your wedding: the timeline hour by hour (times and places), and the Instagram accounts of the couple and everyone who worked on your wedding (makeup, dress, venue, DJ and more), so we can tag them when we share your photos:\n' + r.link + '\n\nYou can change anything in it at any time. The link is private, please do not share it.';
+      var url = waLink(b.phone) + '?text=' + encodeURIComponent(msg);
+      if (tab) tab.location = url; else window.location = url;
+      await sb.from('wedding_details').update({ link_sent_at: new Date().toISOString() }).eq('booking_id', String(id));
+      toast('WhatsApp opened'); await load();
+    } catch (e) { if (tab) tab.close(); toast('Could not create the link: ' + e.message); }
+    this.disabled = false;
   };
   if (c) c.onclick = async function () { try { var r = await detailsCall(id, false); copyText(r.link, 'Link copied'); await load(); } catch (e) { toast('Error: ' + e.message); } };
   if (l) l.onclick = async function () {
