@@ -45,7 +45,7 @@ h2{font-family:Montserrat,sans-serif;font-weight:300;font-size:20px;text-transfo
 .calbar h2{margin:0;flex:1}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden}
 .cal .h{background:#222;padding:8px;font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--mut);text-align:center}
-.cal .d{background:var(--card);min-height:96px;padding:6px;font-size:12px}
+.cal .d[data-day]{cursor:pointer}.cal .d[data-day]:hover{background:#2c2c2c}.cal .d{background:var(--card);min-height:96px;padding:6px;font-size:12px}
 .cal .d.o{background:#212121;color:#666}
 .cal .d.t{outline:1px solid #fff;outline-offset:-1px}
 .cal .d .n{color:var(--mut);font-size:11px;margin-bottom:4px}
@@ -138,6 +138,19 @@ var D = { bookings: [], payments: [], links: [] };
 var cal = { y: new Date().getFullYear(), m: new Date().getMonth() };
 var tab = 'calendar';
 
+
+/* ---------- in-dashboard confirm (replaces the browser pop-up) ---------- */
+function ask(msg, okLabel, danger) {
+  return new Promise(function (res) {
+    var o = document.createElement('div'); o.className = 'mask'; o.style.zIndex = 300;
+    o.innerHTML = '<div class="modal" style="width:420px"><p style="margin-bottom:20px;line-height:1.6;font-size:14px">' + esc(msg) + '</p><div class="acts"><button class="btn ' + (danger ? 'bad' : 'ok') + '" data-y>' + esc(okLabel || 'Confirm') + '</button><button class="btn ghost" data-n>Cancel</button></div></div>';
+    function done(v) { document.removeEventListener('keydown', key); o.remove(); res(v); }
+    function key(e) { if (e.key === 'Escape') done(false); }
+    o.addEventListener('click', function (e) { if (e.target === o || e.target.closest('[data-n]')) done(false); else if (e.target.closest('[data-y]')) done(true); });
+    document.addEventListener('keydown', key); document.body.appendChild(o); o.querySelector('[data-y]').focus();
+  });
+}
+
 function toast(t) { var e = document.createElement('div'); e.className = 'toast'; e.textContent = t; document.body.appendChild(e); setTimeout(function () { e.remove(); }, 2600); }
 function paid(b) { return D.payments.filter(function (p) { return p.booking_id === b.id; }).reduce(function (a, p) { return a + p.amount; }, 0); }
 function fmtDate(s) { if (!s) return 'No date'; var d = new Date(s + 'T00:00:00'); return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }); }
@@ -192,13 +205,13 @@ function drawCalendar() {
   var names = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
   var today = new Date(), tk = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
   var html = '<div class="calbar"><h2>' + first.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) + '</h2>' +
-    '<button class="btn ghost sm" data-m="-1">‹ Prev</button><button class="btn ghost sm" data-m="0">Today</button><button class="btn ghost sm" data-m="1">Next ›</button></div>';
+    '<button class="btn sm" data-add>+ Add client</button><button class="btn ghost sm" data-m="-1">‹ Prev</button><button class="btn ghost sm" data-m="0">Today</button><button class="btn ghost sm" data-m="1">Next ›</button></div>';
   html += '<div class="cal">' + names.map(function (n) { return '<div class="h">' + n + '</div>'; }).join('');
   for (var i = 0; i < offset; i++) html += '<div class="d o"></div>';
   for (var d = 1; d <= days; d++) {
     var key = cal.y + '-' + String(cal.m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
     var ev = D.bookings.filter(function (b) { return b.wedding_date === key && b.status !== 'cancelled'; });
-    html += '<div class="d' + (key === tk ? ' t' : '') + '"><div class="n">' + d + '</div>' +
+    html += '<div class="d' + (key === tk ? ' t' : '') + '" data-day="' + key + '"><div class="n">' + d + '</div>' +
       ev.map(function (b) { var w = wdOf(b.id); return '<button class="chip ' + (b.status === 'confirmed' ? 'c' : 'p') + '" data-b="' + b.id + '">' + esc(b.couple) + (w && w.submitted_at ? ' ✓' : '') + '</button>'; }).join('') + '</div>';
   }
   var rest = (7 - ((offset + days) % 7)) % 7; for (var j = 0; j < rest; j++) html += '<div class="d o"></div>';
@@ -211,7 +224,9 @@ function drawCalendar() {
 }
 $('#t-calendar').addEventListener('click', function (e) {
   var m = e.target.closest('[data-m]'); if (m) { var v = +m.dataset.m; if (v === 0) { cal.y = new Date().getFullYear(); cal.m = new Date().getMonth(); } else { cal.m += v; if (cal.m < 0) { cal.m = 11; cal.y--; } if (cal.m > 11) { cal.m = 0; cal.y++; } } return drawCalendar(); }
-  var b = e.target.closest('[data-b]'); if (b) openBooking(b.dataset.b);
+  var b = e.target.closest('[data-b]'); if (b) return openBooking(b.dataset.b);
+  if (e.target.closest('[data-add]')) return openAdd('');
+  var dy = e.target.closest('[data-day]'); if (dy) openAdd(dy.dataset.day);
 });
 
 /* ---------- requests ---------- */
@@ -250,7 +265,7 @@ async function detailsCall(id, send) {
   }
   return r.data;
 }
-function copyText(t, ok) { (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { toast(ok || 'Copied'); }, function () { window.prompt('Copy:', t); }); }
+function copyText(t, ok) { (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { toast(ok || 'Copied'); }, function () { toast('Could not copy'); }); }
 function wdOf(id) { return (D.details || []).find(function (x) { return String(x.booking_id) === String(id); }); }
 function wdState(w) { return !w ? 'Not created yet' : w.submitted_at ? 'Filled in · last change ' + new Date(w.updated_at || w.submitted_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : w.link_sent_at ? 'Email sent, waiting for the client' : 'Link created, not emailed'; }
 function igs(d) {
@@ -337,11 +352,46 @@ function confirmModal(id) {
     closeModal(); toast(note); await load(); render();
   };
 }
-async function setStatus(id, status, ask) {
-  if (ask && !confirm(ask)) return;
+async function setStatus(id, status, msg) {
+  if (msg && !(await ask(msg, status === 'cancelled' ? 'Yes, cancel' : 'Confirm', status === 'cancelled'))) return;
   var u = await sb.from('bookings').update({ status: status }).eq('id', id);
   if (u.error) return toast('Error: ' + u.error.message);
   closeModal(); await load(); render();
+}
+
+
+/* ---------- add a client by hand ---------- */
+function openAdd(dateKey) {
+  modal('<h3>Add a client</h3>' +
+    '<div class="g"><div class="full"><label>Groom &amp; Bride</label><input id="a-name" placeholder="e.g. Mariam &amp; Ahmed"></div>' +
+    '<div><label>Event</label><select id="a-type"><option>Wedding</option><option>Engagement</option><option>Mini wedding</option></select></div>' +
+    '<div><label>Date</label><input id="a-date" type="date" value="' + esc(dateKey || '') + '"></div>' +
+    '<div><label>Venue</label><input id="a-venue"></div><div><label>Phone</label><input id="a-phone" type="tel"></div>' +
+    '<div class="full"><label>Email (optional)</label><input id="a-email" type="email"></div>' +
+    '<div><label>Package</label><input id="a-pkg" placeholder="e.g. Photography — 8 Hours"></div>' +
+    '<div><label>Total price (EGP)</label><input id="a-tot" type="number" min="0"></div>' +
+    '<div><label>Status</label><select id="a-st"><option value="confirmed">Confirmed (deposit paid)</option><option value="pending">Waiting for deposit</option></select></div>' +
+    '<div><label>Deposit received (EGP)</label><input id="a-dep" type="number" min="0"></div>' +
+    '<div class="full"><label>Notes</label><textarea id="a-notes" rows="2"></textarea></div></div>' +
+    '<div class="acts"><button class="btn ok" id="a-go">Add to calendar</button><button class="btn ghost" data-close>Cancel</button></div>');
+  $('#a-name').focus();
+  $('#a-go').onclick = async function () {
+    var name = $('#a-name').value.trim(), date = $('#a-date').value, st = $('#a-st').value;
+    var tot = parseInt($('#a-tot').value, 10), dep = parseInt($('#a-dep').value, 10);
+    if (!name) return toast('Enter the names');
+    if (!date) return toast('Pick the date');
+    var clash = D.bookings.filter(function (x) { return x.status === 'confirmed' && x.wedding_date === date; });
+    if (st === 'confirmed' && clash.length && !(await ask(clash[0].couple + ' is already confirmed on this date. Add anyway?', 'Add anyway'))) return;
+    this.disabled = true;
+    var row = { couple: name, wedding_date: date, venue: $('#a-venue').value.trim() || null, phone: $('#a-phone').value.trim() || null, email: $('#a-email').value.trim() || null,
+      package: $('#a-pkg').value.trim() || null, total_amount: isNaN(tot) ? null : tot, notes: $('#a-notes').value.trim() || null, status: st, event_type: $('#a-type').value,
+      confirmed_at: st === 'confirmed' ? new Date().toISOString() : null, marketing_ok: false };
+    var r = await sb.from('bookings').insert(row).select().single();
+    if (r.error && /event_type/.test(r.error.message || '')) { delete row.event_type; r = await sb.from('bookings').insert(row).select().single(); }
+    if (r.error) { this.disabled = false; return toast('Error: ' + r.error.message); }
+    if (dep > 0) { var p = await sb.from('payments').insert({ booking_id: r.data.id, amount: dep, kind: 'deposit', note: 'Deposit' }); if (p.error) toast('Added, but the deposit was not saved: ' + p.error.message); }
+    closeModal(); toast('Added to your calendar'); await load(); render();
+  };
 }
 
 /* ---------- booking detail ---------- */
@@ -386,7 +436,7 @@ function openBooking(id) {
   var cn = $('#d-cancel'); if (cn) cn.onclick = function () { setStatus(id, 'cancelled', 'Cancel this booking?'); };
   var ro = $('#d-reopen'); if (ro) ro.onclick = function () { setStatus(id, 'pending'); };
   [].forEach.call(document.querySelectorAll('[data-delpay]'), function (x) {
-    x.onclick = async function () { if (!confirm('Delete this payment?')) return; var r = await sb.from('payments').delete().eq('id', x.dataset.delpay); if (r.error) return toast('Error: ' + r.error.message); await load(); render(); openBooking(id); };
+    x.onclick = async function () { if (!(await ask('Delete this payment?', 'Delete', true))) return; var r = await sb.from('payments').delete().eq('id', x.dataset.delpay); if (r.error) return toast('Error: ' + r.error.message); await load(); render(); openBooking(id); };
   });
 }
 
@@ -472,12 +522,12 @@ $('#t-links').addEventListener('click', async function (e) {
     try { await navigator.clipboard.writeText(linkUrl(tk)); toast('Link created and copied'); } catch (x) { toast('Link created'); }
     await load(); return render();
   }
-  if (t.dataset.copy) { try { await navigator.clipboard.writeText(linkUrl(t.dataset.copy)); toast('Copied'); } catch (x) { prompt('Copy this link', linkUrl(t.dataset.copy)); } return; }
+  if (t.dataset.copy) { try { await navigator.clipboard.writeText(linkUrl(t.dataset.copy)); toast('Copied'); } catch (x) { toast(linkUrl(t.dataset.copy)); } return; }
   var tkn = t.dataset.reset || t.dataset.toggle || t.dataset.del; if (!tkn) return;
   var l = D.links.find(function (x) { return x.token === tkn; }), q;
-  if (t.dataset.reset) { if (!confirm('Let this link open on a new phone? The old phone will be locked out.')) return; q = sb.from('package_links').update({ device: null, first_opened_at: null }).eq('token', tkn); }
+  if (t.dataset.reset) { if (!(await ask('Let this link open on a new phone? The old phone will be locked out.', 'Reset link'))) return; q = sb.from('package_links').update({ device: null, first_opened_at: null }).eq('token', tkn); }
   else if (t.dataset.toggle) q = sb.from('package_links').update({ active: !l.active }).eq('token', tkn);
-  else { if (!confirm('Delete this link?')) return; q = sb.from('package_links').delete().eq('token', tkn); }
+  else { if (!(await ask('Delete this link? The client will no longer be able to open it.', 'Delete', true))) return; q = sb.from('package_links').delete().eq('token', tkn); }
   var r2 = await q; if (r2.error) return toast('Error: ' + r2.error.message);
   await load(); render();
 });
