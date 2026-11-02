@@ -516,14 +516,14 @@ $('#t-contacts').addEventListener('click', function (e) {
 function token() { var a = new Uint8Array(18); crypto.getRandomValues(a); return Array.prototype.map.call(a, function (x) { return 'abcdefghjkmnpqrstuvwxyz23456789'[x % 31]; }).join(''); }
 function linkUrl(t) { return SITE + '/' + PACKAGE_PATH + '/?t=' + t; }
 function drawLinks() {
-  $('#t-links').innerHTML = '<h2>Package links</h2><p class="muted" style="margin-bottom:16px">Make one link per client. A link opens on the first phone or browser that uses it and stays locked to it. Forwarding it to someone else will not work.</p>' +
+  $('#t-links').innerHTML = '<h2>Package links</h2><p class="muted" style="margin-bottom:16px">Make one link per client. A link works on up to 5 devices (so the couple and their family can all open it). After that it is blocked. You can see how many devices opened it, and reset it any time.</p>' +
     '<div class="card"><div class="lform"><div><label>Client name</label><input id="l-name" placeholder="e.g. Mariam &amp; Ahmed"></div><div><label>Phone (optional)</label><input id="l-phone"></div><button class="btn" id="l-new">Create link</button></div>' +
     (D.links.length ? D.links.map(function (l) {
       return '<div class="row" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--line)"><div style="flex:1;min-width:220px"><b>' + esc(l.client_name || 'Client') + '</b> ' +
-        (l.active ? (l.device ? '<span class="tag c">Opened</span>' : '<span class="tag p">Not opened yet</span>') : '<span class="tag x">Off</span>') +
+        (l.active ? (l.device ? '<span class="tag c">Opened · ' + ((l.devices && l.devices.length) || 1) + ' of 5 devices</span>' : '<span class="tag p">Not opened yet</span>') : '<span class="tag x">Off</span>') +
         '<div class="url">' + esc(linkUrl(l.token)) + '</div></div>' +
         '<button class="btn ghost sm" data-copy="' + esc(l.token) + '">Copy</button>' +
-        (l.device ? '<button class="btn ghost sm" data-reset="' + esc(l.token) + '">Unlock phone</button>' : '') +
+        (l.device ? '<button class="btn ghost sm" data-reset="' + esc(l.token) + '">Reset devices</button>' : '') +
         '<button class="btn ghost sm" data-toggle="' + esc(l.token) + '">' + (l.active ? 'Turn off' : 'Turn on') + '</button>' +
         '<button class="btn bad sm" data-del="' + esc(l.token) + '">Delete</button></div>';
     }).join('') : '<div class="muted" style="padding-top:8px">No links yet.</div>') + '</div>';
@@ -540,7 +540,7 @@ $('#t-links').addEventListener('click', async function (e) {
   if (t.dataset.copy) { try { await navigator.clipboard.writeText(linkUrl(t.dataset.copy)); toast('Copied'); } catch (x) { toast(linkUrl(t.dataset.copy)); } return; }
   var tkn = t.dataset.reset || t.dataset.toggle || t.dataset.del; if (!tkn) return;
   var l = D.links.find(function (x) { return x.token === tkn; }), q;
-  if (t.dataset.reset) { if (!(await ask('Let this link open on a new phone? The old phone will be locked out.', 'Reset link'))) return; q = sb.from('package_links').update({ device: null, first_opened_at: null }).eq('token', tkn); }
+  if (t.dataset.reset) { if (!(await ask('Clear all devices on this link? It will open fresh on the next 5 devices.', 'Reset link'))) return; q = sb.from('package_links').update({ device: null, devices: [], first_opened_at: null }).eq('token', tkn); }
   else if (t.dataset.toggle) q = sb.from('package_links').update({ active: !l.active }).eq('token', tkn);
   else { if (!(await ask('Delete this link? The client will no longer be able to open it.', 'Delete', true))) return; q = sb.from('package_links').delete().eq('token', tkn); }
   var r2 = await q; if (r2.error) return toast('Error: ' + r2.error.message);

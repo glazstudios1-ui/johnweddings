@@ -63,7 +63,7 @@ button{font:inherit;color:inherit}a{color:inherit}
 @media(prefers-reduced-motion:reduce){.bar{transition:none}}
 </style>
 </head><body>
-<div class="bg"><img src="../img/8OzXKM__JE-482-2000.jpg" alt=""></div>
+<div class="bg"><img src="../img/ses__s4-2000.jpg" alt=""></div>
 
 <header class="cover">
   <h1>Our Packages</h1>
@@ -194,7 +194,7 @@ function openPage(client) {
     });
     var res = await r.json();
     if (!res || !res.ok) {
-      var why = { device: ['This link belongs to another phone', 'Each link opens on one phone only. Message us and we will send you your own link.'],
+      var why = { device: ['This link was opened on too many devices', 'For privacy, each link works on a few devices only. Message us and we will send you a fresh link.'],
                   revoked: ['This link is no longer active', 'Message us and we will send you a new link.'] }[res && res.reason] || ['This link is not valid', 'Message us and we will send you a new link.'];
       return lock(why[0], why[1]);
     }
