@@ -15,23 +15,38 @@ if(hero){
   show(0);auto();
 }
 
-/* testimonials carousel */
+/* testimonials: one continuous, smooth strip. Pauses on hover/drag; arrows nudge one card. */
 $$('.car').forEach(function(car){
-  var track=$('.car-track',car),cards=$$('.card',track),pg=0,per=3,pages;
-  var mq=window.matchMedia('(max-width:768px)');
-  function build(){
-    per=mq.matches?1:3;
-    var cur=Math.floor(pg*per_prev/per);
-    track.innerHTML='';pages=[];
-    for(var k=0;k<cards.length;k+=per){var p=document.createElement('div');p.className='car-page';cards.slice(k,k+per).forEach(function(c){p.appendChild(c)});track.appendChild(p);pages.push(p)}
-    pg=Math.min(cur,pages.length-1);go(pg,true);per_prev=per;
+  var track=$('.car-track',car),view=$('.car-view',car),cards=$$('.card',track);
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  cards.forEach(function(c){var k=c.cloneNode(true);k.setAttribute('aria-hidden','true');k.classList.add('clone');track.appendChild(k)});
+  var x=0,setW=0,paused=false,drag=null,glide=0,last=0,visible=true;
+  function measure(){var f=cards[0],g=cards[1];var gap=g?g.offsetLeft-f.offsetLeft-f.offsetWidth:0;setW=cards.length*(f.offsetWidth+gap);return f.offsetWidth+gap}
+  function wrap(){if(setW){while(x<=-setW)x+=setW;while(x>0)x-=setW}}
+  function paint(){track.style.transform='translate3d('+x+'px,0,0)'}
+  function speed(){return window.innerWidth<=768?30:42}
+  function tick(t){
+    var dt=Math.min((t-last)/1000||0,.05);last=t;
+    if(visible&&!drag){
+      if(glide){var step=glide*Math.min(1,dt*7);x+=step;glide-=step;if(Math.abs(glide)<.5){x+=glide;glide=0}}
+      else if(!paused&&!reduce)x-=speed()*dt;
+      wrap();paint();
+    }
+    requestAnimationFrame(tick);
   }
-  var per_prev=3;
-  function go(n,instant){pg=(n+pages.length)%pages.length;track.style.transition=instant?'none':'';track.style.transform='translateX(-'+pg*100+'%)'}
-  $$('.prev',car).forEach(function(a){a.addEventListener('click',function(){go(pg-1)})});
-  $$('.next',car).forEach(function(a){a.addEventListener('click',function(){go(pg+1)})});
-  mq.addEventListener?mq.addEventListener('change',build):mq.addListener(build);
-  build();
+  var card=measure();
+  window.addEventListener('resize',function(){card=measure();wrap();paint()});
+  if('IntersectionObserver' in window){new IntersectionObserver(function(e){visible=e[0].isIntersecting}).observe(view)}
+  view.addEventListener('mouseenter',function(){paused=true});
+  view.addEventListener('mouseleave',function(){paused=false});
+  $$('.prev',car).forEach(function(a){a.addEventListener('click',function(){glide+=card})});
+  $$('.next',car).forEach(function(a){a.addEventListener('click',function(){glide-=card})});
+  view.addEventListener('pointerdown',function(e){if(e.pointerType==='mouse'&&e.button!==0)return;drag={x:e.clientX,x0:x,id:e.pointerId,moved:false};glide=0});
+  window.addEventListener('pointermove',function(e){if(!drag)return;var d=e.clientX-drag.x;if(Math.abs(d)>4&&!drag.moved){drag.moved=true;try{view.setPointerCapture(drag.id)}catch(_){}}if(drag.moved){x=drag.x0+d;wrap();paint()}});
+  function end(){drag=null}
+  window.addEventListener('pointerup',end);window.addEventListener('pointercancel',end);
+  view.addEventListener('dragstart',function(e){e.preventDefault()});
+  requestAnimationFrame(function(t){last=t;requestAnimationFrame(tick)});
 });
 
 /* masonry gallery (aspect ratios are known, so there is no layout jump) */
