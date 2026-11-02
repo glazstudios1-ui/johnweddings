@@ -205,7 +205,7 @@ function drawCalendar() {
   html += '</div><div class="legend"><span><i style="background:#e9e7e2"></i>Confirmed</span><span><i style="border:1px dashed var(--warn)"></i>Waiting for deposit</span><span>✓ = client filled in the day plan</span></div>';
   var up = D.bookings.filter(function (b) { return b.status === 'confirmed' && b.wedding_date >= tk; });
   html += '<h2>Upcoming weddings (' + up.length + ')</h2><div class="card list">' + (up.length ? up.map(function (b) {
-    return '<div class="row"><div class="a"><b>' + esc(b.couple) + '</b><div class="muted">' + fmtDate(b.wedding_date) + ' · ' + esc(b.venue || '') + '</div></div><div class="muted">' + esc(b.package || '') + '</div><div class="muted">' + (function () { var w = wdOf(b.id); return w && w.submitted_at ? 'Day plan ✓' : 'Day plan: waiting'; })() + '</div><button class="btn ghost sm" data-b="' + b.id + '">Open</button></div>';
+    return '<div class="row"><div class="a"><b>' + esc(b.couple) + '</b><div class="muted">' + fmtDate(b.wedding_date) + ' · ' + esc(b.venue || '') + '</div></div><div class="muted">' + esc(b.event_type && b.event_type !== 'Wedding' ? b.event_type : (b.package || '')) + '</div><div class="muted">' + (function () { var w = wdOf(b.id); return w && w.submitted_at ? 'Day plan ✓' : 'Day plan: waiting'; })() + '</div><button class="btn ghost sm" data-b="' + b.id + '">Open</button></div>';
   }).join('') : '<div class="muted">No confirmed weddings yet.</div>') + '</div>';
   $('#t-calendar').innerHTML = html;
 }
@@ -220,7 +220,7 @@ function drawRequests() {
   $('#t-requests').innerHTML = '<h2>Waiting for deposit confirmation (' + list.length + ')</h2>' + (list.length ? list.map(function (b) {
     return '<div class="card req">' + (b.proof_url ? '<img class="shot" src="' + esc(b.proof_url) + '" alt="Payment screenshot" data-zoom="' + esc(b.proof_url) + '">' : '<div class="noshot">No payment yet<br>(may want a call first)</div>') +
       '<div><h3>' + esc(b.couple) + '</h3><div class="muted">Sent ' + new Date(b.created_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) + '</div>' +
-      '<div class="kv"><span>Wedding date</span><b>' + fmtDate(b.wedding_date) + '</b><span>Venue</span><b>' + esc(b.venue || '—') + '</b>' +
+      '<div class="kv">' + (b.event_type ? '<span>Event</span><b>' + esc(b.event_type) + '</b>' : '') + '<span>Date</span><b>' + fmtDate(b.wedding_date) + '</b><span>Venue</span><b>' + esc(b.venue || '—') + '</b>' +
       '<span>Phone</span><b><a href="tel:' + esc(b.phone) + '">' + esc(b.phone || '—') + '</a> · <a href="' + waLink(b.phone) + '" target="_blank" rel="noopener">WhatsApp</a></b>' +
       (b.phone2 ? '<span>Phone 2</span><b>' + esc(b.phone2) + '</b>' : '') + '<span>Email</span><b>' + esc(b.email || '—') + '</b>' +
       '<span>Package</span><b>' + esc(b.package || '—') + '</b><span>Add-ons</span><b>' + esc(b.extras || '—') + '</b>' +
@@ -350,7 +350,7 @@ function openBooking(id) {
   var pays = D.payments.filter(function (p) { return p.booking_id === id; });
   var pd = paid(b), rem = (b.total_amount || 0) - pd;
   modal('<h3>' + esc(b.couple) + ' ' + tagOf(b.status) + '</h3>' +
-    '<div class="kv"><span>Date</span><b>' + fmtDate(b.wedding_date) + '</b><span>Venue</span><b>' + esc(b.venue || '—') + '</b>' +
+    '<div class="kv">' + (b.event_type ? '<span>Event</span><b>' + esc(b.event_type) + '</b>' : '') + '<span>Date</span><b>' + fmtDate(b.wedding_date) + '</b><span>Venue</span><b>' + esc(b.venue || '—') + '</b>' +
     '<span>Phone</span><b><a href="tel:' + esc(b.phone) + '">' + esc(b.phone || '—') + '</a> · <a href="' + waLink(b.phone) + '" target="_blank" rel="noopener">WhatsApp</a></b>' +
     (b.phone2 ? '<span>Phone 2</span><b>' + esc(b.phone2) + '</b>' : '') + '<span>Email</span><b>' + esc(b.email || '—') + '</b>' +
     '<span>Package</span><b>' + esc(b.package || '—') + '</b><span>Add-ons</span><b>' + esc(b.extras || '—') + '</b>' +

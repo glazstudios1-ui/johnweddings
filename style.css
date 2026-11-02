@@ -481,3 +481,16 @@ html{scroll-behavior:smooth}
 .paybtn:hover{background:#fff}
 .paynote{font-size:13.5px;color:var(--mute);line-height:1.5;margin:0 0 18px}
 @media(max-width:768px){.paybtn{height:50px}.paynote{font-size:13px;margin-bottom:14px}}
+
+/* event type (Wedding / Engagement / Mini wedding) */
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bform .fld .seg label{display:block;margin:0;text-transform:none;letter-spacing:0;color:inherit}
+.seg input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.seg span{display:flex;align-items:center;justify-content:center;height:48px;border:1px solid var(--line);border-radius:2px;background:var(--ink);color:var(--soft);font-size:15px;cursor:pointer;text-align:center;line-height:1.2;padding:0 6px;transition:background .2s,color .2s,border-color .2s}
+.seg label:hover span{border-color:rgba(236,231,222,.4)}
+.seg input:checked+span{background:var(--bone);color:var(--ink);border-color:var(--bone);font-weight:500}
+.seg input:focus-visible+span{outline:1px solid var(--bone);outline-offset:2px}
+@media(max-width:768px){
+ .bform .grid2 .fld:nth-child(2),.bform .grid2 .fld:nth-child(3),.bform .grid2 .fld:nth-child(4){grid-column:1/-1}
+ .seg{gap:6px}.seg span{height:44px;font-size:14px}
+}

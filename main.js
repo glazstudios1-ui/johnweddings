@@ -117,9 +117,10 @@ if(f){
     });
     step.then(function(){
       fd.set('Payment screenshot',proofUrl||'(not uploaded)');fd.set('Payment status',proofUrl?'Deposit screenshot uploaded - please verify':'NO DEPOSIT YET - client may want a call first');fd.set('Booking ID',bookingId);
+      var evt=bookingId?fetch(SU+'/rest/v1/rpc/set_booking_event_type',{method:'POST',headers:{apikey:SK,Authorization:'Bearer '+SK,'Content-Type':'application/json'},body:JSON.stringify({p_id:String(bookingId),p_type:fd.get('Event type')||'Wedding'})}).catch(function(){}):Promise.resolve();
       var notify=fetch('https://api.web3forms.com/submit',{method:'POST',body:fd,headers:{'Accept':'application/json'}}).catch(function(){});
       var thanks=bookingId?fetch(SU+'/functions/v1/send-thanks',{method:'POST',headers:{'Content-Type':'application/json',apikey:SK,Authorization:'Bearer '+SK},body:JSON.stringify({booking_id:bookingId})}).catch(function(){}):Promise.resolve();
-      return Promise.all([notify,thanks]);
+      return Promise.all([notify,thanks,evt]);
     }).then(function(){
       f.reset();document.getElementById('f-package').value=hasPkg?Q.get('package')?'Photography — '+Q.get('package'):'':'No package selected (booked directly)';
       msg.textContent=proofUrl?'Thank you! We received your request and your payment screenshot. Your date is confirmed as soon as we verify the deposit, and we will contact you shortly.':'Thank you! We received your request and will contact you shortly. Please note that your date is only reserved once the 50% deposit is paid.';
