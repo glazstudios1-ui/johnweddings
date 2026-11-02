@@ -157,4 +157,17 @@ if(f){
   document.getElementById('f-deposit').value=dep?egp(dep):'';
   document.getElementById('f-ref').value=q.get('ref')||'';
 })();
+/* booking (phones): the photo opens the page, then the form fades in as you scroll */
+(function(){
+  var bg=$('.book-bg'),form=$('.b-form');
+  if(!bg||!form||!window.matchMedia('(max-width:768px)').matches)return;
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function dim(){var p=Math.min(1,window.scrollY/(window.innerHeight*.75));bg.style.opacity=(1-p*.84).toFixed(3)}
+  window.addEventListener('scroll',dim,{passive:true});dim();
+  if(reduce||!('IntersectionObserver' in window))return;
+  form.classList.add('pre');
+  var io=new IntersectionObserver(function(e){if(e[0].isIntersecting){form.classList.add('in');io.disconnect()}},{threshold:.04,rootMargin:'0px 0px -12% 0px'});
+  io.observe(form);
+  var go=$('.b-go');if(go)go.addEventListener('click',function(){form.classList.add('in')});
+})();
 })();
