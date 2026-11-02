@@ -477,3 +477,7 @@ html{scroll-behavior:smooth}
  .ftr{margin-top:0;padding-top:70px}
 }
 @media(prefers-reduced-motion:reduce){.b-form.pre{opacity:1;transform:none;transition:none}}
+.paybtn{display:flex;align-items:center;justify-content:center;height:54px;margin:0 0 10px;background:var(--bone);color:var(--ink);font-weight:500;font-size:15px;letter-spacing:.03em;border-radius:2px;transition:background .25s}
+.paybtn:hover{background:#fff}
+.paynote{font-size:13.5px;color:var(--mute);line-height:1.5;margin:0 0 18px}
+@media(max-width:768px){.paybtn{height:50px}.paynote{font-size:13px;margin-bottom:14px}}

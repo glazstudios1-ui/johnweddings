@@ -88,8 +88,6 @@ if(f){
   /* deposit box */
   if(hasPkg&&Q.get('deposit')){document.getElementById('pamt-wrap').hidden=false;document.getElementById('pamt').textContent='EGP '+Number(Q.get('deposit')).toLocaleString('en-US');}
   else document.getElementById('pay-desc').textContent='To reserve your date, transfer the 50% deposit through InstaPay and upload the screenshot. Your date is only held once the deposit is paid. If you have not chosen a package yet or would like to talk first, send the form without it and we will call you.';
-  var cpb=document.getElementById('ipa-copy');
-  if(cpb)cpb.addEventListener('click',function(){var t=document.getElementById('ipa').textContent;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){cpb.textContent='Copied'},function(){window.prompt('Copy',t)});setTimeout(function(){cpb.textContent='Copy'},1600)});
 
   f.addEventListener('submit',function(e){
     e.preventDefault();
