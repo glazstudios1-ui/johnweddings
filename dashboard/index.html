@@ -1,7 +1,14 @@
 <!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dashboard">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1d1d1d">
 <title>John Emad — Dashboard</title>
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta name="referrer" content="no-referrer">
@@ -10,6 +17,9 @@
 <style>
 :root{--bg:#1d1d1d;--card:#262626;--line:#3a3a3a;--mut:#a8a8a8;--ok:#7fd1a0;--warn:#e8c46a;--bad:#e5877e}
 *{box-sizing:border-box;margin:0;padding:0}
+body{padding-bottom:env(safe-area-inset-bottom,0px);-webkit-tap-highlight-color:transparent}
+#login{padding-top:env(safe-area-inset-top,0px)}
+input,select,textarea{font-size:16px}
 [hidden]{display:none!important}
 body{background:var(--bg);color:#fff;font-family:Lora,serif;font-size:14px;line-height:1.5;min-height:100vh}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -30,7 +40,7 @@ a{color:#fff}
 #login .btn{width:100%;height:46px}
 .err{color:var(--bad);font-size:13px;margin-top:14px;min-height:20px}
 /* app */
-header.top{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:18px 24px;border-bottom:1px solid var(--line)}
+header.top{padding-top:calc(18px + env(safe-area-inset-top,0px))!important;padding-left:max(24px,env(safe-area-inset-left,0px))!important;padding-right:max(24px,env(safe-area-inset-right,0px))!important;display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:18px 24px;border-bottom:1px solid var(--line)}
 header.top h1{font-family:Montserrat,sans-serif;font-weight:300;font-size:18px;text-transform:uppercase;margin-right:auto}
 .tabs{display:flex;gap:4px;flex-wrap:wrap}
 .tabs button{background:none;border:1px solid transparent;border-radius:4px;padding:8px 14px;cursor:pointer;font-family:Montserrat,sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--mut)}
