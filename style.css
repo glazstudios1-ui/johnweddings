@@ -552,3 +552,28 @@ html{scroll-behavior:smooth}
  .hero-name{top:57%;font-size:clamp(78px,29vw,150px)}
  .strip{bottom:178px}
 }
+
+/* ===== v32 reel: black stage ===== */
+.hero.reel{background:#000;height:100svh;min-height:580px;max-height:1100px;overflow:hidden}
+.hero.reel .hero-shade{background:linear-gradient(180deg,rgba(0,0,0,.5) 0,rgba(0,0,0,0) 24%,rgba(0,0,0,0) 56%,rgba(0,0,0,.82) 100%)!important;opacity:0;transition:opacity .6s}
+.hero.reel.lit .hero-shade{opacity:1}
+.rbgs{position:absolute;inset:0;z-index:0}
+.rbg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--od,50% 50%);opacity:0;transition:opacity .55s ease;filter:brightness(.78)}
+.rbg.on{opacity:1}
+.hero.reel .strip{width:clamp(96px,11vw,190px);top:0;bottom:0;animation:fade 1.2s ease .3s forwards}
+.hero.reel .strip-in{animation-duration:60s}
+.hero.reel .strip:hover .strip-in{animation-play-state:paused}
+.hero.reel .strip img{cursor:pointer;filter:none;transition:transform .35s ease}
+.hero.reel .strip img:hover{transform:scale(1.04)}
+.hero.reel .hero-name{top:auto;bottom:clamp(120px,19svh,190px);transform:none;font-size:clamp(52px,7.4vw,128px);line-height:1;letter-spacing:-.01em;text-shadow:0 2px 30px rgba(0,0,0,.45)}
+.hero.reel .hero-name .hl{display:block;padding:.04em 0 .1em}
+.hero.reel .hero-copy{bottom:clamp(30px,5svh,56px)}
+@media(max-width:768px){
+ .hero.reel .strip{width:clamp(74px,22vw,110px)}
+ .hero.reel .hero-name{font-size:clamp(46px,14.5vw,80px);bottom:176px}
+ .hero.reel .hero-copy{bottom:58px}
+ .rbg{object-position:var(--om,50% 50%)}
+}
+/* the column ends above the name so the text stays clean */
+.hero.reel .strip{bottom:clamp(250px,36svh,360px)}
+@media(max-width:768px){.hero.reel .strip{bottom:250px}}

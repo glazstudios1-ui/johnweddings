@@ -4,15 +4,15 @@ var $=function(s,c){return(c||document).querySelector(s)},$$=function(s,c){retur
 /* mobile menu */
 var b=$('.burger');if(b)b.addEventListener('click',function(){document.body.classList.toggle('menu-open')});
 
-/* hero slider */
-var hero=$('.hero');
+/* hero reel: hover (desktop) or tap / auto-cycle (touch) lights a photo behind the name */
+var hero=$('.hero.reel');
 if(hero){
-  var sl=$$('.slide',hero),i=0,cnt=$('.pg-n',hero),t;
-  function show(n){i=(n+sl.length)%sl.length;sl.forEach(function(s,k){s.classList.toggle('on',k===i)});cnt.textContent=(i+1)}
-  function auto(){clearInterval(t);t=setInterval(function(){show(i+1)},5500)}
-  $('.hp-prev',hero).addEventListener('click',function(){show(i-1);auto()});
-  $('.hp-next',hero).addEventListener('click',function(){show(i+1);auto()});
-  show(0);auto();
+  var bgs=$$('.rbg',hero),strip=$('.strip',hero),cur=-1,cyc,touch=window.matchMedia('(hover:none)').matches;
+  function lit(n){cur=n;bgs.forEach(function(b,k){b.classList.toggle('on',k===n)});hero.classList.toggle('lit',n>=0)}
+  strip.addEventListener('mouseover',function(e){var t=e.target.closest('.rt');if(t&&!touch){clearInterval(cyc);lit(+t.dataset.i)}});
+  strip.addEventListener('mouseleave',function(){if(!touch)lit(-1)});
+  strip.addEventListener('click',function(e){var t=e.target.closest('.rt');if(t){clearInterval(cyc);lit(+t.dataset.i===cur?-1:+t.dataset.i)}});
+  if(touch){var k=0;function step(){lit(k%bgs.length);k++}setTimeout(function(){step();cyc=setInterval(step,4200)},1200)}
 }
 
 /* testimonials: one continuous, smooth strip. Pauses on hover/drag; arrows nudge one card. */
