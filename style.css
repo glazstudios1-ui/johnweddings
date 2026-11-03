@@ -512,3 +512,6 @@ html{scroll-behavior:smooth}
 /* landscape hero photo fills the screen */
 @media(min-width:769px){.hero .slide.wide img{width:100%;margin:0;-webkit-mask-image:none;mask-image:none;object-position:var(--od,50% 50%)}.hero .slide.wide~.hero-shade{}}
 @media(max-width:768px){.hero .slide.wide img{position:absolute;inset:0;width:100%;height:100%;object-position:var(--om,50% 50%);filter:brightness(.9)}}
+/* close crop on the couple in slide 2 (faces stay put, the photo grows around them) */
+.hero .slide img[src*="ses__s11"]{scale:1.3;transform-origin:0% 40%}
+@media(max-width:768px){.hero .slide img[src*="ses__s11"]{scale:1.3;transform-origin:50% 38%}}
