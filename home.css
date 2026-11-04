@@ -15,7 +15,7 @@ html.homeA,html.homeA body{overflow-x:clip}
 .skip{position:absolute;z-index:3;right:4vw;bottom:30px;font-size:13px;color:var(--mute);background:none;border:0;font-family:var(--sans);cursor:pointer}
 .intro{display:none}.introing .intro{display:grid}.introing body{overflow:hidden;height:100svh}.introing .hdr{opacity:0}.hdr{transition:opacity 1s ease .2s}
 .hA .mark{display:block;width:100%;height:auto}
-.hA .btn{display:inline-flex;align-items:center;justify-content:center;height:52px;padding:0 30px;background:var(--bone);color:var(--ink);font-weight:500;font-size:14px;letter-spacing:.04em;border-radius:2px;transition:background .25s}
+.hA .btn{border-radius:var(--br,2px);display:inline-flex;align-items:center;justify-content:center;height:52px;padding:0 30px;background:var(--bone);color:var(--ink);font-weight:500;font-size:14px;letter-spacing:.04em;border-radius:2px;transition:background .25s}
 .hA .btn:hover{background:#fff}
 .hA .lab{font-size:15px;letter-spacing:.03em;color:var(--mute)}
 .hA .serif{font-family:var(--serif);font-weight:400}
@@ -39,22 +39,22 @@ html.homeA,html.homeA body{overflow-x:clip}
 .hA .heroA .stk{position:sticky;top:0}
 .hA .heroA .ttl{z-index:2;opacity:0;pointer-events:none;text-shadow:0 2px 40px rgba(0,0,0,.45)}
 .hA .heroA .frame{z-index:1}}
-.hA .story{padding:22vh 8vw 14vh}
+.hA .story{padding:calc(22vh*var(--spm,1)) 8vw calc(14vh*var(--spm,1))}
 .hA .story .scrub{font-family:var(--serif);font-size:clamp(30px,4.6vw,76px);line-height:1.08;letter-spacing:-.012em;max-width:1200px;margin:0 auto}
-.hA .gx{padding:14vh 4vw 10vh}
+.hA .gx{padding:calc(14vh*var(--spm,1)) 4vw calc(10vh*var(--spm,1))}
 .hA .gx .gh{display:flex;justify-content:space-between;align-items:end;padding-bottom:6vh}
 .hA .gx h3{font-family:var(--serif);font-weight:400;font-size:clamp(40px,5vw,80px);line-height:1}
 .hA .gcols{column-count:3;column-gap:1.4vw}
 .hA .gcols figure{break-inside:avoid;margin:0 0 1.4vw;overflow:hidden;background:var(--raise);cursor:zoom-in}
 .hA .gcols img{display:block;width:100%;height:auto;transition:transform 1.1s var(--out),filter .6s}
 .hA .gcols figure:hover img{transform:scale(1.04)}
-@media(max-width:899px){.hA .gx{padding:10vh 4vw 6vh}
+@media(max-width:899px){.hA .gx{padding:calc(10vh*var(--spm,1)) 4vw calc(6vh*var(--spm,1))}
 .hA .gcols{column-count:2;column-gap:10px}
 .hA .gcols figure{margin-bottom:10px}}
 .hA .lb{position:fixed;inset:0;z-index:90;background:rgba(8,8,8,.94);display:none;align-items:center;justify-content:center;cursor:zoom-out}
 .hA .lb.on{display:flex}
 .hA .lb img{max-width:94vw;max-height:92vh;object-fit:contain}
-.hA .vo{padding:16vh 4vw}
+.hA .vo{padding:calc(16vh*var(--spm,1)) 4vw}
 .hA .slider{position:relative;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(36px,7vw,120px);align-items:center;max-width:1309px;margin:0 auto}
 .hA .slider .ph{position:relative;aspect-ratio:4/5;max-width:520px;background:var(--raise);overflow:hidden}
 .hA .slider .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.08);transition:opacity 1s ease,transform 1.6s var(--out)}
@@ -83,3 +83,5 @@ html.homeA,html.homeA body{overflow-x:clip}
 .im .mark{display:block;width:100%;height:auto;stroke:currentColor;stroke-width:7;stroke-linejoin:round}
 .im{color:var(--bone)}.intro .skip{font-family:var(--sans)}
 .hdr .logo svg{display:block;width:100%;height:auto}
+/* parts sitting on photos keep light text whatever theme is chosen */
+.homeA .hdr--over,.hA .heroA,.hA .cn2{--bone:#ece7de;--ink:#0d0d0c;--soft:#cfc9bf}

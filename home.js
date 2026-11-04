@@ -16,22 +16,16 @@ else body.classList.add('ready','go');
 function url(it,w){if(!it)return '';return it.b?it.b+'-'+w+'.jpg':(it.src||'')}
 var scr=[];
 function splitScrub(el){el.innerHTML=el.textContent.trim().split(/\s+/).map(function(w){return '<span style="opacity:.16;transition:opacity .35s">'+w+'</span>'}).join(' ')}
-function setT(k,v){if(v==null||v==='')return;$$('[data-t="'+k+'"]').forEach(function(el){el.textContent=v;if(el.classList.contains('scrub'))splitScrub(el)})}
 function apply(c){
  if(!c)return;
  if(c.hero)c.hero.forEach(function(it,i){var el=$('[data-i="hero'+(i+1)+'"]');if(el&&it){el.src=url(it,2000);if(it.pos)el.style.setProperty('--pos',it.pos)}});
- if(c.t)Object.keys(c.t).forEach(function(k){setT(k,c.t[k])});
  if(c.connect_text)$$('[data-rep="connect"] span').forEach(function(s){s.textContent=c.connect_text});
- if(c.tm)c.tm.forEach(function(it,i){var n=i+1;setT('q'+n,it.text);setT('n'+n,it.name);var im=$('[data-i="t'+n+'"]');if(im&&(it.b||it.src)){im.src=url(it,900);if(it.pos)im.style.objectPosition=it.pos}});
+ if(c.tm)c.tm.forEach(function(it,i){var n=i+1;var im=$('[data-i="t'+n+'"]');if(im&&(it.b||it.src)){im.src=url(it,900);if(it.pos)im.style.objectPosition=it.pos}});
  if(c.connect&&(c.connect.b||c.connect.src)){var bg=$('[data-bg="connect"]');if(bg)bg.style.backgroundImage='url('+url(c.connect,2000)+')'}
  if(c.grid&&c.grid.length){var g=$('.gcols');if(g){g.innerHTML=c.grid.map(function(it){return '<figure class="rv in"><img loading="lazy" alt="" src="'+url(it,900)+'" data-full="'+url(it,2000)+'"></figure>'}).join('');}
   var lab=$('[data-count]');if(lab)lab.textContent=c.grid.length+' moments'}
 }
-try{apply(JSON.parse(localStorage.getItem(CK)))}catch(e){}
-try{fetch(SB+'/rest/v1/site_content?key=eq.home&select=value',{headers:{apikey:KEY,Authorization:'Bearer '+KEY}}).then(function(r){return r.ok?r.json():null}).then(function(a){
- if(!a)return;var v=a[0]&&a[0].value;
- if(v){apply(v);try{localStorage.setItem(CK,JSON.stringify(v))}catch(e){}}else{try{localStorage.removeItem(CK)}catch(e){}}
-}).catch(function(){})}catch(e){}
+window.__splitScrub=splitScrub;if(window.JE)JE.on(apply);
 
 /* ---------- reveal ---------- */
 var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12,rootMargin:'0px 0px -6% 0px'});
