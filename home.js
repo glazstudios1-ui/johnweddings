@@ -22,7 +22,7 @@ function apply(c){
  if(c.connect_text)$$('[data-rep="connect"] span').forEach(function(s){s.textContent=c.connect_text});
  if(c.tm)c.tm.forEach(function(it,i){var n=i+1;var im=$('[data-i="t'+n+'"]');if(im&&(it.b||it.src)){im.src=url(it,900);if(it.pos)im.style.objectPosition=it.pos}});
  if(c.connect&&(c.connect.b||c.connect.src)){var bg=$('[data-bg="connect"]');if(bg)bg.style.backgroundImage='url('+url(c.connect,2000)+')'}
- if(c.grid&&c.grid.length){var g=$('.gcols');if(g){g.innerHTML=c.grid.map(function(it){return '<figure class="rv in"><img loading="lazy" alt="" src="'+url(it,900)+'" data-full="'+url(it,2000)+'"></figure>'}).join('');}
+ if(c.grid&&c.grid.length){var g=$('.gcols');if(g){g.innerHTML=c.grid.map(function(it){return '<figure class="rv in"><img loading="lazy" alt="Wedding photography by John Emad" src="'+url(it,900)+'" data-full="'+url(it,2000)+'"></figure>'}).join('');}
   var lab=$('[data-count]');if(lab)lab.textContent=c.grid.length+' moments'}
 }
 window.__splitScrub=splitScrub;if(window.JE)JE.on(apply);

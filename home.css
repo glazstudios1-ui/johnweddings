@@ -95,3 +95,5 @@ html.homeA,html.homeA body{overflow-x:clip}
 .hA .pl-list li:last-child{border-bottom:1px solid var(--line)}
 .hA .pl-list li:before{content:"0" counter(p);font-family:var(--serif);color:var(--mute);font-size:20px}
 .hA .pl-list{counter-reset:p}
+
+.hA .ttl h1{font:inherit;margin:0;letter-spacing:inherit;text-transform:none}
