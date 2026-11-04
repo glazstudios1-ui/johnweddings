@@ -99,6 +99,31 @@ td.n,th.n{text-align:right;white-space:nowrap}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#fff;color:#111;padding:12px 18px;border-radius:6px;font-size:13px;z-index:99}
 .tag{display:inline-block;font-family:Montserrat,sans-serif;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;border:1px solid;border-radius:3px;padding:2px 7px}
 .tag.p{color:var(--warn)}.tag.c{color:var(--ok)}.tag.x{color:var(--bad)}
+
+/* ---------- Website tab ---------- */
+.wb{max-width:1100px;margin:0 auto;padding:22px 24px 80px}
+.wbar{position:sticky;top:0;z-index:20;display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--bg);padding:14px 0;border-bottom:1px solid var(--line);margin-bottom:8px}
+.wbar h2{font-family:Montserrat,sans-serif;font-weight:300;font-size:16px;text-transform:uppercase;letter-spacing:1px;margin-right:auto}
+.wbar .st{color:var(--warn);font-size:12px}
+.wsec{margin-top:34px}.wsec>h3{font-family:Montserrat,sans-serif;font-weight:400;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;margin-bottom:6px}
+.wsec>p{color:var(--mut);font-size:13px;margin-bottom:14px}
+.wgrid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.wcard{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:12px}
+.wprev{position:relative;aspect-ratio:16/10;border-radius:4px;overflow:hidden;background:#111;cursor:crosshair}
+.wprev img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.wprev i{position:absolute;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px rgba(0,0,0,.5);pointer-events:none}
+.wcard .cap{color:var(--mut);font-size:12px;margin:8px 0}
+.wtiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.wtile{position:relative;aspect-ratio:3/4;border-radius:4px;overflow:hidden;background:#111;border:1px solid var(--line)}
+.wtile img{width:100%;height:100%;object-fit:cover;display:block}
+.wtile .n{position:absolute;left:6px;top:6px;background:rgba(0,0,0,.65);font:10px Montserrat,sans-serif;padding:2px 6px;border-radius:3px}
+.wtile .tb{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;gap:4px;padding:5px;background:linear-gradient(transparent,rgba(0,0,0,.8))}
+.wtile .tb button{background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.35);border-radius:3px;width:30px;height:28px;cursor:pointer;color:#fff;font-size:13px;padding:0}
+.wtile .tb button.x{color:var(--bad)}
+.wfld{margin-bottom:12px}.wfld textarea{min-height:96px;resize:vertical;line-height:1.5}
+.wtm{display:grid;grid-template-columns:110px 1fr;gap:12px}
+.wtm .wprev{aspect-ratio:4/5;cursor:crosshair}
+@media(max-width:760px){.wgrid3,.wgrid3[style]{grid-template-columns:1fr!important}.wtm{grid-template-columns:90px 1fr}.wtiles{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}}
 </style>
 </head><body>
 
@@ -122,6 +147,7 @@ td.n,th.n{text-align:right;white-space:nowrap}
       <button data-t="finance" aria-selected="false">Money</button>
       <button data-t="contacts" aria-selected="false">Contacts</button>
       <button data-t="links" aria-selected="false">Package links</button>
+      <button data-t="website" aria-selected="false">Website</button>
     </nav>
     <button class="btn ghost sm" id="out">Sign out</button>
   </header>
@@ -131,6 +157,7 @@ td.n,th.n{text-align:right;white-space:nowrap}
     <section id="t-finance" hidden></section>
     <section id="t-contacts" hidden></section>
     <section id="t-links" hidden></section>
+    <section id="t-website" hidden></section>
   </main>
 </div>
 <div id="mask" class="mask" hidden></div>
@@ -198,7 +225,7 @@ $('#tabs').addEventListener('click', function (e) {
 });
 function render() {
   [].forEach.call(document.querySelectorAll('#tabs button'), function (b) { b.setAttribute('aria-selected', String(b.dataset.t === tab)); });
-  ['calendar', 'requests', 'finance', 'contacts', 'links'].forEach(function (t) { $('#t-' + t).hidden = t !== tab; });
+  ['calendar', 'requests', 'finance', 'contacts', 'links', 'website'].forEach(function (t) { $('#t-' + t).hidden = t !== tab; });
   var pend = D.bookings.filter(function (b) { return b.status === 'pending'; }).length;
   $('#rb').hidden = !pend; $('#rb').textContent = pend;
   if (tab === 'calendar') drawCalendar();
@@ -206,6 +233,7 @@ function render() {
   if (tab === 'finance') drawFinance();
   if (tab === 'contacts') drawContacts();
   if (tab === 'links') drawLinks();
+  if (tab === 'website') drawWebsite();
 }
 
 /* ---------- calendar (week starts on Saturday) ---------- */
@@ -556,6 +584,143 @@ $('#t-links').addEventListener('click', async function (e) {
   var r2 = await q; if (r2.error) return toast('Error: ' + r2.error.message);
   await load(); render();
 });
+
+/* ---------- Website editor (photos + text of the home page) ---------- */
+var SITE_DEF = {"hero": [{"src": "/img/home/hero1.jpg", "pos": "50% 66%"}, {"src": "/img/home/hero2.jpg", "pos": "50% 31%"}, {"src": "/img/home/hero3.jpg", "pos": "50% 60%"}], "grid": [{"src": "/img/home/g/01.jpg"}, {"src": "/img/home/g/02.jpg"}, {"src": "/img/home/g/03.jpg"}, {"src": "/img/home/g/04.jpg"}, {"src": "/img/home/g/05.jpg"}, {"src": "/img/home/g/06.jpg"}, {"src": "/img/home/g/07.jpg"}, {"src": "/img/home/g/08.jpg"}, {"src": "/img/home/g/09.jpg"}, {"src": "/img/home/g/10.jpg"}, {"src": "/img/home/g/11.jpg"}, {"src": "/img/home/g/12.jpg"}, {"src": "/img/home/g/13.jpg"}, {"src": "/img/home/g/14.jpg"}, {"src": "/img/home/g/15.jpg"}, {"src": "/img/home/g/16.jpg"}, {"src": "/img/home/g/17.jpg"}, {"src": "/img/home/g/18.jpg"}, {"src": "/img/home/g/19.jpg"}, {"src": "/img/home/g/20.jpg"}, {"src": "/img/home/g/21.jpg"}, {"src": "/img/home/g/22.jpg"}, {"src": "/img/home/g/23.jpg"}, {"src": "/img/home/g/24.jpg"}, {"src": "/img/home/g/25.jpg"}, {"src": "/img/home/g/26.jpg"}, {"src": "/img/home/g/27.jpg"}, {"src": "/img/home/g/28.jpg"}, {"src": "/img/home/g/29.jpg"}, {"src": "/img/home/g/30.jpg"}], "t": {"hero1": "Genuine emotions,", "hero2": "timeless moments.", "story": "Your wedding day is more than an event. It is a collection of emotions, fleeting moments, and meaningful connections. My goal is to keep them in timeless images that feel real, elegant, and deeply personal.", "grid_title": "Selected frames", "connect_btn": "Check availability"}, "connect_text": "Let’s tell your story", "connect": {"src": "/img/home/connect.jpg"}, "tm": [{"name": "Mahomud & Hanaa", "text": "The photos look straight out of Pinterest. Every single image is absolutely breathtaking.", "src": "/img/home/t1.jpg", "pos": "50% 50%"}, {"name": "Marina & Kareem", "text": "You just caught each & every moment. The vibes are a gift. I watch them 90 times a day.", "src": "/img/home/t2.jpg", "pos": "50% 50%"}, {"name": "John & Mizo", "text": "Thanks for your fantastic shots and your perfect touch. You make the day the best.", "src": "/img/home/t3.jpg", "pos": "50% 50%"}, {"name": "Michael & Lucia", "text": "Your professionalism, kindness, and talent were beyond anything we expected. We could not have done our wedding without you.", "src": "/img/home/t4.jpg", "pos": "50% 50%"}, {"name": "Mario & Koka", "text": "Your photos and editing exceeded every expectation. You truly made our wedding day unforgettable.", "src": "/img/home/t5.jpg", "pos": "50% 50%"}, {"name": "Peter & Christeen", "text": "You made us feel completely relaxed all day. Knowing you were behind the camera gave us confidence that every moment would be beautifully captured.", "src": "/img/home/t6.jpg", "pos": "50% 50%"}]};
+var W = { c: null, dirty: false, loaded: false, err: '' };
+function clone(o) { return JSON.parse(JSON.stringify(o)); }
+function wMerge(saved) {
+  var c = clone(SITE_DEF); if (!saved) return c;
+  if (saved.hero) c.hero = c.hero.map(function (d, i) { return saved.hero[i] || d; });
+  if (saved.grid && saved.grid.length) c.grid = saved.grid;
+  if (saved.t) Object.keys(saved.t).forEach(function (k) { c.t[k] = saved.t[k]; });
+  if (saved.connect_text) c.connect_text = saved.connect_text;
+  if (saved.connect) c.connect = saved.connect;
+  if (saved.tm) c.tm = c.tm.map(function (d, i) { return Object.assign({}, d, saved.tm[i] || {}); });
+  return c;
+}
+function wUrl(it, w) { return !it ? '' : (it.b ? it.b + '-' + w + '.jpg' : it.src); }
+function wDirty(v) { W.dirty = v; var e = $('#w-st'); if (e) e.textContent = v ? 'Unsaved changes' : ''; }
+async function wLoad() {
+  var r = await sb.from('site_content').select('value').eq('key', 'home').maybeSingle();
+  if (r.error) { W.err = r.error.message; W.c = clone(SITE_DEF); }
+  else { W.err = ''; W.c = wMerge(r.data && r.data.value); }
+  W.loaded = true;
+}
+function wResize(file, edge) {
+  return new Promise(function (res, rej) {
+    var url = URL.createObjectURL(file), im = new Image();
+    im.onload = function () {
+      var k = Math.min(1, edge / Math.max(im.naturalWidth, im.naturalHeight));
+      var cv = document.createElement('canvas'); cv.width = Math.round(im.naturalWidth * k); cv.height = Math.round(im.naturalHeight * k);
+      var cx = cv.getContext('2d'); cx.imageSmoothingQuality = 'high'; cx.drawImage(im, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(url);
+      cv.toBlob(function (b) { b ? res(b) : rej(new Error('Could not read this image')); }, 'image/jpeg', 0.86);
+    };
+    im.onerror = function () { URL.revokeObjectURL(url); rej(new Error('Could not read this image')); };
+    im.src = url;
+  });
+}
+async function wUpload(file) {
+  var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6), base = 'home/' + id;
+  var big = await wResize(file, 2000), small = await wResize(file, 900);
+  var a = await sb.storage.from('site-images').upload(base + '-2000.jpg', big, { contentType: 'image/jpeg', upsert: true });
+  if (a.error) throw a.error;
+  var b = await sb.storage.from('site-images').upload(base + '-900.jpg', small, { contentType: 'image/jpeg', upsert: true });
+  if (b.error) throw b.error;
+  return sb.storage.from('site-images').getPublicUrl(base + '-900.jpg').data.publicUrl.replace(/-900\.jpg$/, '');
+}
+function wPrev(it, w, cls) {
+  var pos = it.pos || '50% 50%', p = pos.split(' ');
+  return '<div class="wprev" ' + (cls || '') + '><img src="' + esc(wUrl(it, w)) + '" style="object-position:' + esc(pos) + '" alt=""><i style="left:' + esc(p[0]) + ';top:' + esc(p[1]) + '"></i></div>';
+}
+function drawWebsite() {
+  var el = $('#t-website');
+  if (!W.loaded) { el.innerHTML = '<div class="wb"><p style="color:var(--mut)">Loading…</p></div>'; wLoad().then(function () { if (tab === 'website') drawWebsite(); }); return; }
+  var c = W.c;
+  var h = '<div class="wb"><div class="wbar"><h2>Website</h2><span class="st" id="w-st"></span><button class="btn ok" data-w="save">Save changes</button></div>';
+  if (W.err) h += '<p style="color:var(--bad);margin:14px 0">Website editor is not set up yet: ' + esc(W.err) + '<br>Run <b>website-editor.sql</b> once in Supabase &gt; SQL Editor, then reload this page.</p>';
+  h += '<p style="color:var(--mut);margin:12px 0 0;font-size:13px">Changes appear on the home page right after you press Save. Photos are resized automatically.</p>';
+  /* hero */
+  h += '<div class="wsec"><h3>Hero photos</h3><p>The three big photos at the top. Click on a picture to choose the point that always stays in view.</p><div class="wgrid3">';
+  c.hero.forEach(function (it, i) { h += '<div class="wcard" data-hero="' + i + '">' + wPrev(it, 900, 'data-focus="hero:' + i + '"') + '<div class="cap">Photo ' + (i + 1) + '</div><button class="btn ghost sm" data-w="rep" data-k="hero:' + i + '">Replace photo</button></div>'; });
+  h += '</div></div>';
+  /* texts */
+  h += '<div class="wsec"><h3>Texts</h3><div class="wgrid3" style="grid-template-columns:1fr 1fr">'
+    + '<div class="wfld"><label>Headline, line 1</label><input data-tx="hero1" value="' + esc(c.t.hero1) + '"></div>'
+    + '<div class="wfld"><label>Headline, line 2</label><input data-tx="hero2" value="' + esc(c.t.hero2) + '"></div></div>'
+    + '<div class="wfld"><label>Paragraph under the hero</label><textarea data-tx="story">' + esc(c.t.story) + '</textarea></div>'
+    + '<div class="wgrid3" style="grid-template-columns:1fr 1fr 1fr">'
+    + '<div class="wfld"><label>Gallery title</label><input data-tx="grid_title" value="' + esc(c.t.grid_title) + '"></div>'
+    + '<div class="wfld"><label>Moving text at the end</label><input data-tx="connect_text" value="' + esc(c.connect_text) + '"></div>'
+    + '<div class="wfld"><label>Last button</label><input data-tx="connect_btn" value="' + esc(c.t.connect_btn) + '"></div></div></div>';
+  /* gallery */
+  h += '<div class="wsec"><h3>Gallery (' + c.grid.length + ' photos)</h3><p>Use the arrows to reorder, the x to remove. New photos are added at the end.</p><div class="wtiles">';
+  c.grid.forEach(function (it, i) { h += '<div class="wtile"><img loading="lazy" src="' + esc(wUrl(it, 900)) + '" alt=""><span class="n">' + (i + 1) + '</span><div class="tb"><button data-w="mv" data-i="' + i + '" data-d="-1" aria-label="Move earlier">&larr;</button><button data-w="mv" data-i="' + i + '" data-d="1" aria-label="Move later">&rarr;</button><button class="x" data-w="del" data-i="' + i + '" aria-label="Remove">&times;</button></div></div>'; });
+  h += '</div><div style="margin-top:14px"><button class="btn ghost" data-w="add">+ Add photos</button></div></div>';
+  /* testimonials */
+  h += '<div class="wsec"><h3>Testimonials</h3><p>Photo, name and words of each client.</p>';
+  c.tm.forEach(function (it, i) {
+    h += '<div class="wcard" style="margin-bottom:12px"><div class="wtm"><div>' + wPrev(it, 900, 'data-focus="tm:' + i + '"') + '<button class="btn ghost sm" style="margin-top:8px;width:100%" data-w="rep" data-k="tm:' + i + '">Replace</button></div>'
+      + '<div><div class="wfld"><label>Name</label><input data-tm="' + i + '" data-f="name" value="' + esc(it.name) + '"></div><div class="wfld"><label>Words</label><textarea data-tm="' + i + '" data-f="text">' + esc(it.text) + '</textarea></div></div></div></div>';
+  });
+  h += '</div>';
+  /* closing photo */
+  h += '<div class="wsec"><h3>Closing photo</h3><p>The dark photo behind the moving text at the bottom.</p><div class="wcard" style="max-width:340px">' + wPrev(c.connect, 900, 'data-focus="connect"') + '<div class="cap">&nbsp;</div><button class="btn ghost sm" data-w="rep" data-k="connect">Replace photo</button></div></div>';
+  h += '<div class="wsec" style="display:flex;gap:12px;flex-wrap:wrap"><button class="btn ok" data-w="save">Save changes</button><button class="btn bad" data-w="reset">Reset everything to the original</button></div></div>';
+  el.innerHTML = h;
+  wDirty(W.dirty);
+}
+function wPickFiles(multi) {
+  return new Promise(function (res) {
+    var i = document.createElement('input'); i.type = 'file'; i.accept = 'image/*'; i.multiple = !!multi; i.style.display = 'none';
+    i.onchange = function () { res([].slice.call(i.files)); i.remove(); }; document.body.appendChild(i); i.click();
+  });
+}
+function wRef(k) { var p = k.split(':'); return p[0] === 'hero' ? W.c.hero[+p[1]] : p[0] === 'tm' ? W.c.tm[+p[1]] : W.c.connect; }
+$('#t-website').addEventListener('input', function (e) {
+  var t = e.target, c = W.c;
+  if (t.dataset.tx) { var k = t.dataset.tx; if (k === 'connect_text') c.connect_text = t.value; else c.t[k] = t.value; wDirty(true); }
+  else if (t.dataset.tm != null) { c.tm[+t.dataset.tm][t.dataset.f] = t.value; wDirty(true); }
+});
+$('#t-website').addEventListener('click', async function (e) {
+  var f = e.target.closest('[data-focus]');
+  if (f && !e.target.closest('[data-w]')) {
+    var r = f.getBoundingClientRect(), x = Math.round(((e.clientX - r.left) / r.width) * 100), y = Math.round(((e.clientY - r.top) / r.height) * 100);
+    var it = wRef(f.dataset.focus); it.pos = x + '% ' + y + '%'; wDirty(true);
+    f.querySelector('img').style.objectPosition = it.pos; var d = f.querySelector('i'); d.style.left = x + '%'; d.style.top = y + '%'; return;
+  }
+  var b = e.target.closest('[data-w]'); if (!b) return; var a = b.dataset.w, c = W.c;
+  try {
+    if (a === 'rep') {
+      var fl = (await wPickFiles(false))[0]; if (!fl) return;
+      b.disabled = true; toast('Uploading…'); var base = await wUpload(fl);
+      var it2 = wRef(b.dataset.k); delete it2.src; it2.b = base; wDirty(true); drawWebsite(); toast('Photo replaced. Press Save to publish.');
+    } else if (a === 'add') {
+      var fls = await wPickFiles(true); if (!fls.length) return;
+      b.disabled = true; toast('Uploading ' + fls.length + ' photo' + (fls.length > 1 ? 's' : '') + '…');
+      for (var n = 0; n < fls.length; n++) { c.grid.push({ b: await wUpload(fls[n]) }); }
+      wDirty(true); drawWebsite(); toast('Added. Press Save to publish.');
+    } else if (a === 'mv') {
+      var i = +b.dataset.i, j = i + (+b.dataset.d); if (j < 0 || j >= c.grid.length) return;
+      var tmp = c.grid[i]; c.grid[i] = c.grid[j]; c.grid[j] = tmp; wDirty(true); drawWebsite();
+    } else if (a === 'del') {
+      if (!(await ask('Remove this photo from the gallery?', 'Remove', true))) return;
+      c.grid.splice(+b.dataset.i, 1); wDirty(true); drawWebsite();
+    } else if (a === 'save') {
+      b.disabled = true;
+      var r2 = await sb.from('site_content').upsert({ key: 'home', value: c, updated_at: new Date().toISOString() });
+      b.disabled = false; if (r2.error) return toast('Could not save: ' + r2.error.message);
+      wDirty(false); toast('Saved. The website is updated.');
+    } else if (a === 'reset') {
+      if (!(await ask('Put every photo and text back to the original version?', 'Reset', true))) return;
+      var r3 = await sb.from('site_content').delete().eq('key', 'home'); if (r3.error) return toast('Error: ' + r3.error.message);
+      W.c = clone(SITE_DEF); wDirty(false); drawWebsite(); toast('Back to the original.');
+    }
+  } catch (err) { toast('Error: ' + (err.message || err)); drawWebsite(); }
+});
+window.addEventListener('beforeunload', function (e) { if (W.dirty) { e.preventDefault(); e.returnValue = ''; } });
+
 
 start();
 })();
