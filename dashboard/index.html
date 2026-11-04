@@ -143,7 +143,9 @@ td.n,th.n{text-align:right;white-space:nowrap}
 .we-card .cap{color:var(--mut);font-size:12px;margin:2px 0 8px}
 .we-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .we-tile{position:relative;aspect-ratio:3/4;border-radius:4px;overflow:hidden;background:#111;border:1px solid var(--line)}
+.we-tile{cursor:grab}.we-tile.drag{opacity:.35}.we-tile.over{outline:2px solid #fff;outline-offset:1px}
 .we-tile img{width:100%;height:100%;object-fit:cover;display:block}
+.we-tile{cursor:grab}.we-tile.dragging{opacity:.35}.we-tile.over{outline:2px solid #fff;outline-offset:1px}
 .we-tile .n{position:absolute;left:4px;top:4px;background:rgba(0,0,0,.65);font:10px Montserrat,sans-serif;padding:2px 5px;border-radius:3px}
 .we-tile .tb{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;gap:2px;padding:4px;background:linear-gradient(transparent,rgba(0,0,0,.85))}
 .we-tile .tb button{background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.35);border-radius:3px;width:26px;height:26px;cursor:pointer;color:#fff;font-size:12px;padding:0}
@@ -621,10 +623,10 @@ $('#t-links').addEventListener('click', async function (e) {
 });
 
 /* ---------- Website editor (Pixieset-style: Pages / Design / Settings + live preview) ---------- */
-var SITE_DEF = {"hero": [{"src": "/img/home/hero1.jpg", "pos": "50% 66%"}, {"src": "/img/home/hero2.jpg", "pos": "50% 31%"}, {"src": "/img/home/hero3.jpg", "pos": "50% 60%"}], "grid": [{"src": "/img/home/g/01.jpg"}, {"src": "/img/home/g/02.jpg"}, {"src": "/img/home/g/03.jpg"}, {"src": "/img/home/g/04.jpg"}, {"src": "/img/home/g/05.jpg"}, {"src": "/img/home/g/06.jpg"}, {"src": "/img/home/g/07.jpg"}, {"src": "/img/home/g/08.jpg"}, {"src": "/img/home/g/09.jpg"}, {"src": "/img/home/g/10.jpg"}, {"src": "/img/home/g/11.jpg"}, {"src": "/img/home/g/12.jpg"}, {"src": "/img/home/g/13.jpg"}, {"src": "/img/home/g/14.jpg"}, {"src": "/img/home/g/15.jpg"}, {"src": "/img/home/g/16.jpg"}, {"src": "/img/home/g/17.jpg"}, {"src": "/img/home/g/18.jpg"}, {"src": "/img/home/g/19.jpg"}, {"src": "/img/home/g/20.jpg"}, {"src": "/img/home/g/21.jpg"}, {"src": "/img/home/g/22.jpg"}, {"src": "/img/home/g/23.jpg"}, {"src": "/img/home/g/24.jpg"}, {"src": "/img/home/g/25.jpg"}, {"src": "/img/home/g/26.jpg"}, {"src": "/img/home/g/27.jpg"}, {"src": "/img/home/g/28.jpg"}, {"src": "/img/home/g/29.jpg"}, {"src": "/img/home/g/30.jpg"}], "t": {"hero1": "Genuine emotions,", "hero2": "timeless moments.", "story": "Your wedding day is more than an event. It is a collection of emotions, fleeting moments, and meaningful connections. My goal is to keep them in timeless images that feel real, elegant, and deeply personal.", "grid_title": "Selected frames", "connect_btn": "Check availability", "ab_lab": "Meet the photographer", "ab_h": "Hi, I'm john emad", "ab_p1": "i, I’m John  a wedding photographer with a deep passion for capturing genuine emotions and timeless moments.", "ab_p2": "For me, photography is more than just taking pictures; it’s about telling your story in a way that feels authentic, elegant, and unforgettable.", "ab_p3": "I don’t look for stiff, posed images — I focus on real moments filled with true love, laughter, and connection. Your wedding isn’t just an event; it’s a living story, and I’m there to capture those fleeting seconds that mean everything.", "ab_p4": "Over the years, I’ve had the privilege of documenting countless love stories, each one unique and special in its own way. I combine an artistic eye with cinematic tones and documentary-style storytelling to create images that feel alive — images you’ll cherish for a lifetime.", "ab_p5": "Whether it’s an intimate celebration or a grand event, my approach is always the same: to capture the essence of your day with care, creativity, and attention to every detail.", "ab_p6": "If you’re looking for someone who will treat your memories as treasures, I would be honored to be part of your journey.", "ab_p7": "Let’s create something unforgettable together.", "ab_p8": "📧 Email: info@johnemadweddings.com", "ab_p9": "📞 Phone/WhatsApp: +201066600848", "tp_h": "Testimonials", "tp_sub": "Kind words from my amazing clients", "tp_btn": "Booking Now", "bk_h": "Request packages & availability", "bk_sub": "Tell us about your day and we will come back to you with availability.", "bk_go": "Start your request"}, "connect_text": "Let’s tell your story", "connect": {"src": "/img/home/connect.jpg"}, "tm": [{"name": "Mahomud & Hanaa", "text": "The photos look straight out of Pinterest. Every single image is absolutely breathtaking.", "src": "/img/home/t1.jpg", "pos": "50% 50%"}, {"name": "Marina & Kareem", "text": "You just caught each & every moment. The vibes are a gift. I watch them 90 times a day.", "src": "/img/home/t2.jpg", "pos": "50% 50%"}, {"name": "John & Mizo", "text": "Thanks for your fantastic shots and your perfect touch. You make the day the best.", "src": "/img/home/t3.jpg", "pos": "50% 50%"}, {"name": "Michael & Lucia", "text": "Your professionalism, kindness, and talent were beyond anything we expected. We could not have done our wedding without you.", "src": "/img/home/t4.jpg", "pos": "50% 50%"}, {"name": "Mario & Koka", "text": "Your photos and editing exceeded every expectation. You truly made our wedding day unforgettable.", "src": "/img/home/t5.jpg", "pos": "50% 50%"}, {"name": "Peter & Christeen", "text": "You made us feel completely relaxed all day. Knowing you were behind the camera gave us confidence that every moment would be beautifully captured.", "src": "/img/home/t6.jpg", "pos": "50% 50%"}], "img": {"ab_img": {"src": "../img/G0WPJJ__my-photo-800.jpg"}, "tp_img": {"src": "../img/XLQLVR__JE-31-2000.jpg"}, "bk_img": {"src": "../img/bookbride-2000.jpg"}}, "design": {"bg": "#0d0d0c", "text": "#ece7de", "heading": "Instrument Serif", "body": "Jost", "space": "normal", "radius": 2, "logo": 60, "btn": "solid", "motion": true, "intro": "8h"}};
-var W = { c: null, live: null, dirty: false, saving: false, loaded: false, err: '', view: 'pages', tabK: 'pages', path: '/', dev: 'desktop', hasDraft: false, t: null };
+var SITE_DEF = {"hero": [{"src": "/img/home/hero1.jpg", "pos": "50% 66%"}, {"src": "/img/home/hero2.jpg", "pos": "50% 31%"}, {"src": "/img/home/hero3.jpg", "pos": "50% 60%"}], "grid": [{"src": "/img/home/g/01.jpg"}, {"src": "/img/home/g/02.jpg"}, {"src": "/img/home/g/03.jpg"}, {"src": "/img/home/g/04.jpg"}, {"src": "/img/home/g/05.jpg"}, {"src": "/img/home/g/06.jpg"}, {"src": "/img/home/g/07.jpg"}, {"src": "/img/home/g/08.jpg"}, {"src": "/img/home/g/09.jpg"}, {"src": "/img/home/g/10.jpg"}, {"src": "/img/home/g/11.jpg"}, {"src": "/img/home/g/12.jpg"}, {"src": "/img/home/g/13.jpg"}, {"src": "/img/home/g/14.jpg"}, {"src": "/img/home/g/15.jpg"}, {"src": "/img/home/g/16.jpg"}, {"src": "/img/home/g/17.jpg"}, {"src": "/img/home/g/18.jpg"}, {"src": "/img/home/g/19.jpg"}, {"src": "/img/home/g/20.jpg"}, {"src": "/img/home/g/21.jpg"}, {"src": "/img/home/g/22.jpg"}, {"src": "/img/home/g/23.jpg"}, {"src": "/img/home/g/24.jpg"}, {"src": "/img/home/g/25.jpg"}, {"src": "/img/home/g/26.jpg"}, {"src": "/img/home/g/27.jpg"}, {"src": "/img/home/g/28.jpg"}, {"src": "/img/home/g/29.jpg"}, {"src": "/img/home/g/30.jpg"}], "t": {"hero1": "Genuine emotions,", "hero2": "timeless moments.", "story": "Your wedding day is more than an event. It is a collection of emotions, fleeting moments, and meaningful connections. My goal is to keep them in timeless images that feel real, elegant, and deeply personal.", "grid_title": "Selected frames", "connect_btn": "Check availability", "nav_home": "Home", "nav_about": "About", "nav_booking": "Booking", "nav_testimonials": "Testimonials", "plan_lab": "Planned around your day", "plan_h": "Your day, hour by hour.", "plan_p": "Once you book, we send you a private page where you write your wedding day by the clock: getting ready, the ceremony, the first look, the party. Add the people who worked on your wedding and the moments that matter most, so we arrive knowing your story, not just your schedule.", "plan_1": "Your timeline, by the clock", "plan_2": "Everyone who worked on your day, credited with your photos", "plan_3": "The moments and people we must not miss", "plan_btn": "Request availability", "ab_lab": "Meet the photographer", "ab_h": "Hi, I'm john emad", "ab_p1": "i, I’m John  a wedding photographer with a deep passion for capturing genuine emotions and timeless moments.", "ab_p2": "For me, photography is more than just taking pictures; it’s about telling your story in a way that feels authentic, elegant, and unforgettable.", "ab_p3": "I don’t look for stiff, posed images — I focus on real moments filled with true love, laughter, and connection. Your wedding isn’t just an event; it’s a living story, and I’m there to capture those fleeting seconds that mean everything.", "ab_p4": "Over the years, I’ve had the privilege of documenting countless love stories, each one unique and special in its own way. I combine an artistic eye with cinematic tones and documentary-style storytelling to create images that feel alive — images you’ll cherish for a lifetime.", "ab_p5": "Whether it’s an intimate celebration or a grand event, my approach is always the same: to capture the essence of your day with care, creativity, and attention to every detail.", "ab_p6": "If you’re looking for someone who will treat your memories as treasures, I would be honored to be part of your journey.", "ab_p7": "Let’s create something unforgettable together.", "ab_p8": "📧 Email: info@johnemadweddings.com", "ab_p9": "📞 Phone/WhatsApp: +201066600848", "tp_h": "Testimonials", "tp_sub": "Kind words from my amazing clients", "tp_btn": "Booking Now", "bk_h": "Request packages & availability", "bk_sub": "Tell us about your day and we will come back to you with availability.", "bk_note": "After you book, we send you a private page to write your day hour by hour, so we know every moment that matters to you.", "bk_go": "Start your request"}, "connect_text": "Let’s tell your story", "connect": {"src": "/img/home/connect.jpg"}, "tm": [{"name": "Mahomud & Hanaa", "text": "The photos look straight out of Pinterest. Every single image is absolutely breathtaking.", "src": "/img/home/t1.jpg", "pos": "50% 50%"}, {"name": "Marina & Kareem", "text": "You just caught each & every moment. The vibes are a gift. I watch them 90 times a day.", "src": "/img/home/t2.jpg", "pos": "50% 50%"}, {"name": "John & Mizo", "text": "Thanks for your fantastic shots and your perfect touch. You make the day the best.", "src": "/img/home/t3.jpg", "pos": "50% 50%"}, {"name": "Michael & Lucia", "text": "Your professionalism, kindness, and talent were beyond anything we expected. We could not have done our wedding without you.", "src": "/img/home/t4.jpg", "pos": "50% 50%"}, {"name": "Mario & Koka", "text": "Your photos and editing exceeded every expectation. You truly made our wedding day unforgettable.", "src": "/img/home/t5.jpg", "pos": "50% 50%"}, {"name": "Peter & Christeen", "text": "You made us feel completely relaxed all day. Knowing you were behind the camera gave us confidence that every moment would be beautifully captured.", "src": "/img/home/t6.jpg", "pos": "50% 50%"}], "img": {"ab_img": {"src": "../img/G0WPJJ__my-photo-800.jpg"}, "tp_img": {"src": "../img/XLQLVR__JE-31-2000.jpg"}, "bk_img": {"src": "../img/bookbride-2000.jpg"}}, "pages": [], "design": {"bg": "#0d0d0c", "text": "#ece7de", "heading": "Instrument Serif", "body": "Jost", "space": "normal", "radius": 2, "logo": 60, "btn": "solid", "motion": true, "intro": "8h"}};
+var W = { c: null, live: null, dirty: false, saving: false, loaded: false, err: '', slug: '', view: 'pages', tabK: 'pages', path: '/', dev: 'desktop', hasDraft: false, t: null };
 var W_PAGES = [
-  { path: '/', name: 'Home', secs: [['hero', 'Hero photos & title'], ['story', 'Intro paragraph'], ['grid', 'Selected frames'], ['tm', 'Testimonials'], ['connect', 'Final call to action']] },
+  { path: '/', name: 'Home', secs: [['hero', 'Hero photos & title'], ['story', 'Intro paragraph'], ['grid', 'Selected frames'], ['tm', 'Testimonials'], ['plan', 'Hour-by-hour section'], ['connect', 'Final call to action']] },
   { path: '/about/', name: 'About', secs: [['about', 'Text & photo']] },
   { path: '/testimonials/', name: 'Testimonials', secs: [['tp', 'Header & photo']] },
   { path: '/booking/', name: 'Booking', secs: [['bk', 'Header & photo']] }
@@ -639,6 +641,7 @@ function wMerge(saved) {
   if (saved.hero) c.hero = c.hero.map(function (d, i) { return saved.hero[i] || d; });
   if (saved.grid && saved.grid.length) c.grid = saved.grid;
   ['t', 'design', 'img'].forEach(function (k) { if (saved[k]) { c[k] = c[k] || {}; Object.keys(saved[k]).forEach(function (x) { c[k][x] = saved[k][x]; }); } });
+  if (saved.pages) c.pages = saved.pages;
   if (saved.connect_text) c.connect_text = saved.connect_text;
   if (saved.connect) c.connect = saved.connect;
   if (saved.tm) c.tm = c.tm.map(function (d, i) { return Object.assign({}, d, saved.tm[i] || {}); });
@@ -692,7 +695,8 @@ function wFit() {
   f.style.left = Math.max(0, (aw - w * k) / 2) + 'px'; f.style.top = mob ? ((ah - h * k) / 2) + 'px' : '0';
   st.classList.toggle('mob', mob && !small);
 }
-function wGo(path) { W.path = path; var f = wFrame(); if (f) f.src = path + '?edit=1'; }
+function wGo(path) { var q = path.split('?'); W.path = q[0]; var m = (q[1] || '').match(/s=([^&]+)/); W.slug = m ? decodeURIComponent(m[1]) : ''; var f = wFrame(); if (f) f.src = path + (path.indexOf('?') > -1 ? '&' : '?') + 'edit=1'; }
+function wCpIdx(slug) { var r = -1; (W.c.pages || []).forEach(function (p, i) { if (p.slug === slug) r = i; }); return r; }
 /* --- save / publish --- */
 function wChange(struct) {
   W.dirty = true; W.hasDraft = true; wSend({ type: 'content', c: W.c }); wStatus('Saving…');
@@ -741,10 +745,11 @@ function fSel(label, key, list) {
 function wSecHtml(s) {
   var c = W.c, h = '';
   if (s === 'hero') { h += fT('Title – line 1', 'hero1') + fT('Title – line 2', 'hero2'); c.hero.forEach(function (_, i) { h += fImg('Photo ' + (i + 1), 'hero.' + i); }); }
+  if (s === 'plan') h += fT('Small label', 'plan_lab') + fT('Title', 'plan_h') + fT('Paragraph', 'plan_p', 1) + fT('Point 1', 'plan_1') + fT('Point 2', 'plan_2') + fT('Point 3', 'plan_3') + fT('Button text', 'plan_btn');
   if (s === 'story') h += fT('Paragraph', 'story', 1);
   if (s === 'grid') {
-    h += fT('Section title', 'grid_title') + '<p class="sub">' + c.grid.length + ' photos. Use the arrows to reorder.</p><div class="we-tiles">';
-    c.grid.forEach(function (it, i) { h += '<div class="we-tile"><img src="' + esc(wUrl(it, 900)) + '" alt=""><span class="n">' + (i + 1) + '</span><div class="tb"><button data-a="gl" data-i="' + i + '">←</button><button data-a="gr" data-i="' + i + '">→</button><button class="x" data-a="gx" data-i="' + i + '">✕</button></div></div>'; });
+    h += fT('Section title', 'grid_title') + '<p class="sub">' + c.grid.length + ' photos. Drag a photo with the mouse to move it (or use the arrows).</p><div class="we-tiles">';
+    c.grid.forEach(function (it, i) { h += '<div class="we-tile" draggable="true" data-i="' + i + '"><img draggable="false" src="' + esc(wUrl(it, 900)) + '" alt=""><span class="n">' + (i + 1) + '</span><div class="tb"><button data-a="gl" data-i="' + i + '">←</button><button data-a="gr" data-i="' + i + '">→</button><button class="x" data-a="gx" data-i="' + i + '">✕</button></div></div>'; });
     h += '</div><p style="margin-top:12px"><button class="btn ghost sm" data-a="gadd">+ Add photos</button></p>';
   }
   if (s === 'tm') c.tm.forEach(function (t, i) { h += '<div class="we-card"><label>Testimonial ' + (i + 1) + '</label><div class="we-f"><input data-tm="' + i + '.name" value="' + esc(t.name) + '"></div><div class="we-f"><textarea data-tm="' + i + '.text">' + esc(t.text) + '</textarea></div>' + fImg('Photo', 'tm.' + i, 1) + '</div>'; });
@@ -753,7 +758,27 @@ function wSecHtml(s) {
   }
   if (s === 'about') { h += fT('Small label', 'ab_lab') + fT('Title', 'ab_h') + fImg('Your photo', 'img.ab_img', 1); for (var i = 1; i <= 9; i++) if (c.t['ab_p' + i] != null) h += fT('Paragraph ' + i, 'ab_p' + i, 1); }
   if (s === 'tp') h += fT('Title', 'tp_h') + fT('Subtitle', 'tp_sub') + fT('Button text', 'tp_btn') + fImg('Header photo', 'img.tp_img', 0, 1);
-  if (s === 'bk') h += fT('Title', 'bk_h') + fT('Subtitle', 'bk_sub', 1) + fT('Button text', 'bk_go') + fImg('Background photo', 'img.bk_img', 0, 1);
+  if (s === 'bk') h += fT('Title', 'bk_h') + fT('Subtitle', 'bk_sub', 1) + fT('Note about the hour-by-hour page', 'bk_note', 1) + fT('Button text', 'bk_go') + fImg('Background photo', 'img.bk_img', 0, 1);
+  return h;
+}
+function cpHtml(i) {
+  var p = W.c.pages[i]; if (!p) return '<p class="sub">Page not found.</p>';
+  var h = '<div class="we-f"><label>Page name</label><input data-cp="' + i + '.title" value="' + esc(p.title) + '"></div>'
+    + '<div class="we-f"><label>Show in the menu</label><div class="we-opts two"><button class="we-opt' + (p.nav !== false ? ' on' : '') + '" data-a="cpnav" data-i="' + i + '" data-v="1">Yes</button><button class="we-opt' + (p.nav === false ? ' on' : '') + '" data-a="cpnav" data-i="' + i + '" data-v="0">No</button></div></div>'
+    + '<p class="sub">Link: <b>/page/?s=' + esc(p.slug) + '</b></p>';
+  (p.blocks || []).forEach(function (b, j) {
+    var r = i + '.blocks.' + j, pre = 'pages.' + r;
+    h += '<div class="we-card"><label style="display:flex;gap:6px;align-items:center">' + ({ text: 'Text', image: 'Photo', gallery: 'Gallery', button: 'Button' }[b.type] || b.type)
+      + '<span style="margin-left:auto;display:flex;gap:4px"><button class="btn ghost sm" data-a="cpbm" data-i="' + i + '" data-j="' + j + '" data-d="-1">↑</button><button class="btn ghost sm" data-a="cpbm" data-i="' + i + '" data-j="' + j + '" data-d="1">↓</button><button class="btn bad sm" data-a="cpbx" data-i="' + i + '" data-j="' + j + '">✕</button></span></label>';
+    if (b.type === 'text') h += '<div class="we-f"><input data-cp="' + r + '.h" placeholder="Heading (optional)" value="' + esc(b.h || '') + '"></div><div class="we-f"><textarea data-cp="' + r + '.p" placeholder="Write here…">' + esc(b.p || '') + '</textarea></div>';
+    if (b.type === 'image') { h += fImg('Photo', pre + '.img') + '<div class="we-f"><input data-cp="' + r + '.cap" placeholder="Caption (optional)" value="' + esc(b.cap || '') + '"></div>'; }
+    if (b.type === 'gallery') {
+      h += '<div class="we-tiles">' + (b.imgs || []).map(function (it, k) { return '<div class="we-tile"><img draggable="false" src="' + esc(wUrl(it, 900)) + '" alt=""><div class="tb"><span></span><button class="x" data-a="cpgx" data-k="' + pre + '.imgs" data-i="' + k + '">✕</button></div></div>'; }).join('') + '</div><p style="margin-top:10px"><button class="btn ghost sm" data-a="cpgadd" data-k="' + pre + '.imgs">+ Add photos</button></p>';
+    }
+    if (b.type === 'button') h += '<div class="we-f"><input data-cp="' + r + '.label" placeholder="Button text" value="' + esc(b.label || '') + '"></div><div class="we-f"><input data-cp="' + r + '.href" placeholder="Link, e.g. /booking/" value="' + esc(b.href || '') + '"></div>';
+    h += '</div>';
+  });
+  h += '<label>Add a block</label><div class="we-opts"><button class="we-opt" data-a="cpadd" data-i="' + i + '" data-v="text">+ Text</button><button class="we-opt" data-a="cpadd" data-i="' + i + '" data-v="image">+ Photo</button><button class="we-opt" data-a="cpadd" data-i="' + i + '" data-v="gallery">+ Gallery</button></div><div class="we-opts two" style="margin-top:8px"><button class="we-opt" data-a="cpadd" data-i="' + i + '" data-v="button">+ Button</button><button class="we-opt" style="color:var(--bad)" data-a="cpdel" data-i="' + i + '">Delete page</button></div>';
   return h;
 }
 function wSecName(s) { var n = s; W_PAGES.forEach(function (p) { p.secs.forEach(function (x) { if (x[0] === s) n = x[1]; }); }); return n; }
@@ -779,9 +804,12 @@ function wPane() {
       h += '<button class="we-row' + (pg.path === W.path ? ' on' : '') + '" data-a="page" data-p="' + pg.path + '">' + esc(pg.name) + '<span class="go">›</span></button>';
       if (pg.path === W.path) pg.secs.forEach(function (s) { h += '<button class="we-row sub2" data-a="sec" data-s="' + s[0] + '">' + esc(s[1]) + '<span class="go">›</span></button>'; });
     });
-    h += '<p class="sub" style="margin-top:18px">Packages, the dashboard and private pages are not part of this menu.</p>';
+    (W.c.pages || []).forEach(function (pg, i) { h += '<button class="we-row' + (W.path === '/page/' && W.slug === pg.slug ? ' on' : '') + '" data-a="cpage" data-i="' + i + '">' + esc(pg.title) + '<span class="go">›</span></button>'; });
+    h += '<button class="we-row" data-a="cpnew" style="border-style:dashed">＋ Add page</button><p class="sub" style="margin-top:18px">Packages, the dashboard and private pages are not part of this menu.</p>';
   } else if (v.indexOf('sec:') === 0) {
     var s = v.slice(4); h = '<button class="we-back" data-a="back">‹ Back</button><h3>' + esc(wSecName(s)) + '</h3><p class="sub">Changes show in the preview straight away.</p>' + wSecHtml(s);
+  } else if (v.indexOf('cp:') === 0) {
+    var ci = +v.slice(3); h = '<button class="we-back" data-a="back">‹ Back</button><h3>' + esc((W.c.pages[ci] || {}).title || 'Page') + '</h3><p class="sub">Build the page from blocks.</p>' + cpHtml(ci);
   } else if (v === 'design') {
     h = '<h3>Design</h3><p class="sub">These apply to the whole site.</p>';
     W_DESIGN.forEach(function (x) { h += '<button class="we-row" data-a="des" data-k="' + x[0] + '"><b style="width:22px;text-align:center;font-weight:400">' + x[2] + '</b>' + x[1] + '<span class="go">›</span></button>'; });
@@ -789,7 +817,7 @@ function wPane() {
     var k = v.slice(4), nm = ''; W_DESIGN.forEach(function (x) { if (x[0] === k) nm = x[1]; });
     h = '<button class="we-back" data-a="back">‹ Design</button><h3>' + esc(nm) + '</h3><p class="sub"></p>' + wDesHtml(k);
   } else if (v === 'settings') {
-    h = '<h3>Settings</h3><p class="sub">Draft: ' + (W.hasDraft ? 'you have unpublished changes.' : 'same as the live site.') + '</p>'
+    h = '<h3>Settings</h3><div class="we-card"><label>Menu names</label>' + fT('Home', 'nav_home') + fT('About', 'nav_about') + fT('Booking', 'nav_booking') + fT('Testimonials', 'nav_testimonials') + '</div><p class="sub">Draft: ' + (W.hasDraft ? 'you have unpublished changes.' : 'same as the live site.') + '</p>'
       + '<p><button class="btn ghost sm" data-a="discard">Discard draft</button></p><p style="margin-top:12px"><button class="btn bad sm" data-a="reset">Reset everything to the original design</button></p>'
       + '<p class="sub" style="margin-top:18px">Original = how the site looked when it was first installed. Press Publish afterwards to apply it.</p>';
   }
@@ -815,9 +843,9 @@ function drawWebsite() {
 window.addEventListener('resize', wFit);
 window.addEventListener('message', function (e) {
   var d = e.data; if (!d || !d.je || tab !== 'website') return;
-  if (d.type === 'ready') { W.path = d.path; wSend({ type: 'content', c: W.c }); if (W.view === 'pages') wPane(); }
+  if (d.type === 'ready') { W.path = d.path; W.slug = d.s || ''; wSend({ type: 'content', c: W.c }); if (W.view === 'pages') wPane(); }
   if (d.type === 'nav') { wGo(d.href); W.view = 'pages'; W.tabK = 'pages'; }
-  if (d.type === 'pick') { W.view = 'sec:' + d.sel; W.tabK = 'pages'; wPane(); $('#t-website').classList.remove('pv'); }
+  if (d.type === 'pick') { W.view = d.sel === 'cp' ? 'cp:' + wCpIdx(W.slug) : 'sec:' + d.sel; W.tabK = 'pages'; wPane(); $('#t-website').classList.remove('pv'); }
 });
 var wFile = document.createElement('input'); wFile.type = 'file'; wFile.accept = 'image/*'; wFile.multiple = true; wFile.style.display = 'none'; document.body.appendChild(wFile);
 wFile.addEventListener('change', async function () {
@@ -825,6 +853,7 @@ wFile.addEventListener('change', async function () {
   try {
     toast('Uploading…');
     if (tgt === 'grid') { for (var i = 0; i < fs.length; i++) W.c.grid.push({ b: await wUpload(fs[i]) }); }
+    else if (/\.imgs$/.test(tgt)) { var arr = wGet(tgt) || []; for (var q = 0; q < fs.length; q++) arr.push({ b: await wUpload(fs[q]) }); wSet(tgt, arr); }
     else { var b = await wUpload(fs[0]), it = wGet(tgt) || {}; delete it.src; it.b = b; wSet(tgt, it); }
     wChange(true); toast('Photo added to the draft.');
   } catch (err) { toast('Error: ' + (err.message || err)); }
@@ -835,6 +864,7 @@ function wBind() {
     var t = e.target, c = W.c;
     if (t.dataset.t) { c.t[t.dataset.t] = t.value; wChange(); }
     else if (t.dataset.tm) { var a = t.dataset.tm.split('.'); c.tm[+a[0]][a[1]] = t.value; wChange(); }
+    else if (t.dataset.cp) { wSet('pages.' + t.dataset.cp, t.value); wChange(); }
     else if (t.hasAttribute('data-ct')) { c.connect_text = t.value; wChange(); }
     else if (t.dataset.d) {
       var k = t.dataset.d, v = t.value; if (k === 'logo' || k === 'radius') { v = +v; var s = $(k === 'logo' ? '#lv' : '#rv'); if (s) s.textContent = v; }
@@ -863,10 +893,37 @@ function wBind() {
     if (a === 'gx') { if (c.grid.length <= 1) return; c.grid.splice(+b.dataset.i, 1); wChange(true); return; }
     if (a === 'dz') { var v = b.dataset.v; c.design[b.dataset.k] = (v === 'true' ? true : v === 'false' ? false : v); wChange(true); return; }
     if (a === 'theme') { c.design.bg = b.dataset.bg; c.design.text = b.dataset.tx; wChange(true); return; }
+    if (a === 'cpage') { var pi = +b.dataset.i; W.view = 'cp:' + pi; wGo('/page/?s=' + encodeURIComponent(c.pages[pi].slug)); wPane(); return; }
+    if (a === 'cpnew') {
+      var nm = prompt('Name of the new page?'); if (!nm || !nm.trim()) return; nm = nm.trim();
+      var sl = nm.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'page-' + Date.now().toString(36);
+      c.pages = c.pages || []; while (wCpIdx(sl) > -1) sl += '-2';
+      c.pages.push({ slug: sl, title: nm, nav: true, blocks: [{ type: 'text', h: nm, p: 'Write here…' }] });
+      W.view = 'cp:' + (c.pages.length - 1); wChange(true); wGo('/page/?s=' + encodeURIComponent(sl)); return;
+    }
+    if (a === 'cpnav') { c.pages[+b.dataset.i].nav = b.dataset.v === '1'; wChange(true); return; }
+    if (a === 'cpadd') { var bl = { text: { type: 'text', h: '', p: '' }, image: { type: 'image', img: {}, cap: '' }, gallery: { type: 'gallery', imgs: [] }, button: { type: 'button', label: 'Book now', href: '/booking/' } }[b.dataset.v]; c.pages[+b.dataset.i].blocks.push(bl); wChange(true); return; }
+    if (a === 'cpbx') { c.pages[+b.dataset.i].blocks.splice(+b.dataset.j, 1); wChange(true); return; }
+    if (a === 'cpbm') { var bs = c.pages[+b.dataset.i].blocks, jj = +b.dataset.j, k2 = jj + +b.dataset.d; if (k2 < 0 || k2 >= bs.length) return; var tt = bs[jj]; bs[jj] = bs[k2]; bs[k2] = tt; wChange(true); return; }
+    if (a === 'cpgx') { (wGet(b.dataset.k) || []).splice(+b.dataset.i, 1); wChange(true); return; }
+    if (a === 'cpgadd') { wFile.dataset.k = b.dataset.k; wFile.multiple = true; wFile.click(); return; }
+    if (a === 'cpdel') { if (!confirm('Delete this page?')) return; c.pages.splice(+b.dataset.i, 1); W.view = 'pages'; wChange(true); wGo('/'); return; }
     if (a === 'discard') return wDiscard();
     if (a === 'reset') { if (!confirm('Reset all text, photos and design to the original? (Only the draft; nothing goes live until you press Set as live site.)')) return; W.c = clone(SITE_DEF); wChange(true); return; }
   });
 }
+(function () {
+  var el = $('#t-website'), from = null;
+  function tile(e) { return e.target.closest && e.target.closest('.we-tile[data-i]'); }
+  el.addEventListener('dragstart', function (e) { var t = tile(e); if (!t) return; from = +t.dataset.i; t.classList.add('drag'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', String(from)); } catch (x) {} });
+  el.addEventListener('dragover', function (e) { var t = tile(e); if (!t || from === null) return; e.preventDefault(); el.querySelectorAll('.we-tile.over').forEach(function (x) { if (x !== t) x.classList.remove('over'); }); t.classList.add('over'); });
+  el.addEventListener('dragend', function () { from = null; el.querySelectorAll('.we-tile').forEach(function (x) { x.classList.remove('drag', 'over'); }); });
+  el.addEventListener('drop', function (e) {
+    var t = tile(e); if (!t || from === null) return; e.preventDefault();
+    var to = +t.dataset.i, g = W.c.grid; if (to !== from) { var it = g.splice(from, 1)[0]; g.splice(to, 0, it); wChange(true); }
+    from = null;
+  });
+})();
 wBind();
 window.addEventListener('beforeunload', function (e) { if (W.dirty) { e.preventDefault(); e.returnValue = ''; } });
 

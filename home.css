@@ -85,3 +85,13 @@ html.homeA,html.homeA body{overflow-x:clip}
 .hdr .logo svg{display:block;width:100%;height:auto}
 /* parts sitting on photos keep light text whatever theme is chosen */
 .homeA .hdr--over,.hA .heroA,.hA .cn2{--bone:#ece7de;--ink:#0d0d0c;--soft:#cfc9bf}
+
+.hA .plan{padding:calc(16vh*var(--spm,1)) 8vw;border-top:1px solid var(--line);text-align:center}
+.hA .plan .pl-in{max-width:760px;margin:0 auto}
+.hA .plan h3{font-family:var(--serif);font-weight:400;font-size:clamp(40px,6vw,84px);line-height:1;margin:18px 0 26px}
+.hA .plan p{color:var(--soft);font-size:17px;line-height:1.75}
+.hA .pl-list{list-style:none;margin:34px 0 40px;padding:0;display:grid;gap:0;text-align:left}
+.hA .pl-list li{padding:16px 0;border-top:1px solid var(--line);font-size:16px;display:flex;gap:18px;align-items:baseline;counter-increment:p}
+.hA .pl-list li:last-child{border-bottom:1px solid var(--line)}
+.hA .pl-list li:before{content:"0" counter(p);font-family:var(--serif);color:var(--mute);font-size:20px}
+.hA .pl-list{counter-reset:p}

@@ -532,3 +532,15 @@ html{scroll-behavior:smooth}
 .nomo .rv{opacity:1!important;transform:none!important;transition:none!important}
 .nomo .mq div{animation:none!important}
 body:not(.menu-open) .hdr--over{--bone:#ece7de;--soft:#cfc9bf;color:#ece7de}
+
+.bnote{margin-top:10px;opacity:.85;max-width:560px}
+.cp{padding:150px 6vw 100px;min-height:70vh}
+.cp-in{max-width:1000px;margin:0 auto}
+.cp h1{font-family:var(--serif);font-weight:400;font-size:clamp(44px,7vw,96px);line-height:1;margin:0 0 50px}
+.cp .cb{margin:0 0 56px}
+.cp .cb h2{font-family:var(--serif);font-weight:400;font-size:clamp(28px,3.4vw,44px);margin:0 0 16px}
+.cp .cb p{color:var(--soft);font-size:17px;line-height:1.8;max-width:720px;margin:0 0 14px}
+.cp .cb img{width:100%;height:auto;display:block}
+.cp .cb figcaption{color:var(--mute);font-size:13px;margin-top:8px}
+.cp .gal{columns:3 260px;column-gap:14px}
+.cp .gal img{margin:0 0 14px;break-inside:avoid}
