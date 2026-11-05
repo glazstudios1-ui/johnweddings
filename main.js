@@ -182,7 +182,7 @@ function up(file,folder){
 }
 function collect(fd,photoUrl,musicUrl,voiceUrls){
   var program=String(fd.get('program')||'').split('\n').map(function(l){l=l.trim();if(!l)return null;var m=l.match(/^(.{1,14}?)\s*(?:-|–|—|\|)\s+(.+)$/);return m?{t:m[1].trim(),l:m[2].trim()}:{t:'',l:l}}).filter(Boolean);
-  return {theme:fd.get('theme')||'noir',lang:fd.get('lang')||'en',names:fd.get('names'),hosts:fd.get('hosts')||'',date:fd.get('date'),time:fd.get('time'),venue:fd.get('venue'),address:fd.get('address')||'',map:fd.get('map')||'',program:program,dress:fd.get('dress')||'',msg:fd.get('msg')||'',rsvp:fd.get('rsvp'),photos:photoUrl||[],music:musicUrl||'',voices:voiceUrls||[]};
+  return {theme:fd.get('theme')||'ivory',lang:fd.get('lang')||'en',names:fd.get('names'),hosts:fd.get('hosts')||'',date:fd.get('date'),time:fd.get('time'),venue:fd.get('venue'),address:fd.get('address')||'',map:fd.get('map')||'',program:program,dress:fd.get('dress')||'',msg:fd.get('msg')||'',rsvp:fd.get('rsvp'),photos:photoUrl||[],music:musicUrl||'',voices:voiceUrls||[]};
 }
 /* live preview */
 var pvf=document.getElementById('pv-if'),pvReady=false,pvT=0,pvPhoto=[];
