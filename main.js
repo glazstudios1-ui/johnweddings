@@ -180,17 +180,17 @@ function up(file,folder){
   var name=folder+(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2))+'.'+ext;
   return fetch(SU+'/storage/v1/object/proofs/'+name,{method:'POST',headers:{apikey:SK,Authorization:'Bearer '+SK,'Content-Type':file.type||'image/jpeg'},body:file}).then(function(r){if(!r.ok)throw new Error('upload');return SU+'/storage/v1/object/public/proofs/'+name});
 }
-function collect(fd,photoUrl){
+function collect(fd,photoUrl,musicUrl){
   var program=String(fd.get('program')||'').split('\n').map(function(l){l=l.trim();if(!l)return null;var m=l.match(/^(.{1,14}?)\s*(?:-|–|—|\|)\s+(.+)$/);return m?{t:m[1].trim(),l:m[2].trim()}:{t:'',l:l}}).filter(Boolean);
-  return {theme:fd.get('theme')||'noir',lang:fd.get('lang')||'en',names:fd.get('names'),hosts:fd.get('hosts')||'',date:fd.get('date'),time:fd.get('time'),venue:fd.get('venue'),address:fd.get('address')||'',map:fd.get('map')||'',program:program,dress:fd.get('dress')||'',msg:fd.get('msg')||'',rsvp:fd.get('rsvp'),photo:photoUrl||''};
+  return {theme:fd.get('theme')||'noir',lang:fd.get('lang')||'en',names:fd.get('names'),hosts:fd.get('hosts')||'',date:fd.get('date'),time:fd.get('time'),venue:fd.get('venue'),address:fd.get('address')||'',map:fd.get('map')||'',program:program,dress:fd.get('dress')||'',msg:fd.get('msg')||'',rsvp:fd.get('rsvp'),photos:photoUrl||[],music:musicUrl||''};
 }
 /* live preview */
-var pvf=document.getElementById('pv-if'),pvReady=false,pvT=0,pvPhoto='';
+var pvf=document.getElementById('pv-if'),pvReady=false,pvT=0,pvPhoto=[];
 function pvSend(){if(!pvf||!pvReady)return;var d=collect(new FormData(f),pvPhoto);pvf.contentWindow.postMessage({je:'inv',d:d},'*')}
 function pvQ(){clearTimeout(pvT);pvT=setTimeout(pvSend,120)}
 window.addEventListener('message',function(e){if(e.data&&e.data.je==='inv-ready'){pvReady=true;pvSend()}});
 f.addEventListener('input',pvQ);f.addEventListener('change',pvQ);
-if(f.elements['photo'])f.elements['photo'].addEventListener('change',function(){var x=this.files[0];if(pvPhoto)URL.revokeObjectURL(pvPhoto);pvPhoto=x?URL.createObjectURL(x):'';pvQ()});
+if(f.elements['photos'])f.elements['photos'].addEventListener('change',function(){pvPhoto.forEach(function(u){URL.revokeObjectURL(u)});pvPhoto=[].slice.call(this.files,0,6).map(function(x){return URL.createObjectURL(x)});pvQ()});
 var pv=document.getElementById('po-pv');
 document.getElementById('pv-btn').onclick=function(){pv.classList.add('open');pvSend()};document.getElementById('pv-x').onclick=function(){pv.classList.remove('open')};
 f.addEventListener('submit',function(e){
@@ -199,12 +199,14 @@ f.addEventListener('submit',function(e){
   if(fd.get('surname'))return;
   var bad=[].filter.call(f.querySelectorAll('[required]'),function(x){return !x.value});
   if(bad.length){bad[0].focus();msg.textContent='Please fill in the fields marked with a star.';msg.style.display='block';return}
-  var proof=f.elements['proof'].files[0],photo=f.elements['photo'].files[0];
-  if((proof&&proof.size>8*1048576)||(photo&&photo.size>8*1048576)){msg.textContent='A file is too large (max 8 MB each).';msg.style.display='block';return}
-  btn.disabled=true;msg.textContent='Sending…';msg.style.display='block';
-  var proofUrl='',photoUrl='';
-  up(proof,'orders/').then(function(u){proofUrl=u;return photo?up(photo,'inv/'):''}).then(function(u){photoUrl=u;
-    var details=collect(fd,photoUrl);
+  var proof=f.elements['proof'].files[0],photos=[].slice.call(f.elements['photos'].files,0,6),music=f.elements['music'].files[0];
+  if((proof&&proof.size>8*1048576)||(music&&music.size>12*1048576)){msg.textContent='A file is too large (payment screenshot max 8 MB, music max 12 MB).';msg.style.display='block';return}
+  btn.disabled=true;msg.textContent='Sending… please keep this page open';msg.style.display='block';
+  var proofUrl='',photoUrls=[],musicUrl='';
+  function shrink(file){return new Promise(function(res){var img=new Image(),u=URL.createObjectURL(file);img.onload=function(){var k=Math.min(1,1500/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(function(b){res(b?new File([b],'p.jpg',{type:'image/jpeg'}):file)},'image/jpeg',.84)};img.onerror=function(){URL.revokeObjectURL(u);res(file)};img.src=u})}
+  up(proof,'orders/').then(function(u){proofUrl=u;return photos.reduce(function(p,x){return p.then(function(){return shrink(x).then(function(s){return up(s,'inv/')}).then(function(u){photoUrls.push(u)}).catch(function(){})})},Promise.resolve())}).then(function(){
+    return music?up(music,'inv/').then(function(u){musicUrl=u}).catch(function(){}):0}).then(function(){
+    var details=collect(fd,photoUrls,musicUrl);
     return fetch(SU+'/rest/v1/rpc/create_order',{method:'POST',headers:{apikey:SK,Authorization:'Bearer '+SK,'Content-Type':'application/json'},body:JSON.stringify({p_name:fd.get('yname'),p_email:fd.get('yemail'),p_phone:fd.get('yphone'),p_details:details,p_proof:proofUrl,p_product:'digital-invitation'})}).then(function(r){if(!r.ok)throw new Error('save');return r.json()});
   }).then(function(){
     f.reset();msg.textContent='Thank you! We received your order and your payment. We will check the payment and email you the link to your invitation very soon.';
