@@ -256,6 +256,7 @@ async function load() {
   ]);
   if (r[0].error) { toast('Could not load data: ' + r[0].error.message); }
   try { var ro = await sb.from('orders').select('*').order('created_at', { ascending: false }); D.orders = ro.data || []; D.ordersErr = ro.error ? ro.error.message : ''; } catch (x) { D.orders = []; D.ordersErr = String(x); }
+  try { var rv = await sb.from('invite_voices').select('slug'); D.vc = {}; (rv.data || []).forEach(function (v) { D.vc[v.slug] = (D.vc[v.slug] || 0) + 1; }); } catch (x) { D.vc = {}; }
   D.bookings = r[0].data || []; D.payments = r[1].data || []; D.links = r[2].data || []; D.details = r[3] && r[3].data ? r[3].data : [];
 }
 
@@ -983,6 +984,9 @@ window.addEventListener('beforeunload', function (e) { if (W.dirty) { e.preventD
 
 /* ---------- shop orders (digital invitations) ---------- */
 var INV_BASE = 'https://www.johnemadweddings.com/i/?s=';
+function memLink(o) { return 'https://www.johnemadweddings.com/i/book/?s=' + o.slug + '&k=' + o.guest_key; }
+function gkey() { var a = new Uint8Array(12); crypto.getRandomValues(a); return Array.prototype.map.call(a, function (x) { return 'abcdefghjkmnpqrstuvwxyz23456789'[x % 31]; }).join(''); }
+async function ensureKey(o) { if (o.guest_key) return true; var k = gkey(); var u = await sb.from('orders').update({ guest_key: k }).eq('id', o.id); if (u.error) { toast('Error: ' + u.error.message + ' (did you run shop2.sql?)'); return false; } o.guest_key = k; return true; }
 function invSlug(n) { var b = String(n || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24) || 'wedding'; var a = new Uint8Array(4); crypto.getRandomValues(a); return b + '-' + Array.prototype.map.call(a, function (x) { return 'abcdefghjkmnpqrstuvwxyz23456789'[x % 31]; }).join(''); }
 function orderTag(o) { return { pending: '<span class="tag p">Waiting for you</span>', paid: '<span class="tag c">Paid</span>', cancelled: '<span class="tag x">Cancelled</span>' }[o.status] || ''; }
 function drawShop() {
@@ -993,10 +997,10 @@ function drawShop() {
     var d = o.details || {}, link = o.slug ? INV_BASE + o.slug : '';
     return '<div class="card" style="margin-bottom:12px"><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center"><div style="flex:1;min-width:230px"><b style="font-size:16px">' + esc(d.names || o.name) + '</b> ' + orderTag(o) +
       '<div class="muted" style="margin-top:4px">' + esc(o.name || '') + ' · ' + esc(o.email || '') + ' · ' + esc(o.phone || '') + '</div>' +
-      '<div class="muted">' + esc(d.date ? fmtDate(d.date) : '') + (d.venue ? ' · ' + esc(d.venue) : '') + ' · ' + egp(o.amount) + (o.emailed_at ? ' · email sent' : '') + '</div>' +
+      '<div class="muted">' + esc(d.date ? fmtDate(d.date) : '') + (d.venue ? ' · ' + esc(d.venue) : '') + ' · ' + egp(o.amount) + (o.emailed_at ? ' · email sent' : '') + (o.status === 'paid' ? ' · ' + ((D.vc || {})[o.slug] || 0) + ' guest voice note(s)' : '') + '</div>' +
       (link ? '<div class="url">' + esc(link) + '</div>' : '') + '</div><div style="display:flex;gap:8px;flex-wrap:wrap">' +
       (o.status === 'pending' ? '<button class="btn ok sm" data-oa="confirm" data-id="' + o.id + '">Confirm payment &amp; send</button>' : '') +
-      (o.status === 'paid' ? '<button class="btn sm" data-oa="resend" data-id="' + o.id + '">Resend email</button><button class="btn ghost sm" data-oa="copy" data-id="' + o.id + '">Copy link</button><a class="btn ghost sm" href="' + esc(link) + '" target="_blank" rel="noopener">Open</a>' : '') +
+      (o.status === 'paid' ? '<button class="btn sm" data-oa="resend" data-id="' + o.id + '">Resend email</button><button class="btn ghost sm" data-oa="copy" data-id="' + o.id + '">Copy link</button><button class="btn ghost sm" data-oa="mem" data-id="' + o.id + '">Copy memories link</button><a class="btn ghost sm" href="' + esc(link) + '" target="_blank" rel="noopener">Open</a>' : '') +
       (o.proof_url ? '<a class="btn ghost sm" href="' + esc(o.proof_url) + '" target="_blank" rel="noopener">Payment proof</a>' : '') +
       '<button class="btn ghost sm" data-oa="edit" data-id="' + o.id + '">Details</button>' +
       (o.status === 'pending' ? '<button class="btn ghost sm" data-oa="cancel" data-id="' + o.id + '">Cancel</button>' : '') +
@@ -1014,7 +1018,7 @@ function orderModal(o) {
   function f(k, l, v, big) { return '<div class="we-f" style="margin-bottom:10px"><label>' + l + '</label>' + (big ? '<textarea data-od="' + k + '" rows="3">' + esc(v) + '</textarea>' : '<input data-od="' + k + '" value="' + esc(v) + '">') + '</div>'; }
   modal('<h3 style="margin-bottom:14px">Invitation details</h3><div style="max-height:62vh;overflow:auto;padding-right:6px">' +
     '<div class="we-f" style="margin-bottom:10px"><label>Style</label><select data-od="theme"><option value="noir"' + (!d.theme || d.theme === 'noir' ? ' selected' : '') + '>Black</option><option value="sage"' + (d.theme === 'sage' ? ' selected' : '') + '>Sage green</option><option value="ivory"' + (d.theme === 'ivory' ? ' selected' : '') + '>Ivory</option></select></div><div class="we-f" style="margin-bottom:10px"><label>Language</label><select data-od="lang"><option value="en"' + (d.lang !== 'ar' ? ' selected' : '') + '>English</option><option value="ar"' + (d.lang === 'ar' ? ' selected' : '') + '>Arabic</option></select></div>' +
-    f('names', 'Names', d.names || '') + f('hosts', 'Line above names', d.hosts || '') + f('date', 'Date (YYYY-MM-DD)', d.date || '') + f('time', 'Time (HH:MM, 24h)', d.time || '') + f('venue', 'Venue', d.venue || '') + f('address', 'Address', d.address || '') + f('map', 'Map link', d.map || '') + f('program', 'Program (one per line)', prog, 1) + f('dress', 'Dress code', d.dress || '') + f('msg', 'Message', d.msg || '', 1) + f('rsvp', 'RSVP WhatsApp', d.rsvp || '') + f('photos', 'Photos (one link per line, first is the cover)', (d.photos || (d.photo ? [d.photo] : [])).join('\n'), 1) + f('music', 'Music link (optional)', d.music || '') +
+    f('names', 'Names', d.names || '') + f('hosts', 'Line above names', d.hosts || '') + f('date', 'Date (YYYY-MM-DD)', d.date || '') + f('time', 'Time (HH:MM, 24h)', d.time || '') + f('venue', 'Venue', d.venue || '') + f('address', 'Address', d.address || '') + f('map', 'Map link', d.map || '') + f('program', 'Program (one per line)', prog, 1) + f('dress', 'Dress code', d.dress || '') + f('msg', 'Message', d.msg || '', 1) + f('rsvp', 'RSVP WhatsApp', d.rsvp || '') + f('photos', 'Photos (one link per line, first is the cover)', (d.photos || (d.photo ? [d.photo] : [])).join('\n'), 1) + f('music', 'Music link (optional)', d.music || '') + f('voices', 'Couple voice notes (one per line: Name | audio link)', (d.voices || []).map(function (v) { return v.label + ' | ' + v.url; }).join('\n'), 1) +
     '<div class="muted" style="margin:10px 0 4px">Client: ' + esc(o.name || '') + ' · ' + esc(o.email || '') + ' · ' + esc(o.phone || '') + '</div></div>' +
     '<div class="acts" style="margin-top:16px"><button class="btn ok" id="od-save">Save</button><button class="btn ghost" id="od-x">Close</button></div>');
   $('#od-x').onclick = function () { $('#mask').hidden = true; };
@@ -1023,6 +1027,7 @@ function orderModal(o) {
     [].forEach.call(document.querySelectorAll('[data-od]'), function (el) { n[el.dataset.od] = el.value; });
     n.photos = String(n.photos || '').split('\n').map(function (x) { return x.trim(); }).filter(Boolean);
     n.program = String(n.program || '').split('\n').map(function (l) { l = l.trim(); if (!l) return null; var m = l.match(/^(.{1,14}?)\s*(?:-|–|—|\|)\s+(.+)$/); return m ? { t: m[1].trim(), l: m[2].trim() } : { t: '', l: l }; }).filter(Boolean);
+    n.voices = String(n.voices || '').split('\n').map(function (l) { var i = l.lastIndexOf('|'); if (i < 0) return null; var u = l.slice(i + 1).trim(); return u ? { label: l.slice(0, i).trim(), url: u } : null; }).filter(Boolean);
     var u = await sb.from('orders').update({ details: n }).eq('id', o.id);
     if (u.error) return toast('Error: ' + u.error.message);
     toast('Saved'); $('#mask').hidden = true; await load(); render();
@@ -1033,14 +1038,16 @@ $('#t-shop').addEventListener('click', async function (e) {
   var o = (D.orders || []).find(function (x) { return x.id === b.dataset.id; }); if (!o) return; var a = b.dataset.oa;
   if (a === 'edit') return orderModal(o);
   if (a === 'copy') return copyText(INV_BASE + o.slug, 'Invitation link copied');
-  if (a === 'resend') { b.disabled = true; await sendInvitation(o); await load(); return render(); }
+  if (a === 'mem') { if (!(await ensureKey(o))) return; return copyText(memLink(o), 'Memories link copied (private, for the couple only)'); }
+  if (a === 'resend') { b.disabled = true; await ensureKey(o); await sendInvitation(o); await load(); return render(); }
   if (a === 'confirm') {
     if (!o.email) return toast('This order has no email. Open Details and check the client.');
     if (!(await ask('Confirm that you received EGP ' + o.amount + ' from ' + (o.name || 'this client') + '? The invitation will be created and emailed to ' + o.email + '.', 'Confirm & send'))) return;
     var slug = o.slug || invSlug((o.details && o.details.names) || o.name);
-    var u = await sb.from('orders').update({ status: 'paid', slug: slug, paid_at: new Date().toISOString() }).eq('id', o.id);
+    var gk = o.guest_key || gkey();
+    var u = await sb.from('orders').update({ status: 'paid', slug: slug, guest_key: gk, paid_at: new Date().toISOString() }).eq('id', o.id);
     if (u.error) return toast('Error: ' + u.error.message);
-    o.status = 'paid'; o.slug = slug; await sendInvitation(o); await load(); return render();
+    o.status = 'paid'; o.slug = slug; o.guest_key = gk; await sendInvitation(o); await load(); return render();
   }
   if (a === 'cancel') { if (!(await ask('Cancel this order?', 'Cancel order', true))) return; var c = await sb.from('orders').update({ status: 'cancelled' }).eq('id', o.id); if (c.error) return toast('Error: ' + c.error.message); await load(); return render(); }
   if (a === 'del') { if (!(await ask('Delete this order for good? If it was paid, the invitation link stops working.', 'Delete', true))) return; var x = await sb.from('orders').delete().eq('id', o.id); if (x.error) return toast('Error: ' + x.error.message); await load(); return render(); }

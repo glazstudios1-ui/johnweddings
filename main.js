@@ -180,17 +180,20 @@ function up(file,folder){
   var name=folder+(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2))+'.'+ext;
   return fetch(SU+'/storage/v1/object/proofs/'+name,{method:'POST',headers:{apikey:SK,Authorization:'Bearer '+SK,'Content-Type':file.type||'image/jpeg'},body:file}).then(function(r){if(!r.ok)throw new Error('upload');return SU+'/storage/v1/object/public/proofs/'+name});
 }
-function collect(fd,photoUrl,musicUrl){
+function collect(fd,photoUrl,musicUrl,voiceUrls){
   var program=String(fd.get('program')||'').split('\n').map(function(l){l=l.trim();if(!l)return null;var m=l.match(/^(.{1,14}?)\s*(?:-|–|—|\|)\s+(.+)$/);return m?{t:m[1].trim(),l:m[2].trim()}:{t:'',l:l}}).filter(Boolean);
-  return {theme:fd.get('theme')||'noir',lang:fd.get('lang')||'en',names:fd.get('names'),hosts:fd.get('hosts')||'',date:fd.get('date'),time:fd.get('time'),venue:fd.get('venue'),address:fd.get('address')||'',map:fd.get('map')||'',program:program,dress:fd.get('dress')||'',msg:fd.get('msg')||'',rsvp:fd.get('rsvp'),photos:photoUrl||[],music:musicUrl||''};
+  return {theme:fd.get('theme')||'noir',lang:fd.get('lang')||'en',names:fd.get('names'),hosts:fd.get('hosts')||'',date:fd.get('date'),time:fd.get('time'),venue:fd.get('venue'),address:fd.get('address')||'',map:fd.get('map')||'',program:program,dress:fd.get('dress')||'',msg:fd.get('msg')||'',rsvp:fd.get('rsvp'),photos:photoUrl||[],music:musicUrl||'',voices:voiceUrls||[]};
 }
 /* live preview */
 var pvf=document.getElementById('pv-if'),pvReady=false,pvT=0,pvPhoto=[];
-function pvSend(){if(!pvf||!pvReady)return;var d=collect(new FormData(f),pvPhoto);pvf.contentWindow.postMessage({je:'inv',d:d},'*')}
+var vr=[null,null];
+function pvVoices(){var o=[];[1,2].forEach(function(i){var g=vr[i-1]&&vr[i-1].get();if(g)o.push({label:(f.elements['vl'+i].value||'').trim()||('Voice '+i),url:URL.createObjectURL(g.blob)})});return o}
+function pvSend(){if(!pvf||!pvReady)return;var d=collect(new FormData(f),pvPhoto,'',pvVoices());pvf.contentWindow.postMessage({je:'inv',d:d},'*')}
 function pvQ(){clearTimeout(pvT);pvT=setTimeout(pvSend,120)}
 window.addEventListener('message',function(e){if(e.data&&e.data.je==='inv-ready'){pvReady=true;pvSend()}});
 f.addEventListener('input',pvQ);f.addEventListener('change',pvQ);
 if(f.elements['photos'])f.elements['photos'].addEventListener('change',function(){pvPhoto.forEach(function(u){URL.revokeObjectURL(u)});pvPhoto=[].slice.call(this.files,0,6).map(function(x){return URL.createObjectURL(x)});pvQ()});
+if(window.JERec)[1,2].forEach(function(i){var z=document.getElementById('vz'+i);if(!z)return;vr[i-1]=JERec.create({max:60,upload:true},function(){pvQ()});z.appendChild(vr[i-1])});
 var pv=document.getElementById('po-pv');
 document.getElementById('pv-btn').onclick=function(){pv.classList.add('open');pvSend()};document.getElementById('pv-x').onclick=function(){pv.classList.remove('open')};
 f.addEventListener('submit',function(e){
@@ -202,14 +205,16 @@ f.addEventListener('submit',function(e){
   var proof=f.elements['proof'].files[0],photos=[].slice.call(f.elements['photos'].files,0,6),music=f.elements['music'].files[0];
   if((proof&&proof.size>8*1048576)||(music&&music.size>12*1048576)){msg.textContent='A file is too large (payment screenshot max 8 MB, music max 12 MB).';msg.style.display='block';return}
   btn.disabled=true;msg.textContent='Sending… please keep this page open';msg.style.display='block';
-  var proofUrl='',photoUrls=[],musicUrl='';
+  var proofUrl='',photoUrls=[],musicUrl='',voiceUrls=[];
   function shrink(file){return new Promise(function(res){var img=new Image(),u=URL.createObjectURL(file);img.onload=function(){var k=Math.min(1,1500/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(function(b){res(b?new File([b],'p.jpg',{type:'image/jpeg'}):file)},'image/jpeg',.84)};img.onerror=function(){URL.revokeObjectURL(u);res(file)};img.src=u})}
   up(proof,'orders/').then(function(u){proofUrl=u;return photos.reduce(function(p,x){return p.then(function(){return shrink(x).then(function(s){return up(s,'inv/')}).then(function(u){photoUrls.push(u)}).catch(function(){})})},Promise.resolve())}).then(function(){
     return music?up(music,'inv/').then(function(u){musicUrl=u}).catch(function(){}):0}).then(function(){
-    var details=collect(fd,photoUrls,musicUrl);
+    return [1,2].reduce(function(p,i){return p.then(function(){var g=vr[i-1]&&vr[i-1].get();if(!g)return;var ex=g.blob.type&&g.blob.name?g.blob.name.split('.').pop():g.ext||JERec.ext(g.mime||g.blob.type);var path='couple/'+(crypto.randomUUID?crypto.randomUUID():String(Date.now())+i)+'.'+JERec.ext(g.blob.type||g.mime);
+      return fetch(SU+'/storage/v1/object/voices/'+path,{method:'POST',headers:{apikey:SK,Authorization:'Bearer '+SK,'Content-Type':(g.blob.type||g.mime||'audio/mp4').split(';')[0]},body:g.blob}).then(function(r){if(r.ok)voiceUrls.push({label:(fd.get('vl'+i)||'').trim()||('Voice '+i),url:SU+'/storage/v1/object/public/voices/'+path})}).catch(function(){})})},Promise.resolve())}).then(function(){
+    var details=collect(fd,photoUrls,musicUrl,voiceUrls);
     return fetch(SU+'/rest/v1/rpc/create_order',{method:'POST',headers:{apikey:SK,Authorization:'Bearer '+SK,'Content-Type':'application/json'},body:JSON.stringify({p_name:fd.get('yname'),p_email:fd.get('yemail'),p_phone:fd.get('yphone'),p_details:details,p_proof:proofUrl,p_product:'digital-invitation'})}).then(function(r){if(!r.ok)throw new Error('save');return r.json()});
   }).then(function(){
-    f.reset();msg.textContent='Thank you! We received your order and your payment. We will check the payment and email you the link to your invitation very soon.';
+    f.reset();vr.forEach(function(x){if(x)x.reset()});msg.textContent='Thank you! We received your order and your payment. We will check the payment and email you the link to your invitation very soon.';
   }).catch(function(err){msg.textContent='Something went wrong ('+(err&&err.message?err.message:'network')+'). Please WhatsApp me on +201066600848.'}).then(function(){btn.disabled=false});
 });
 })();
