@@ -170,3 +170,32 @@ if(f){
   var go=$('.b-go');if(go)go.addEventListener('click',function(){form.classList.add('in')});
 })();
 })();
+
+/* shop: digital invitation order */
+(function(){
+var f=document.getElementById('order-form');if(!f)return;
+var SU='https://vzunjnrosrmvtlipqpsa.supabase.co',SK='sb_publishable_3jb0Y2sDRHAcCesFcKzyZw_iDquPZwj';
+function up(file,folder){
+  var ext=(file.type.split('/')[1]||'jpg').replace('jpeg','jpg').replace(/[^a-z0-9]/gi,'');
+  var name=folder+(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2))+'.'+ext;
+  return fetch(SU+'/storage/v1/object/proofs/'+name,{method:'POST',headers:{apikey:SK,Authorization:'Bearer '+SK,'Content-Type':file.type||'image/jpeg'},body:file}).then(function(r){if(!r.ok)throw new Error('upload');return SU+'/storage/v1/object/public/proofs/'+name});
+}
+f.addEventListener('submit',function(e){
+  e.preventDefault();
+  var msg=f.querySelector('.form-msg'),btn=f.querySelector('button[type=submit]'),fd=new FormData(f);
+  if(fd.get('surname'))return;
+  var bad=[].filter.call(f.querySelectorAll('[required]'),function(x){return !x.value});
+  if(bad.length){bad[0].focus();msg.textContent='Please fill in the fields marked with a star.';msg.style.display='block';return}
+  var proof=f.elements['proof'].files[0],photo=f.elements['photo'].files[0];
+  if((proof&&proof.size>8*1048576)||(photo&&photo.size>8*1048576)){msg.textContent='A file is too large (max 8 MB each).';msg.style.display='block';return}
+  btn.disabled=true;msg.textContent='Sending…';msg.style.display='block';
+  var proofUrl='',photoUrl='';
+  up(proof,'orders/').then(function(u){proofUrl=u;return photo?up(photo,'inv/'):''}).then(function(u){photoUrl=u;
+    var program=String(fd.get('program')||'').split('\n').map(function(l){l=l.trim();if(!l)return null;var m=l.match(/^(.{1,14}?)\s*(?:-|–|—|\|)\s+(.+)$/);return m?{t:m[1].trim(),l:m[2].trim()}:{t:'',l:l}}).filter(Boolean);
+    var details={theme:fd.get('theme')||'noir',lang:fd.get('lang')||'en',names:fd.get('names'),hosts:fd.get('hosts')||'',date:fd.get('date'),time:fd.get('time'),venue:fd.get('venue'),address:fd.get('address')||'',map:fd.get('map')||'',program:program,dress:fd.get('dress')||'',msg:fd.get('msg')||'',rsvp:fd.get('rsvp'),photo:photoUrl};
+    return fetch(SU+'/rest/v1/rpc/create_order',{method:'POST',headers:{apikey:SK,Authorization:'Bearer '+SK,'Content-Type':'application/json'},body:JSON.stringify({p_name:fd.get('yname'),p_email:fd.get('yemail'),p_phone:fd.get('yphone'),p_details:details,p_proof:proofUrl,p_product:'digital-invitation'})}).then(function(r){if(!r.ok)throw new Error('save');return r.json()});
+  }).then(function(){
+    f.reset();msg.textContent='Thank you! We received your order and your payment. We will check the payment and email you the link to your invitation very soon.';
+  }).catch(function(err){msg.textContent='Something went wrong ('+(err&&err.message?err.message:'network')+'). Please WhatsApp me on +201066600848.'}).then(function(){btn.disabled=false});
+});
+})();
