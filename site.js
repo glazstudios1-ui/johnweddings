@@ -24,7 +24,30 @@ function cpage(c){var root=document.getElementById('cp');if(!root)return;var sl=
   if(b.type==='button'&&b.label)h+='<p class="cb"><a class="btn" href="'+esc(b.href||'/booking/')+'">'+esc(b.label)+'</a></p>';
  });
  root.innerHTML=h+'</div>'}
-function set(c){if(!c)return;cur=c;base(c);navs(c);cpage(c);subs.forEach(function(f){try{f(c)}catch(e){}})}
+
+/* ---------- testimonials deck ---------- */
+var DK={i:0,t:null,hold:false,sig:''},reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function ini(n){var p=String(n||'').split(/\s*(?:&|and|\+)\s*/i).map(function(x){return x.trim().charAt(0).toUpperCase()}).filter(Boolean);return p.slice(0,2).join('&')||'\u2605'}
+function cardHtml(c,k){var v=c.t==='video',src=url(v?c.poster:c.img,900),full=url(v?c.poster:c.img,2000),m=c.ini==null?ini(c.name):c.ini;
+ return '<article class="dk-card" data-k="'+k+'" data-type="'+(v?'video':'photo')+'"'+(v?' data-vid="'+esc((c.vid&&c.vid.src)||'')+'"':'')+' data-full="'+esc(full)+'"><img alt="'+esc(c.name)+' - wedding photographed by John Emad" loading="lazy" src="'+esc(src)+'" style="object-position:'+esc((c.img&&c.img.pos)||'50% 50%')+'"><div class="dk-sh"></div>'+(m?'<div class="dk-ini">'+esc(m)+'</div>':'')+'<div class="dk-nm">'+esc(c.name)+'</div>'+(v?'<span class="dk-play" aria-hidden="true"></span>':'')+'<div class="dk-tx" hidden>'+esc(c.text||'')+'</div></article>'}
+function layout(){var cs=$$('.dk-card'),n=cs.length;if(DK.i>=n)DK.i=0;cs.forEach(function(el,k){var r=(k-DK.i+n)%n;el.style.setProperty('--r',Math.min(r,4));el.classList.toggle('far',r>3);el.style.zIndex=n-r});var cn=document.querySelector('.dk-n');if(cn&&n)cn.textContent=('0'+(DK.i+1)).slice(-2)+' / '+('0'+n).slice(-2)}
+function adv(d){var cs=$$('.dk-card');if(cs.length<2)return;if(d>0){var top=cs[DK.i];top.classList.add('out');setTimeout(function(){top.classList.remove('out');DK.i=(DK.i+1)%cs.length;layout()},reduce?0:420)}else{DK.i=(DK.i-1+cs.length)%cs.length;layout()}}
+function autoDeck(){clearInterval(DK.t);if(reduce||EDIT||!document.querySelector('.deck'))return;DK.t=setInterval(function(){if(!document.querySelector('.tmod.on')&&!DK.hold)adv(1)},4800)}
+function renderDeck(cards){var d=document.querySelector('.deck');if(!d)return;var sig=JSON.stringify(cards);if(sig===DK.sig)return;DK.sig=sig;
+ d.innerHTML=cards.map(cardHtml).join('');var l=document.querySelector('.tq-list');
+ if(l)l.innerHTML=cards.filter(function(c){return c.text}).map(function(c){return'<blockquote><p>'+esc(c.text)+'</p><cite>'+esc(c.name)+'</cite></blockquote>'}).join('');layout();autoDeck()}
+function openCard(el){var md=document.querySelector('.tmod');if(!md){md=document.createElement('div');md.className='tmod';document.body.appendChild(md);
+  md.addEventListener('click',function(e){if(e.target===md||e.target.classList.contains('tm-x'))closeCard()});document.addEventListener('keydown',function(e){if(e.key==='Escape')closeCard()})}
+ var v=el.dataset.type==='video',nm=el.querySelector('.dk-nm').textContent,tx=el.querySelector('.dk-tx').textContent;
+ md.className='tmod on'+(v?' vd':'');
+ md.innerHTML='<button class="tm-x" aria-label="Close">&times;</button><div class="tm-in">'+(v?'<video src="'+esc(el.dataset.vid)+'" poster="'+esc(el.querySelector('img').src)+'" controls autoplay playsinline></video>':'<img alt="'+esc(nm)+'" src="'+esc(el.dataset.full||el.querySelector('img').src)+'">')+'<div class="tm-t">'+(tx?'<p>&ldquo;'+esc(tx)+'&rdquo;</p>':'')+'<cite>'+esc(nm)+'</cite></div></div>'}
+function closeCard(){var md=document.querySelector('.tmod');if(md){md.className='tmod';md.innerHTML=''}}
+document.addEventListener('click',function(e){if(EDIT)return;var p=e.target.closest('.dk-p'),n=e.target.closest('.dk-nx'),c=e.target.closest('.dk-card');
+ if(p){adv(-1);autoDeck()}else if(n){adv(1);autoDeck()}else if(c&&c.style.getPropertyValue('--r')==='0')openCard(c)});
+document.addEventListener('mouseover',function(e){DK.hold=!!e.target.closest('.deck')});
+document.addEventListener('DOMContentLoaded',function(){layout();autoDeck()});
+
+function set(c){if(!c)return;cur=c;base(c);navs(c);cpage(c);if(c.tcards&&c.tcards.length)renderDeck(c.tcards);subs.forEach(function(f){try{f(c)}catch(e){}})}
 window.JE={on:function(f){subs.push(f);if(cur)try{f(cur)}catch(e){}},set:set};
 if(!EDIT){
  if(!PRE)try{set(JSON.parse(localStorage.getItem(CK)))}catch(e){}
