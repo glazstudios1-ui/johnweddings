@@ -1,6 +1,8 @@
 html,body.inv-page{margin:0;background:#050505;color:var(--tx)}
 body.inv-page{--bg:#0d0d0c;--bg2:#1d1b18;--tx:#f1ece2;--mu:#c9c2b4;--ln:rgba(241,236,226,.35);--pn:rgba(14,14,13,.46);--ov:rgba(8,8,7,.66);--bt:#f1ece2;--btt:#0d0d0c;--seal:#8c3b30;--env:#1b1a18;--env2:#23211e;--card:#f4efe6;--cardt:#2b2420}
 body.th-sage{--bg:#2c3a2e;--bg2:#3b4e3d;--tx:#eef0e6;--mu:#c3cfbd;--ln:rgba(238,240,230,.4);--pn:rgba(46,66,44,.52);--ov:rgba(28,42,26,.7);--bt:#eef0e6;--btt:#2c3a2e;--seal:#b9975b;--env:#3b4e3d;--env2:#44593f}
+body.th-wine{--bg:#3a1218;--bg2:#4b1a22;--tx:#f3e6df;--mu:#d9bfb4;--ln:rgba(243,230,223,.4);--pn:rgba(72,16,26,.52);--ov:rgba(46,10,16,.74);--bt:#f3e6df;--btt:#3a1218;--seal:#c9a35e;--env:#5a1d27;--env2:#6c2531;--card:#f6ece3;--cardt:#3a1218}
+body.th-gold{--bg:#efe3cf;--bg2:#e6d6bb;--tx:#3a2f1f;--mu:#6b5a3f;--ln:rgba(58,47,31,.38);--pn:rgba(255,250,238,.62);--ov:rgba(239,227,207,.84);--bt:#3a2f1f;--btt:#f7eddb;--seal:#9c7a35;--env:#dcc9a4;--env2:#ead9b9;--card:#fbf5e8;--cardt:#3a2f1f}
 body.th-ivory{--bg:#f4efe6;--bg2:#ebe4d7;--tx:#2b2420;--mu:#5d5248;--ln:rgba(43,36,32,.35);--pn:rgba(255,252,246,.6);--ov:rgba(244,239,230,.82);--bt:#2b2420;--btt:#f4efe6;--seal:#7a2f2a;--env:#e6dccb;--env2:#efe6d6}
 .inv-nf,.inv-load{color:#a8a39a;text-align:center;padding:30px}
 .inv-nf h1{font-family:'Pinyon Script',cursive;font-weight:400;font-size:38px;color:#eee;margin:0 0 8px}
@@ -69,7 +71,7 @@ html.lk,html.lk body{overflow:hidden}
 .bt{display:inline-flex;align-items:center;justify-content:center;padding:14px 22px;border-radius:40px;background:var(--bt);color:var(--btt);font:500 11px 'Jost',sans-serif;letter-spacing:2px;text-transform:uppercase;text-decoration:none;border:1px solid var(--bt);cursor:pointer;transition:transform .2s,opacity .2s;-webkit-tap-highlight-color:transparent}
 .bt:active{transform:scale(.97)}.bt[disabled]{opacity:.45;cursor:default}
 .bt.ghost{background:var(--pn);color:var(--tx);border-color:var(--ln);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-body.th-ivory .bt.ghost{background:rgba(255,255,255,.55)}
+body.th-ivory .bt.ghost,body.th-gold .bt.ghost{background:rgba(255,255,255,.55)}
 .inv.ar .bt{font-family:'Cairo',sans-serif;font-size:14px;letter-spacing:0;text-transform:none}
 .cal{width:100%;padding:18px 14px;background:var(--pn);border:1px solid var(--ln);border-radius:18px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .cal-m{font:italic 400 26px 'Cormorant Garamond',serif;margin-bottom:10px}
@@ -107,7 +109,7 @@ body.th-ivory .bt.ghost{background:rgba(255,255,255,.55)}
 .bl input{padding:15px 18px;border-radius:40px;border:1px solid var(--ln);background:var(--pn);color:var(--tx);font:400 16px 'Jost',sans-serif;text-align:center;outline:none;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .bl input::placeholder{color:var(--mu)}
 .bmsg{margin:0;font:400 14px 'Jost',sans-serif;color:#e7a39b}.bmsg.ok{color:#a8d8a5}
-body.th-ivory .bmsg{color:#9a2f27}body.th-ivory .bmsg.ok{color:#2f6b2c}
+body.th-ivory .bmsg,body.th-gold .bmsg{color:#9a2f27}body.th-ivory .bmsg.ok,body.th-gold .bmsg.ok{color:#2f6b2c}
 .rc{width:100%;color:var(--tx)}
 .rc-i{display:flex;align-items:center;gap:14px;justify-content:center;padding:14px;background:var(--pn);border:1px dashed var(--ln);border-radius:18px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .rc-b{flex:none;width:60px;height:60px;border-radius:50%;border:0;background:var(--seal);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;position:relative}
@@ -128,6 +130,6 @@ body.th-ivory .bmsg{color:#9a2f27}body.th-ivory .bmsg.ok{color:#2f6b2c}
 .fc-t{margin:0;font:italic 400 20px 'Cormorant Garamond',serif}
 .fc-d{margin:6px 0 0;font:400 12px 'Jost',sans-serif;letter-spacing:4px;text-transform:uppercase}
 .mk{font:400 10px 'Jost',sans-serif;letter-spacing:2px;text-transform:uppercase;color:var(--mu);text-decoration:none;opacity:.8}
-body.th-ivory .sec .ov{background:rgba(244,239,230,.84)}
+body.th-ivory .sec .ov{background:rgba(244,239,230,.84)}body.th-gold .sec .ov{background:rgba(239,227,207,.84)}
 @media(min-width:700px){.sec>.in{max-width:480px}.sec{padding:100px 22px}}
 @media(prefers-reduced-motion:reduce){.rv{transition:none;opacity:1;transform:none}.cue i,.cal-g .on svg{animation:none}}

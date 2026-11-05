@@ -87,7 +87,7 @@ function wireBless(d,t){
 function render(d){
   var my=++gen;
   var t=L[d.lang==='ar'?'ar':'en'],ar=d.lang==='ar';
-  document.body.classList.remove('th-sage','th-ivory');if(d.theme==='sage'||d.theme==='ivory')document.body.classList.add('th-'+d.theme);
+  document.body.classList.remove('th-sage','th-ivory','th-wine','th-gold');if(d.theme==='sage'||d.theme==='ivory'||d.theme==='wine'||d.theme==='gold')document.body.classList.add('th-'+d.theme);
   document.documentElement.lang=ar?'ar':'en';root.dir=ar?'rtl':'ltr';root.classList.toggle('ar',ar);
   if(!d.names){root.innerHTML='<div class="inv-nf"><h1>'+t.nf+'</h1><p>'+t.nf2+'</p></div>';return}
   document.title=d.names;
