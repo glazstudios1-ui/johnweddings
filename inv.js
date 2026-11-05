@@ -1,6 +1,6 @@
 (function(){
 var SU='https://vzunjnrosrmvtlipqpsa.supabase.co',SK='sb_publishable_3jb0Y2sDRHAcCesFcKzyZw_iDquPZwj',root=document.getElementById('inv');
-var slug=new URLSearchParams(location.search).get('s')||'';
+var QS=new URLSearchParams(location.search),slug=QS.get('s')||'',PREVIEW=QS.get('preview')==='1',gen=0;
 var DEMO={theme:new URLSearchParams(location.search).get('theme')||'noir',lang:'en',hosts:'Together with their families',names:'Sara & Omar',date:(function(){var d=new Date();d.setMonth(d.getMonth()+3);return d.toISOString().slice(0,10)})(),time:'18:30',venue:'The Garden Hall',address:'New Cairo, Egypt',map:'https://maps.google.com',program:[{t:'6:30 PM',l:'Ceremony'},{t:'8:00 PM',l:'Dinner'},{t:'9:30 PM',l:'Party'}],dress:'Formal',msg:'Your presence is the best gift we could ask for. We cannot wait to celebrate with you.',rsvp:'01066600848',photo:''};
 var L={en:{loc:'en-GB',rsvp:'Will you join us?',yes:'Yes, I will be there',no:'Sorry, I cannot make it',prog:'The day',dress:'Dress code',when:'When',where:'Where',maps:'Get directions',cal:'Add to calendar',days:'Days',hrs:'Hours',min:'Min',sec:'Sec',today:'Today is the day',made:'Digital invitation by John Emad Weddings',yesm:function(n){return 'Hi! I will be at '+n+'\'s wedding. See you there!'},nom:function(n){return 'Hi! Sorry, I cannot make it to '+n+'\'s wedding. Wishing you all the best!'},nf:'This invitation was not found.',nf2:'Please check the link you were sent.'},
 ar:{loc:'ar-EG-u-nu-latn',rsvp:'هل ستشاركنا فرحتنا؟',yes:'نعم، سأكون هناك',no:'للأسف لن أستطيع الحضور',prog:'برنامج اليوم',dress:'الزي',when:'الموعد',where:'المكان',maps:'الاتجاهات',cal:'أضف إلى التقويم',days:'يوم',hrs:'ساعة',min:'دقيقة',sec:'ثانية',today:'اليوم هو اليوم الموعود',made:'دعوة رقمية من جون عماد ويدينجز',yesm:function(n){return 'أهلاً! سأحضر زفاف '+n+'. نراكم هناك!'},nom:function(n){return 'أهلاً! للأسف لن أستطيع حضور زفاف '+n+'. أتمنى لكم كل السعادة!'},nf:'لم نجد هذه الدعوة.',nf2:'من فضلك تأكد من الرابط الذي وصلك.'}};
@@ -16,13 +16,14 @@ function load(){
 }
 function when(d){var dt=new Date(d.date+'T'+(d.time||'00:00')+':00');return isNaN(dt)?null:dt}
 function render(d){
+  var my=++gen;
   document.body.classList.remove('th-sage','th-ivory');if(d.theme==='sage'||d.theme==='ivory')document.body.classList.add('th-'+d.theme);
   var t=L[d.lang==='ar'?'ar':'en'],ar=d.lang==='ar';
   document.documentElement.lang=ar?'ar':'en';root.dir=ar?'rtl':'ltr';root.classList.toggle('ar',ar);
   if(!d.names){root.innerHTML='<div class="inv-nf"><h1>'+t.nf+'</h1><p>'+t.nf2+'</p></div>';return}
   document.title=d.names;
   var dt=when(d),pn=parts(d.names),h='';
-  var photo=(d.photo&&d.photo.indexOf(SU)===0)?d.photo:'';
+  var photo=(d.photo&&(d.photo.indexOf(SU)===0||(PREVIEW&&d.photo.indexOf('blob:')===0)))?d.photo:'';
   h+='<section class="iv-hero'+(photo?' has-photo':'')+'">'+(photo?'<div class="iv-bg" style="background-image:url(\''+esc(photo)+'\')"></div>':'')+'<div class="iv-in">';
   h+='<div class="iv-mono">'+esc(ini(d.names))+'</div>';
   if(d.hosts)h+='<p class="iv-hosts">'+esc(d.hosts)+'</p>';
@@ -42,11 +43,10 @@ function render(d){
   if(d.rsvp)h+='<section class="iv-sec iv-rs"><h2>'+t.rsvp+'</h2><div class="iv-btns"><a class="iv-btn" href="'+wa(d.rsvp)+'?text='+encodeURIComponent(t.yesm(d.names))+'" target="_blank" rel="noopener">'+t.yes+'</a><a class="iv-btn ghost" href="'+wa(d.rsvp)+'?text='+encodeURIComponent(t.nom(d.names))+'" target="_blank" rel="noopener">'+t.no+'</a></div></section>';
   h+='<footer class="iv-ft"><a href="https://www.johnemadweddings.com/shop/invitation/" target="_blank" rel="noopener">'+t.made+'</a></footer>';
   root.innerHTML=h;
-  envelope(d,t);
-  reveal();
+  if(PREVIEW){[].forEach.call(root.querySelectorAll('.iv-hero .iv-in,.iv-sec,.iv-cd,.iv-ft'),function(e){e.classList.add('in');e.style.animation='none'})}else{envelope(d,t);reveal()}
   if(dt){
     var cd=document.getElementById('cd');
-    (function tick(){var ms=dt-new Date();if(ms<=0){cd.innerHTML='<p class="iv-today">'+t.today+'</p>';return}
+    (function tick(){if(my!==gen)return;var ms=dt-new Date();if(ms<=0){cd.innerHTML='<p class="iv-today">'+t.today+'</p>';return}
       var s=Math.floor(ms/1000),dd=Math.floor(s/86400),hh=Math.floor(s%86400/3600),mm=Math.floor(s%3600/60),ss=s%60;
       cd.innerHTML=[[dd,t.days],[hh,t.hrs],[mm,t.min],[ss,t.sec]].map(function(x){return '<div><b>'+x[0]+'</b><span>'+x[1]+'</span></div>'}).join('');setTimeout(tick,1000)})();
     var b=document.getElementById('ics');
@@ -69,5 +69,9 @@ function reveal(go){
   if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});return}
   var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.12});els.forEach(function(e){io.observe(e)});
 }
-load().then(function(d){render(d||{})});
+if(PREVIEW){
+  var fill=function(x){x=x||{};var o={};Object.keys(DEMO).forEach(function(k){o[k]=DEMO[k]});Object.keys(x).forEach(function(k){if(x[k]!==''&&x[k]!=null&&!(Array.isArray(x[k])&&!x[k].length))o[k]=x[k]});return o};
+  window.addEventListener('message',function(e){if(e.data&&e.data.je==='inv')render(fill(e.data.d))});
+  render(fill({}));try{parent.postMessage({je:'inv-ready'},'*')}catch(x){}
+}else load().then(function(d){render(d||{})});
 })();

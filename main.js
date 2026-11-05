@@ -180,6 +180,19 @@ function up(file,folder){
   var name=folder+(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2))+'.'+ext;
   return fetch(SU+'/storage/v1/object/proofs/'+name,{method:'POST',headers:{apikey:SK,Authorization:'Bearer '+SK,'Content-Type':file.type||'image/jpeg'},body:file}).then(function(r){if(!r.ok)throw new Error('upload');return SU+'/storage/v1/object/public/proofs/'+name});
 }
+function collect(fd,photoUrl){
+  var program=String(fd.get('program')||'').split('\n').map(function(l){l=l.trim();if(!l)return null;var m=l.match(/^(.{1,14}?)\s*(?:-|–|—|\|)\s+(.+)$/);return m?{t:m[1].trim(),l:m[2].trim()}:{t:'',l:l}}).filter(Boolean);
+  return {theme:fd.get('theme')||'noir',lang:fd.get('lang')||'en',names:fd.get('names'),hosts:fd.get('hosts')||'',date:fd.get('date'),time:fd.get('time'),venue:fd.get('venue'),address:fd.get('address')||'',map:fd.get('map')||'',program:program,dress:fd.get('dress')||'',msg:fd.get('msg')||'',rsvp:fd.get('rsvp'),photo:photoUrl||''};
+}
+/* live preview */
+var pvf=document.getElementById('pv-if'),pvReady=false,pvT=0,pvPhoto='';
+function pvSend(){if(!pvf||!pvReady)return;var d=collect(new FormData(f),pvPhoto);pvf.contentWindow.postMessage({je:'inv',d:d},'*')}
+function pvQ(){clearTimeout(pvT);pvT=setTimeout(pvSend,120)}
+window.addEventListener('message',function(e){if(e.data&&e.data.je==='inv-ready'){pvReady=true;pvSend()}});
+f.addEventListener('input',pvQ);f.addEventListener('change',pvQ);
+if(f.elements['photo'])f.elements['photo'].addEventListener('change',function(){var x=this.files[0];if(pvPhoto)URL.revokeObjectURL(pvPhoto);pvPhoto=x?URL.createObjectURL(x):'';pvQ()});
+var pv=document.getElementById('po-pv');
+document.getElementById('pv-btn').onclick=function(){pv.classList.add('open');pvSend()};document.getElementById('pv-x').onclick=function(){pv.classList.remove('open')};
 f.addEventListener('submit',function(e){
   e.preventDefault();
   var msg=f.querySelector('.form-msg'),btn=f.querySelector('button[type=submit]'),fd=new FormData(f);
@@ -191,8 +204,7 @@ f.addEventListener('submit',function(e){
   btn.disabled=true;msg.textContent='Sending…';msg.style.display='block';
   var proofUrl='',photoUrl='';
   up(proof,'orders/').then(function(u){proofUrl=u;return photo?up(photo,'inv/'):''}).then(function(u){photoUrl=u;
-    var program=String(fd.get('program')||'').split('\n').map(function(l){l=l.trim();if(!l)return null;var m=l.match(/^(.{1,14}?)\s*(?:-|–|—|\|)\s+(.+)$/);return m?{t:m[1].trim(),l:m[2].trim()}:{t:'',l:l}}).filter(Boolean);
-    var details={theme:fd.get('theme')||'noir',lang:fd.get('lang')||'en',names:fd.get('names'),hosts:fd.get('hosts')||'',date:fd.get('date'),time:fd.get('time'),venue:fd.get('venue'),address:fd.get('address')||'',map:fd.get('map')||'',program:program,dress:fd.get('dress')||'',msg:fd.get('msg')||'',rsvp:fd.get('rsvp'),photo:photoUrl};
+    var details=collect(fd,photoUrl);
     return fetch(SU+'/rest/v1/rpc/create_order',{method:'POST',headers:{apikey:SK,Authorization:'Bearer '+SK,'Content-Type':'application/json'},body:JSON.stringify({p_name:fd.get('yname'),p_email:fd.get('yemail'),p_phone:fd.get('yphone'),p_details:details,p_proof:proofUrl,p_product:'digital-invitation'})}).then(function(r){if(!r.ok)throw new Error('save');return r.json()});
   }).then(function(){
     f.reset();msg.textContent='Thank you! We received your order and your payment. We will check the payment and email you the link to your invitation very soon.';
