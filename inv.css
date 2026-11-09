@@ -2,6 +2,7 @@ html,body.inv-page{margin:0}
 body.inv-page{--bg:#f4ede1;--bg2:#efe5d4;--tx:#3b2f29;--mu:#7d6d5e;--ac:#a9843f;--fr:rgba(169,132,63,.65);--pc:rgba(255,252,246,.88);--pb:rgba(169,132,63,.45);--bt:#3b2f29;--btt:#f7f0e3;--foil:linear-gradient(110deg,#8a672c,#d4b46f 35%,#a9843f 55%,#e0c88f);--s1:#f1dca4;--s2:#c79f50;--s3:#85632a;--e1:#f4ecda;--e2:#e6d9c0;--e3:#d6c4a0;--liner:#efe3cb;--lace:#fffaf0;--card:#fbf7ef;--cardt:#3b2f29;--pt:#e9c9bf;--tn:.05;background:var(--bg);color:var(--tx)}
 body.th-wine{--bg:#2a0b11;--bg2:#36101a;--tx:#f4e8dc;--mu:#cfae9f;--ac:#d6b06a;--fr:rgba(214,176,106,.6);--pc:rgba(92,24,40,.55);--pb:rgba(214,176,106,.5);--bt:#d6b06a;--btt:#2a0b11;--foil:linear-gradient(110deg,#8a6526,#f4dc9c 38%,#b88a3c 58%,#f4dc9c);--s1:#f6e1a8;--s2:#c19a55;--s3:#7a5720;--e1:#74202f;--e2:#5c1826;--e3:#44101c;--liner:#3a0d18;--lace:#d6b06a;--card:#f2e5d4;--cardt:#4a1420;--pt:#eac985;--tn:.1}
 body.th-noir{--bg:#0b0b0c;--bg2:#141415;--tx:#f1eee8;--mu:#aaa59b;--ac:#d9d4c8;--fr:rgba(241,238,232,.45);--pc:rgba(26,26,27,.82);--pb:rgba(241,238,232,.32);--bt:#f1eee8;--btt:#0b0b0c;--foil:linear-gradient(110deg,#b4afa4,#ffffff 40%,#c9c4ba 60%,#ffffff);--s1:#f6f3ec;--s2:#c9c4b9;--s3:#8a867d;--e1:#242425;--e2:#19191a;--e3:#101011;--liner:#1c1c1d;--lace:#f3f0e8;--card:#f4f1ea;--cardt:#141415;--pt:#ffffff;--tn:.09}
+body.th-kraft{--bg:#f1e6d3;--bg2:#ead9bf;--tx:#4a2e20;--mu:#80634a;--ac:#a2602c;--fr:rgba(162,96,44,.6);--pc:rgba(255,250,240,.85);--pb:rgba(162,96,44,.45);--bt:#7a2e24;--btt:#fbf3e6;--foil:linear-gradient(110deg,#7a2e24,#b2523f 50%,#7a2e24);--s1:#e8c996;--s2:#b98d57;--s3:#7a5428;--e1:#c19a62;--e2:#b08850;--e3:#9c7640;--liner:#a8803f;--lace:#fbf3e6;--card:#f6ead6;--cardt:#4a2e20;--pt:#d9a46a;--tn:.06}
 body.th-sage{--bg:#e8ece0;--bg2:#dfe5d4;--tx:#33402f;--mu:#6c7a64;--ac:#7c8f72;--fr:rgba(124,143,114,.7);--pc:rgba(252,253,249,.9);--pb:rgba(124,143,114,.5);--bt:#4b5e44;--btt:#f6f8f1;--foil:linear-gradient(110deg,#43563c,#7c8f72 50%,#43563c);--s1:#ffffff;--s2:#e9e3d2;--s3:#b5ad96;--e1:#b8c4ac;--e2:#a6b69a;--e3:#94a688;--liner:#cbd6bf;--lace:#f7f8f1;--card:#fbfcf7;--cardt:#33402f;--pt:#c3d2b6;--tn:.06}
 .inv-nf,.inv-load{color:var(--mu);text-align:center;padding:30px}
 .inv-nf h1{font:400 38px 'Pinyon Script',cursive;margin:0 0 8px}
@@ -139,7 +140,7 @@ body.th-wine .iv-env:before,body.th-noir .iv-env:before{mix-blend-mode:screen;op
 @keyframes evfl{50%{transform:translateY(-8px)}}
 .iv-env.o4 .ev-sc{animation:none;transform:translateY(60vh) scale(.9);opacity:0}
 .ev{position:relative;width:min(84vw,360px);aspect-ratio:340/240;cursor:pointer;filter:drop-shadow(0 28px 36px rgba(0,0,0,.42))}
-.ev-back{position:absolute;inset:0;background:var(--liner);border-radius:3px}
+.ev-back{position:absolute;inset:0;background:var(--liner);border-radius:3px;background-image:url(/img/inv/tex_linen.jpg);background-blend-mode:multiply;background-size:180px}
 .ev-pk{position:absolute;inset:0;width:100%;height:100%;z-index:4;border-radius:3px}
 .ev-card{position:absolute;left:6%;right:6%;top:6%;bottom:5%;background:var(--card);color:var(--cardt);z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:10px;box-sizing:border-box;transition:transform 1.3s cubic-bezier(.45,0,.2,1),opacity .8s;border-radius:2px;box-shadow:0 2px 10px rgba(0,0,0,.2)}
 .ev-card:before{content:'';position:absolute;inset:5px;border:1px solid currentColor;opacity:.3}
@@ -151,7 +152,7 @@ body.th-wine .iv-env:before,body.th-noir .iv-env:before{mix-blend-mode:screen;op
 .ev-flap .ff svg{width:100%;height:100%;display:block;overflow:visible}
 .ev-flap .fb{transform:rotateX(180deg);background:var(--liner);clip-path:polygon(0 0,100% 0,50% 100%);filter:brightness(.92)}
 .ev-print{color:var(--s1);opacity:.85}
-.ev-seal{position:absolute;left:50%;top:55%;width:23%;aspect-ratio:1;margin:-11.5% 0 0 -11.5%;z-index:8;filter:drop-shadow(0 5px 7px rgba(0,0,0,.45));transition:transform .7s cubic-bezier(.5,-.4,.3,1),opacity .5s}
+.ev-seal{position:absolute;left:50%;top:55%;width:30%;aspect-ratio:1;margin:-15% 0 0 -15%;z-index:8;transition:transform .7s cubic-bezier(.5,-.4,.3,1),opacity .5s}
 .ev-seal svg{width:100%;height:100%;display:block}
 .iv-tap{font:400 11px 'Jost',sans-serif;letter-spacing:4px;text-transform:uppercase;color:var(--mu);animation:ivBl 2.2s infinite}
 @keyframes ivBl{50%{opacity:.35}}
@@ -161,3 +162,81 @@ body.th-wine .iv-env:before,body.th-noir .iv-env:before{mix-blend-mode:screen;op
 .iv-env.o3 .ev-card{transform:translateY(-62%)}
 .iv-env.o1 .iv-tap,.iv-env.o2 .iv-tap{opacity:0;animation:none}
 .iv-env.o4 .ev-card{transform:translateY(-62%) scale(1.5);opacity:0}
+
+/* ===== photo envelope (Black) ===== */
+.iv-env.ph{background:#efeeec;display:block}
+.iv-env.ph:before{display:none}
+.sc3{position:absolute;left:50%;top:50%;width:max(100vw,calc(100svh*.625));aspect-ratio:1500/2400;transform:translate(-50%,-50%);cursor:pointer;perspective:1800px;transition:transform 2.6s cubic-bezier(.5,0,.3,1)}
+.sc3>*{position:absolute;inset:0}
+.sc-bg,.sc-flap .ff{background-size:100% 100%;background-repeat:no-repeat}
+.sc-hole{background:linear-gradient(180deg,#050505,#161616 60%,#0c0c0c);opacity:0;transition:opacity .01s .4s}
+.sc-flap{transform-origin:50% 9.58%;transform-style:preserve-3d;transition:transform 1.1s cubic-bezier(.5,0,.2,1)}
+.sc-flap .ff,.sc-flap .fb{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.sc-flap .fb{background:linear-gradient(180deg,#2a2a2a,#141414);transform:rotateX(180deg)}
+.sc-ring{left:49.93%;top:22.71%;inset:auto;width:13%;aspect-ratio:1;margin:-6.5% 0 0 -6.5%;border-radius:50%;border:2px solid rgba(255,255,255,.75);animation:scring 2s ease-out infinite;pointer-events:none}
+@keyframes scring{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.5);opacity:0}}
+.iv-env.ph .iv-tap{position:absolute;bottom:7%;left:0;right:0;text-align:center;color:#555;z-index:3}
+.iv-env.o1 .sc-ring{display:none}
+.iv-env.o2 .sc-hole{opacity:1}
+.iv-env.o2 .sc-flap{transform:rotateX(180deg)}
+.iv-env.ph .iv-tap{transition:opacity .4s}.iv-env.o1.ph .iv-tap{opacity:0;animation:none}
+.inv-card{position:fixed;left:50%;top:50%;width:min(76vw,330px);aspect-ratio:.72;z-index:5;background:#0e0e0f;color:#f1eee8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;box-sizing:border-box;box-shadow:0 30px 70px rgba(0,0,0,.5);border-radius:2px;opacity:0;transform:translate(-50%,-30%) scale(.45);transition:transform 1.4s cubic-bezier(.4,0,.2,1),opacity .7s}
+.inv-card:before{content:'';position:absolute;inset:8px;border:1px solid rgba(241,238,232,.5)}
+.inv-card p{margin:0;font:400 10px 'Jost',sans-serif;letter-spacing:4px;text-transform:uppercase;opacity:.75}
+.inv-card b{font:400 clamp(40px,12vw,54px)/1.05 'Pinyon Script',cursive;padding:0 .1em}
+html[lang=ar] .inv-card b{font-family:'Amiri',serif}
+.inv-card span{font:400 11px 'Jost',sans-serif;letter-spacing:4px;text-transform:uppercase;opacity:.8}
+.iv-env.o3 .inv-card{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.iv-env.o4 .inv-card{opacity:0;transform:translate(-50%,-50%) scale(1.5);transition:transform 1.1s ease-in,opacity .9s}
+.iv-env.o3 .sc3{transform:translate(-50%,-50%) scale(1.04)}
+.iv-env.o4 .sc3{opacity:0;transition:opacity .9s,transform 1.2s;transform:translate(-50%,-50%) scale(1.5)}
+
+/* kraft pouch scene */
+.sc3.k3{aspect-ratio:1100/1637;width:max(100vw,calc(100svh*.672));container-type:inline-size}
+.iv-env.kr{background:#e3dfd8}
+.k-patch{left:29.8%;top:15%;right:auto;bottom:auto;inset:auto;position:absolute;width:46.4%;height:17.9%;background:url(/img/inv/kraft-patch.jpg) center/100% 100%;opacity:0}
+.k-card{inset:auto;position:absolute;left:29.8%;top:15%;width:46.4%;height:42%;background:linear-gradient(180deg,#bf935a,#b88a50);box-shadow:0 2px 8px rgba(0,0,0,.25);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:2.6cqw;gap:1.4cqw;text-align:center;color:#6e2a20;transition:transform 1.3s cubic-bezier(.4,0,.2,1)}
+.k-card:before{content:'';position:absolute;inset:1.6cqw;border:1px solid rgba(110,42,32,.55)}
+.k-card p{margin:2cqw 0 0;font:400 1.9cqw 'Jost',sans-serif;letter-spacing:.5cqw;text-transform:uppercase;opacity:.85}
+.k-card b{font:400 6.4cqw/1.05 'Pinyon Script',cursive;padding:0 .1em}
+html[lang=ar] .k-card b{font-family:'Amiri',serif;font-size:5.2cqw}
+.k-card span{font:400 1.8cqw 'Jost',sans-serif;letter-spacing:.45cqw;text-transform:uppercase}
+.k-pouch{inset:0;position:absolute;background-size:100% 100%;clip-path:inset(32.9% 0 0 0);pointer-events:none}
+.k-ring{inset:auto;position:absolute;left:53%;top:23%;width:13cqw;height:13cqw;margin:-6.5cqw 0 0 -6.5cqw;border-radius:50%;border:2px solid rgba(255,255,255,.9);animation:scring 2s ease-out infinite;pointer-events:none}
+.iv-env.kr.o1 .k-ring{display:none}
+.iv-env.kr.o1 .k-patch{opacity:1}
+.iv-env.kr.o1 .k-card{transform:translateY(-3%)}
+.iv-env.kr.o2 .k-card{transform:translateY(-13%) rotate(-1.2deg)}
+.iv-env.kr.o3 .sc3{transform:translate(-50%,-44%) scale(2.1)}
+.iv-env.kr.o4 .sc3{opacity:0;transform:translate(-50%,-44%) scale(2.6);transition:opacity .9s,transform 1.2s}
+
+/* burgundy envelope (photo assets) */
+.iv-env.wn{background:#3a0507;overflow:hidden}
+.wn-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 42%,rgba(0,0,0,0) 0,rgba(10,0,0,.62) 100%),url(/img/inv/wine-leather.jpg) center/cover}
+.we{position:absolute;left:50%;top:46%;width:min(88vw,540px);aspect-ratio:565/500;transform:translate(-50%,-50%);container-type:inline-size;perspective:1400px;transition:transform 1.4s cubic-bezier(.5,0,.2,1),opacity 1s;cursor:pointer;animation:weIn 1.1s cubic-bezier(.2,.7,.2,1) both}
+@keyframes weIn{from{opacity:0;transform:translate(-50%,-44%) scale(.94)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.we-body{position:absolute;inset:0;width:100%;height:100%;z-index:3;filter:drop-shadow(0 18px 22px rgba(0,0,0,.55));pointer-events:none}
+.we-card{position:absolute;left:23%;top:14%;width:54%;aspect-ratio:504/643;z-index:2;background:url(/img/inv/wine-paper.png) center/100% 100%;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));transition:transform 1.3s cubic-bezier(.45,0,.2,1)}
+.wc-in{position:absolute;inset:11% 9%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#5a1620;gap:3.2cqw}
+.wc-in p{margin:0;font:400 2.1cqw 'Jost',sans-serif;letter-spacing:.9cqw;text-transform:uppercase;opacity:.8}
+.wc-in b{font:400 9.5cqw/1.05 'Pinyon Script',cursive;font-weight:400}
+html[lang=ar] .wc-in b{font-family:'Amiri',serif;font-size:7.5cqw}
+.wc-in i{width:14cqw;height:1px;background:rgba(90,22,32,.55)}
+.wc-in span{font:400 2cqw 'Jost',sans-serif;letter-spacing:.7cqw;text-transform:uppercase}
+.we-fl{position:absolute;left:2%;top:12%;width:96%;height:50%;z-index:4;transform-origin:50% 0;transform-style:preserve-3d;transition:transform 1.1s cubic-bezier(.5,0,.3,1);pointer-events:none}
+.we-fl .fa,.we-fl .fb{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;clip-path:polygon(0 0,100% 0,50% 100%);background:url(/img/inv/wine-flap.jpg) 0 0/100% 100%}
+.we-fl .fa{filter:brightness(1.6) saturate(1.1)}
+.we-fl .fa:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.35))}
+.we-fl .fb{transform:rotateX(180deg);filter:brightness(.9)}
+.we-seal{position:absolute;left:50%;top:81%;width:21.3%;transform:translate(-50%,-50%);filter:drop-shadow(0 5px 6px rgba(0,0,0,.55));transition:transform .6s,opacity .5s}
+.we-ring{position:absolute;left:50%;top:60%;width:15cqw;height:15cqw;margin:-7.5cqw 0 0 -7.5cqw;border-radius:50%;border:2px solid rgba(255,255,255,.85);z-index:6;animation:scring 2s ease-out infinite;pointer-events:none}
+.iv-env.wn .iv-tap{position:absolute;bottom:8%;left:0;right:0;text-align:center;color:#e9c9c4;z-index:5}
+.iv-env.wn.o1 .we-ring{display:none}
+.iv-env.wn.o1 .iv-tap{opacity:0;animation:none}
+.iv-env.wn.o1 .we-seal{transform:translate(-50%,-50%) scale(1.12);opacity:0}
+.iv-env.wn.o2 .we-fl{transform:rotateX(180deg)}
+.iv-env.wn.o2b .we-fl{z-index:1}
+.iv-env.wn.o2 .we-card{transform:translateY(-56%)}
+.iv-env.wn.o3 .we-card{z-index:5;transform:translateY(-14%) scale(1.7)}
+.iv-env.wn.o3 .we{transform:translate(-50%,-38%)}
+.iv-env.wn.o4 .we{opacity:0;transform:translate(-50%,-34%) scale(1.5);transition:opacity .9s,transform 1.2s}
