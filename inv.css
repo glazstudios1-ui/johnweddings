@@ -331,3 +331,62 @@ html[lang=ar] .k-card b{font-family:'Amiri',serif;font-size:5.2cqw}
 .iv-env.bl.o1 .bl-txt{opacity:1;transform:translate(-50%,-50%) scale(1)}
 .iv-env.bl .iv-tap{color:#6b7a5e}
 .iv-env.bl.o3 .bl-box{transform:scale(2.6);opacity:0}
+
+/* persian envelope */
+.iv-env.pr{background:#2a0508}
+.pr-bg{position:absolute;inset:-4%;background:url(/img/inv/rug-a.jpg) center/cover;filter:blur(1.5px) brightness(.62) saturate(1.1)}
+.pr-vig{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 48%,rgba(20,0,4,0) 25%,rgba(15,0,3,.7) 100%)}
+.pr-env{position:absolute;left:50%;top:50%;width:min(92vw,520px);aspect-ratio:646/782;transform:translate(-50%,-50%);transform-origin:50% 20%;container-type:inline-size;transition:transform 1.8s cubic-bezier(.5,0,.25,1);animation:prIn 1.4s cubic-bezier(.2,.8,.2,1) backwards;filter:drop-shadow(0 22px 28px rgba(0,0,0,.6))}
+@keyframes prIn{from{opacity:0;transform:translate(-50%,-40%) scale(.92)}to{opacity:1;transform:translate(-50%,-50%)}}
+.pr-eb,.pr-fr{position:absolute;inset:0;width:100%;height:100%}
+.pr-fr{clip-path:polygon(0 41%,36.4% 65%,50.3% 63.7%,63.5% 65%,100% 41%,100% 100%,0 100%);z-index:3}
+.pr-card{position:absolute;left:12%;top:66%;width:76%;aspect-ratio:600/923;background:url(/img/inv/card-emb.jpg) center/100% 100%;z-index:2;display:flex;align-items:center;justify-content:center;box-shadow:0 0 18px rgba(0,0,0,.25);transition:top 1.9s cubic-bezier(.45,0,.2,1)}
+.pr-card .cu-txt{color:#5a1620;gap:3cqw;padding:0 8%}.pr-card .cu-txt p{font-size:2cqw;letter-spacing:.9cqw}.pr-card .cu-txt b{font-size:9.6cqw}.pr-card .cu-txt span{font-size:2cqw;letter-spacing:.8cqw}.pr-card .cu-txt i{width:12cqw}
+.iv-env.pr.o1 .pr-card{top:-28%}
+.iv-env.pr.o3 .pr-env{transform:translate(-50%,-20%) scale(1.3)}
+.iv-env.pr.o1 .iv-tap{opacity:0}
+.pr-fl{position:absolute;z-index:4;pointer-events:none;filter:drop-shadow(0 10px 14px rgba(0,0,0,.5));transition:transform 1.8s ease-in,opacity 1.2s}
+.pr-f1{left:-14vw;bottom:-6vh;width:min(60vw,320px);transform:rotate(-12deg);animation:prF1 1.7s cubic-bezier(.2,.9,.2,1) .4s both,sway 5s ease-in-out 2.2s infinite alternate}
+.pr-f2{right:-12vw;top:5vh;width:min(54vw,290px);transform:rotate(20deg);animation:prF2 1.7s cubic-bezier(.2,.9,.2,1) .6s both,sway 6s ease-in-out 2.4s infinite alternate-reverse;z-index:0}
+@keyframes prF1{from{opacity:0;transform:translate(-30vw,30vh) rotate(-60deg) scale(.5)}to{opacity:1;transform:rotate(-12deg)}}
+@keyframes prF2{from{opacity:0;transform:translate(30vw,-30vh) rotate(80deg) scale(.5)}to{opacity:1;transform:rotate(20deg)}}
+@keyframes sway{to{margin-left:6px;margin-top:-4px}}
+.iv-env.pr.o1 .pr-f1{animation:none;transform:translate(-40vw,30vh) rotate(-40deg);opacity:0}
+.iv-env.pr.o1 .pr-f2{animation:none;transform:translate(40vw,-30vh) rotate(60deg);opacity:0}
+/* lace doors */
+.iv-env.la{background:#e9dcc7}
+.la-back{position:absolute;inset:0;background:url(/img/inv/card-emb.jpg) center/cover;display:flex;align-items:center;justify-content:center}
+.la-txt{color:#5a1620;opacity:0;transform:scale(.92);transition:opacity 1.4s ease 1.2s,transform 2.4s ease 1.2s}
+.la-txt b{font-size:clamp(52px,15vw,76px)}
+.iv-env.la.o1 .la-txt{opacity:1;transform:none}
+.la-wrap{position:absolute;inset:0;perspective:1600px;overflow:hidden}
+.la-d{position:absolute;top:0;bottom:0;width:50.5%;background:#3a0712 url(/img/inv/lace.webp) center top/100% auto repeat-y;box-shadow:inset 0 0 70px rgba(0,0,0,.55);transition:transform 2.2s cubic-bezier(.6,0,.2,1)}
+.la-l{left:0;transform-origin:0 50%}.la-r{right:0;transform-origin:100% 50%}
+.iv-env.la.o1 .la-l{transform:rotateY(104deg) translateX(-4%)}.iv-env.la.o1 .la-r{transform:rotateY(-104deg) translateX(4%)}
+.la-seal{position:absolute;left:50%;top:50%;width:104px;height:104px;margin:-52px 0 0 -52px;z-index:5;filter:drop-shadow(0 5px 8px rgba(0,0,0,.6));transition:transform .7s,opacity .6s}
+.la-seal svg{width:100%;height:100%}
+.la-seal u{position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(255,255,255,.8);animation:scring 2s ease-out infinite}
+.iv-env.la.o1 .la-seal{opacity:0;transform:scale(1.25)}
+.iv-env.la.o3 .la-back{transition:transform 1.6s ease-in,opacity 1.2s;transform:scale(1.15)}
+/* oval bloom */
+.iv-env.ov{background:#1f0306}
+.ov-bg{position:absolute;inset:-4%;background:url(/img/inv/rug-b.jpg) center/cover;filter:blur(2px) brightness(.5)}
+.ov-wrap{position:absolute;left:50%;top:50%;width:min(76vw,370px);aspect-ratio:737/1049;transform:translate(-50%,-50%);container-type:inline-size;z-index:2;filter:drop-shadow(0 20px 30px rgba(0,0,0,.6));animation:ovIn 1.4s cubic-bezier(.2,.8,.2,1) backwards;transition:transform 2s cubic-bezier(.55,0,.2,1),opacity 1.2s}
+@keyframes ovIn{from{opacity:0;transform:translate(-50%,-46%) scale(.9)}to{opacity:1;transform:translate(-50%,-50%)}}
+.ov-frame{position:absolute;inset:0;width:100%;height:100%}
+.ov-txt{position:absolute;inset:0;justify-content:center;color:#f3dcc4;gap:3.4cqw;padding:0 16%}
+.ov-txt p{font-size:3cqw;letter-spacing:1.2cqw}.ov-txt b{font-size:13cqw}.ov-txt span{font-size:3cqw;letter-spacing:1cqw}.ov-txt i{width:16cqw}
+.iv-env.ov.o3 .ov-wrap{transform:translate(-50%,-50%) scale(2.7)}
+.ov-fl{position:absolute;z-index:3;pointer-events:none;filter:drop-shadow(0 10px 14px rgba(0,0,0,.55));transition:transform 1.8s cubic-bezier(.5,0,.3,1),opacity 1.1s}
+.ov-a{left:-12vw;bottom:6vh;width:min(52vw,290px);--r:-14deg;--dx:-36vw;--dy:18vh;animation:ovB 1.9s cubic-bezier(.2,.9,.25,1) .5s both}
+.ov-b{right:-14vw;top:7vh;width:min(54vw,300px);--r:24deg;--dx:36vw;--dy:-20vh;animation:ovB 1.9s cubic-bezier(.2,.9,.25,1) .8s both}
+.ov-c{left:-8vw;top:10vh;width:min(36vw,200px);--r:-20deg;--dx:-34vw;--dy:-22vh;animation:ovB 1.9s cubic-bezier(.2,.9,.25,1) 1.1s both}
+.ov-d{right:-6vw;bottom:9vh;width:min(32vw,180px);--r:18deg;--dx:34vw;--dy:20vh;animation:ovB 1.9s cubic-bezier(.2,.9,.25,1) 1.3s both}
+@keyframes ovB{from{opacity:0;transform:rotate(calc(var(--r) - 80deg)) scale(.2)}to{opacity:1;transform:rotate(var(--r)) scale(1)}}
+.iv-env.ov.o1 .ov-fl{animation:none;opacity:0;transform:translate(var(--dx),var(--dy)) rotate(calc(var(--r)*3)) scale(1.4)}
+.iv-env.ov .iv-tap{color:#f3dcc4;z-index:9}
+
+.iv-env.pr .cu-txt,.iv-env.ov .cu-txt{opacity:1;transform:none;transition:none}
+.la-seal{width:130px;height:130px;margin:-65px 0 0 -65px}
+.ov-a{width:min(60vw,330px);left:-16vw}.ov-b{width:min(60vw,330px)}.ov-c{width:min(40vw,220px)}.ov-d{width:min(36vw,200px)}
+.pr-cw{position:absolute;inset:0;z-index:2;clip-path:inset(-120% -20% 0 -20%)}

@@ -34,7 +34,7 @@ function calendar(dt,t,ar){
 var seed=7;function rnd(){seed=(seed*9301+49297)%233280;return seed/233280}
 function player(v,i){var bars='';seed=11+i*5;for(var k=0;k<30;k++)bars+='<i style="height:'+(18+Math.round(rnd()*70))+'%"></i>';
   return '<div class="vp" data-src="'+esc(v.url||'')+'"><button type="button" class="vp-b" aria-label="Play"><span></span></button><div class="vp-m"><b>'+esc(v.label||'')+'</b><div class="vp-w">'+bars+'</div><em class="vp-t">0:00</em></div></div>'}
-var TH=['ivory','wine','noir','sage','kraft','curtain','gate','mono','stars','bloom'];
+var TH=['ivory','wine','noir','sage','kraft','curtain','gate','mono','stars','bloom','persian','lace','oval'];
 function corner(){return '<svg viewBox="0 0 40 40" class="cn"><path d="M1 39V14A13 13 0 0 1 14 1h25" fill="none" stroke="currentColor" stroke-width=".8"/><path d="M6 39V17A11 11 0 0 1 17 6h22" fill="none" stroke="currentColor" stroke-width=".5" opacity=".6"/><path d="M7 7l3 3-3 3-3-3z" fill="currentColor"/><circle cx="20" cy="3.2" r=".9" fill="currentColor"/><circle cx="3.2" cy="20" r=".9" fill="currentColor"/></svg>'}
 function frame(){return '<div class="frm"><i class="c1">'+corner()+'</i><i class="c2">'+corner()+'</i><i class="c3">'+corner()+'</i><i class="c4">'+corner()+'</i></div>'}
 function divider(){return '<svg class="dv" viewBox="0 0 220 22" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width=".8" stroke-linecap="round"><path d="M2 11h84M134 11h84" opacity=".7"/><path d="M92 11c5-8 10-8 18 0 8 8 13 8 18 0" opacity=".9"/><path d="M92 11c5 8 10 8 18 0" opacity=".5"/></g><path d="M110 4l4 7-4 7-4-7z" fill="currentColor"/><circle cx="86" cy="11" r="1.6" fill="currentColor"/><circle cx="134" cy="11" r="1.6" fill="currentColor"/></svg>'}
@@ -163,7 +163,7 @@ function envelopeWine(d,t,cb){
   if(QS.get('open')==='1')open();
 }
 
-var PAL={curtain:'wine',gate:'ivory',mono:'noir',stars:'navy',bloom:'sage'};
+var PAL={persian:'wine',lace:'wine',oval:'wine',curtain:'wine',gate:'ivory',mono:'noir',stars:'navy',bloom:'sage'};
 function mk(cls,html,t,cb,T){
   var ev=document.createElement('div');ev.className='iv-env cs '+cls;ev.setAttribute('role','button');ev.tabIndex=0;ev.innerHTML=html+'<div class="iv-tap">'+t.tap+'</div>';
   document.body.appendChild(ev);document.documentElement.classList.add('lk');
@@ -181,7 +181,12 @@ function introBloom(d,t,cb){var p='',i,a;for(i=0;i<8;i++){a=i*45;p+='<g class="b
   for(i=0;i<8;i++){a=i*45+22.5;p+='<g class="bl-p bl-i" style="--r:'+a+'deg"><path d="M0 0C-28-20-32-76 0-112 32-76 28-20 0 0Z"/></g>'}
   var lv='';for(i=0;i<6;i++){lv+='<g class="bl-lf" style="--r:'+(i*60+30)+'deg"><path d="M0 0C-22-24-22-78 0-118 22-78 22-24 0 0Z"/></g>'}
   mk('bl','<div class="bl-box"><svg viewBox="-160 -160 320 320" class="bl-svg"><defs><linearGradient id="blg" x1="0" y1="0" x2="0" y2="-1"><stop offset="0" stop-color="#f6e3dc"/><stop offset="1" stop-color="#fdf6f1"/></linearGradient></defs>'+lv+p+'<circle class="bl-c" r="62"/></svg><div class="cu-txt bl-txt">'+txt(d,t)+'</div></div>',t,cb,[500,2400,4000])}
+
+function introPersian(d,t,cb){var I='/img/inv/';mk('pr','<div class="pr-bg"></div><div class="pr-vig"></div><img class="pr-fl pr-f2" src="'+I+'flower-red.webp" alt=""><div class="pr-env"><img class="pr-eb" src="'+I+'env-open.webp" alt=""><div class="pr-cw"><div class="pr-card"><div class="cu-txt">'+txt(d,t)+'</div></div></div><img class="pr-fr" src="'+I+'env-open.webp" alt=""></div><img class="pr-fl pr-f1" src="'+I+'peony.webp" alt="">',t,cb,[1900,2700,4300])}
+function introLace(d,t,cb){var I='/img/inv/';mk('la','<div class="la-back"><div class="cu-txt la-txt">'+txt(d,t)+'</div></div><div class="la-wrap"><div class="la-d la-l"></div><div class="la-d la-r"></div></div><div class="la-seal">'+sealSvg(ini(d.names),'#7a1020')+'<u></u></div>',t,cb,[300,2300,3700])}
+function introOval(d,t,cb){var I='/img/inv/';mk('ov','<div class="ov-bg"></div><div class="ov-wrap"><img class="ov-frame" src="'+I+'oval.webp" alt=""><div class="cu-txt ov-txt">'+txt(d,t)+'</div></div><img class="ov-fl ov-a" src="'+I+'peony.webp" alt=""><img class="ov-fl ov-b" src="'+I+'flower-red.webp" alt=""><img class="ov-fl ov-c" src="'+I+'pearl.webp" alt=""><img class="ov-fl ov-d" src="'+I+'lily.webp" alt="">',t,cb,[400,1900,3500])}
 function envelope(d,t,th,cb){
+  if(th==='persian')return introPersian(d,t,cb);if(th==='lace')return introLace(d,t,cb);if(th==='oval')return introOval(d,t,cb);
   if(th==='curtain')return introCurtain(d,t,cb);if(th==='gate')return introGate(d,t,cb);if(th==='mono')return introMono(d,t,cb);if(th==='stars')return introStars(d,t,cb);if(th==='bloom')return introBloom(d,t,cb);
   if(th==='wine')return envelopeWine(d,t,cb);
   if(th==='kraft')return envelopeKraft(d,t,cb);
