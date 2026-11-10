@@ -1,6 +1,6 @@
 (function(){
 var SU='https://vzunjnrosrmvtlipqpsa.supabase.co',SK='sb_publishable_3jb0Y2sDRHAcCesFcKzyZw_iDquPZwj',root=document.getElementById('inv');
-var QS=new URLSearchParams(location.search),slug=QS.get('s')||'',PREVIEW=QS.get('preview')==='1',gen=0,audio=null,cur=null,vols=[],duck=0;
+var QS=new URLSearchParams(location.search),slug=QS.get('s')||'',PREVIEW=QS.get('preview')==='1',gen=0,lastPv='',audio=null,cur=null,vols=[],duck=0;
 var DEMO={theme:QS.get('theme')||'sage',lang:QS.get('lang')||'en',hosts:'',names:'Sara & Omar',date:(function(){var d=new Date();d.setMonth(d.getMonth()+3);d.setDate(12);return d.toISOString().slice(0,10)})(),time:'18:30',venue:'The Garden Hall',address:'New Cairo, Egypt',map:'https://maps.google.com',program:[{t:'6:30 PM',l:'Ceremony'},{t:'8:00 PM',l:'Dinner'},{t:'9:30 PM',l:'Party'},{t:'11:30 PM',l:'Cake'}],dress:'Formal, soft green tones',msg:'Your presence is the best gift we could ask for.',rsvp:'01066600848',photos:['/img/home/hero1.jpg','/img/home/hero2.jpg','/img/home/hero3.jpg'],music:'',voices:[{label:'Sara',url:''},{label:'Omar',url:''}]};
 var L={en:{loc:'en-GB',join:'Join us for the wedding of',std:'Save the date',det:'The details',when:'When',where:'Where',dress:'Dress code',prog:'Wedding program',rsvp:'Kindly RSVP',rsub:'We would love to know if you can join us',yes:'Yes, I will be there',no:'Sorry, I cannot make it',call:'Call us',fin:'We hope to see you there',cal:'Add to calendar',maps:'Get directions',tap:'Tap to open',scroll:'Scroll',vh:'A little hello',vs:'Press play to hear us',bh:'Leave us a voice blessing',bs:'Record a short message for the couple. They will keep it forever.',bn:'Your name',bsend:'Send my blessing',bsending:'Sending…',bok:'Thank you! Your blessing was sent.',berr:'Could not send. Please try again.',bneed:'Please write your name and record your message first.',days:'Days',hrs:'Hours',min:'Min',sec:'Sec',today:'Today is the day',made:'Digital invitation by John Emad Weddings',yesm:function(n){return 'Hi! I will be at '+n+'\'s wedding. See you there!'},nom:function(n){return 'Hi! Sorry, I cannot make it to '+n+'\'s wedding. Wishing you all the best!'},nf:'This invitation was not found.',nf2:'Please check the link you were sent.',rt:{rec:'Tap to record',stop:'Recording… tap to stop',again:'Record again',deny:'Please allow the microphone to record.',nosup:'Recording is not supported on this browser.',short:'Too short, please try again.'}},
 ar:{loc:'ar-EG-u-nu-latn',join:'يتشرفون بدعوتكم لحضور زفاف',std:'احفظوا الموعد',det:'التفاصيل',when:'الموعد',where:'المكان',dress:'الزي',prog:'برنامج الحفل',rsvp:'تأكيد الحضور',rsub:'يسعدنا معرفة حضوركم',yes:'نعم، سأكون هناك',no:'للأسف لن أستطيع الحضور',call:'اتصل بنا',fin:'نتشرف بحضوركم',cal:'أضف إلى التقويم',maps:'الاتجاهات',tap:'اضغط لفتح الدعوة',scroll:'اسحب لأسفل',vh:'كلمة منا',vs:'اضغط للاستماع',bh:'اترك لنا بركة بصوتك',bs:'سجّل رسالة قصيرة للعروسين، وهم هيحتفظوا بيها للأبد.',bn:'اسمك',bsend:'ابعت البركة',bsending:'جاري الإرسال…',bok:'شكرًا! وصلت رسالتك.',berr:'تعذر الإرسال، حاول مرة أخرى.',bneed:'من فضلك اكتب اسمك وسجّل رسالتك أولًا.',days:'يوم',hrs:'ساعة',min:'دقيقة',sec:'ثانية',today:'اليوم هو اليوم الموعود',made:'دعوة رقمية من جون عماد ويدينجز',yesm:function(n){return 'أهلاً! سأحضر زفاف '+n+'. نراكم هناك!'},nom:function(n){return 'أهلاً! للأسف لن أستطيع حضور زفاف '+n+'. أتمنى لكم كل السعادة!'},nf:'لم نجد هذه الدعوة.',nf2:'من فضلك تأكد من الرابط الذي وصلك.',rt:{rec:'اضغط للتسجيل',stop:'جاري التسجيل… اضغط للإيقاف',again:'سجّل من جديد',deny:'من فضلك اسمح باستخدام المايك.',nosup:'التسجيل غير مدعوم في هذا المتصفح.',short:'التسجيل قصير جدًا، حاول مرة أخرى.'}}};
@@ -34,7 +34,7 @@ function calendar(dt,t,ar){
 var seed=7;function rnd(){seed=(seed*9301+49297)%233280;return seed/233280}
 function player(v,i){var bars='';seed=11+i*5;for(var k=0;k<30;k++)bars+='<i style="height:'+(18+Math.round(rnd()*70))+'%"></i>';
   return '<div class="vp" data-src="'+esc(v.url||'')+'"><button type="button" class="vp-b" aria-label="Play"><span></span></button><div class="vp-m"><b>'+esc(v.label||'')+'</b><div class="vp-w">'+bars+'</div><em class="vp-t">0:00</em></div></div>'}
-var TH=['ivory','wine','noir','sage','kraft'];
+var TH=['ivory','wine','noir','sage','kraft','curtain','gate','mono','stars','bloom'];
 function corner(){return '<svg viewBox="0 0 40 40" class="cn"><path d="M1 39V14A13 13 0 0 1 14 1h25" fill="none" stroke="currentColor" stroke-width=".8"/><path d="M6 39V17A11 11 0 0 1 17 6h22" fill="none" stroke="currentColor" stroke-width=".5" opacity=".6"/><path d="M7 7l3 3-3 3-3-3z" fill="currentColor"/><circle cx="20" cy="3.2" r=".9" fill="currentColor"/><circle cx="3.2" cy="20" r=".9" fill="currentColor"/></svg>'}
 function frame(){return '<div class="frm"><i class="c1">'+corner()+'</i><i class="c2">'+corner()+'</i><i class="c3">'+corner()+'</i><i class="c4">'+corner()+'</i></div>'}
 function divider(){return '<svg class="dv" viewBox="0 0 220 22" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width=".8" stroke-linecap="round"><path d="M2 11h84M134 11h84" opacity=".7"/><path d="M92 11c5-8 10-8 18 0 8 8 13 8 18 0" opacity=".9"/><path d="M92 11c5 8 10 8 18 0" opacity=".5"/></g><path d="M110 4l4 7-4 7-4-7z" fill="currentColor"/><circle cx="86" cy="11" r="1.6" fill="currentColor"/><circle cx="134" cy="11" r="1.6" fill="currentColor"/></svg>'}
@@ -95,14 +95,14 @@ function wireBless(d,t){
   };
 }
 function render(d){
-  var my=++gen;
+  var my=++gen;d.lang='en';
   var t=L[d.lang==='ar'?'ar':'en'],ar=d.lang==='ar',th=TH.indexOf(d.theme)>-1?d.theme:(d.theme==='gold'?'ivory':'ivory');
-  TH.concat(['gold']).forEach(function(x){document.body.classList.remove('th-'+x)});document.body.classList.add('th-'+th);
+  TH.concat(['gold','navy']).forEach(function(x){document.body.classList.remove('th-'+x)});document.body.classList.add('th-'+(PAL[th]||th));
   document.documentElement.lang=ar?'ar':'en';root.dir=ar?'rtl':'ltr';root.classList.toggle('ar',ar);
   if(!d.names){root.innerHTML='<div class="inv-nf"><h1>'+t.nf+'</h1><p>'+t.nf2+'</p></div>';return}
   document.title=d.names;
   var ph=(d.photos&&d.photos.length?d.photos:(d.photo?[d.photo]:[])).filter(okPhoto),dt=when(d);
-  var S=sections(d,t,ar,ph,th),h='<div class="prog"><b></b></div><div class="tex"></div>';
+  var S=sections(d,t,ar,ph,PAL[th]||th),h='<div class="prog"><b></b></div><div class="tex"></div>';
   S.forEach(function(x,i){h+='<section class="sec s-'+x.c+'"><div class="in">'+x.h+'</div></section>'});
   root.innerHTML=h;
   var secs=[].slice.call(root.querySelectorAll('.sec'));
@@ -126,6 +126,7 @@ function render(d){
       var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/calendar'}));a.download='invitation.ics';document.body.appendChild(a);a.click();a.remove()};
   }
   wirePlayers();wireBless(d,t);
+  if(PREVIEW&&th!==lastPv){lastPv=th;var oe=document.querySelector('.iv-env');if(oe)oe.remove();document.documentElement.classList.remove('lk');envelope(d,t,th,function(){});var ne=document.querySelector('.iv-env');setTimeout(function(){if(ne)ne.dispatchEvent(new Event('click'))},1100)}
   if(!PREVIEW&&!d._done){root.classList.add('locked');envelope(d,t,th,function(){root.classList.remove('locked');if(d.music&&okAudio(d.music)){try{audio=new Audio(d.music);audio.loop=true;audio.volume=.7;audio.play().catch(function(){})}catch(x){}}})}
 }
 function lacePts(x0,y0,x1,y1,off,step,r,flip){var dx=x1-x0,dy=y1-y0,L=Math.sqrt(dx*dx+dy*dy),ux=dx/L,uy=dy/L,nx=-uy*(flip?-1:1),ny=ux*(flip?-1:1),n=Math.floor(L/step),s='';
@@ -152,15 +153,36 @@ function envelopeKraft(d,t,cb){
   if(QS.get('open')==='1')open();
 }
 function envelopeWine(d,t,cb){
-  var ev=document.createElement('div');ev.className='iv-env ph wn';
+  var S='/img/inv/wine-scene.jpg',poly='polygon(0 0,100% 0,100% 26%,67.9% 44.4%,51.1% 54.3%,34% 44.4%,0 23.3%)';
   var dt=when(d),ds=dt?dt.toLocaleDateString(t.loc,{day:'numeric',month:'long',year:'numeric'}):'';
-  ev.innerHTML='<div class="wn-bg"></div><div class="we" role="button" tabindex="0" aria-label="Open"><div class="we-card"><div class="wc-in"><p>'+(d.lang==='ar'?'دعوة زفاف':'You are invited')+'</p><b>'+esc(d.names)+'</b><i></i>'+(ds?'<span>'+esc(ds)+'</span>':'')+'</div></div><img class="we-body" src="/img/inv/wine-env.png" alt=""><div class="we-fl"><div class="fa"><img class="we-seal" src="/img/inv/wine-seal.png" alt=""></div><div class="fb"></div></div><i class="we-ring"></i></div><div class="iv-tap">'+t.tap+'</div>';
+  var ev=document.createElement('div');ev.className='iv-env ph wn';
+  ev.innerHTML='<div class="sc3 w3" role="button" tabindex="0" aria-label="Open"><div class="sc-bg" style="background-image:url('+S+')"></div><div class="w-dark" style="clip-path:'+poly+'"></div><div class="w-in"><div class="w-card"><div class="wc-in"><p>You are invited</p><b>'+esc(d.names)+'</b><i></i>'+(ds?'<span>'+esc(ds)+'</span>':'')+'</div></div></div><div class="sc-flap" style="clip-path:'+poly+'"><div class="ff" style="background-image:url('+S+')"></div><div class="fb"></div></div><i class="w-ring"></i></div><div class="iv-tap">'+t.tap+'</div>';
   document.body.appendChild(ev);document.documentElement.classList.add('lk');
-  var done=false;function open(){if(done)return;done=true;ev.classList.add('o1');setTimeout(function(){ev.classList.add('o2')},650);setTimeout(function(){ev.classList.add('o2b')},1050);setTimeout(function(){ev.classList.add('o3')},2000);setTimeout(function(){ev.classList.add('o4');document.documentElement.classList.remove('lk');cb()},3500);setTimeout(function(){ev.classList.add('gone')},3900);setTimeout(function(){ev.remove()},5400)}
+  var done=false;function open(){if(done)return;done=true;ev.classList.add('o1');setTimeout(function(){ev.classList.add('o2')},450);setTimeout(function(){ev.classList.add('o3')},1700);setTimeout(function(){ev.classList.add('o4');document.documentElement.classList.remove('lk');cb()},3300);setTimeout(function(){ev.classList.add('gone')},3700);setTimeout(function(){ev.remove()},5200)}
   ev.addEventListener('click',open);ev.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ')open()});
   if(QS.get('open')==='1')open();
 }
+
+var PAL={curtain:'wine',gate:'ivory',mono:'noir',stars:'navy',bloom:'sage'};
+function mk(cls,html,t,cb,T){
+  var ev=document.createElement('div');ev.className='iv-env cs '+cls;ev.setAttribute('role','button');ev.tabIndex=0;ev.innerHTML=html+'<div class="iv-tap">'+t.tap+'</div>';
+  document.body.appendChild(ev);document.documentElement.classList.add('lk');
+  var done=false;function open(){if(done)return;done=true;ev.classList.add('o1');setTimeout(function(){ev.classList.add('o2')},T[0]);setTimeout(function(){ev.classList.add('o3')},T[1]);setTimeout(function(){ev.classList.add('o4');document.documentElement.classList.remove('lk');cb()},T[2]);setTimeout(function(){ev.classList.add('gone')},T[2]+400);setTimeout(function(){ev.remove()},T[2]+1900)}
+  ev.addEventListener('click',open);ev.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ')open()});
+  if(QS.get('open')==='1')open();
+}
+function txt(d,t){var dt=when(d),ds=dt?dt.toLocaleDateString(t.loc,{day:'numeric',month:'long',year:'numeric'}):'';return '<p>You are invited</p><b>'+esc(d.names)+'</b><i></i>'+(ds?'<span>'+esc(ds)+'</span>':'')}
+function introCurtain(d,t,cb){mk('cu','<div class="cu-stage"><div class="cu-spot"></div><div class="cu-txt">'+txt(d,t)+'</div></div><div class="cu-c cu-l"></div><div class="cu-c cu-r"></div><div class="cu-val"></div><div class="cu-rod"></div><div class="cu-seam"><u></u><span>'+esc(ini(d.names))+'</span></div>',t,cb,[300,2400,3600])}
+function introGate(d,t,cb){var ph=(d.photos||[]).filter(okPhoto)[0]||'';mk('ga','<div class="ga-wrap"><div class="ga-in" style="'+(ph?'background-image:url('+ph+')':'')+'"><div class="ga-sh"></div><div class="cu-txt ga-txt">'+txt(d,t)+'</div></div><div class="ga-d ga-l"><i></i></div><div class="ga-d ga-r"><i></i></div><div class="ga-gl"></div></div>',t,cb,[300,2300,3600])}
+function introMono(d,t,cb){var I=esc(ini(d.names));mk('mo','<div class="mo-box"><svg viewBox="0 0 300 300" class="mo-svg"><circle class="mo-c1" cx="150" cy="150" r="118"/><circle class="mo-c2" cx="150" cy="150" r="108"/><text class="mo-t" x="150" y="178" text-anchor="middle">'+I+'</text></svg><div class="mo-tx">'+txt(d,t)+'</div></div><i class="mo-dot"></i>',t,cb,[1400,3400,5000])}
+function introStars(d,t,cb){var s='',i;seed=11;for(i=0;i<110;i++){s+='<i style="left:'+(rnd()*100).toFixed(1)+'%;top:'+(rnd()*100).toFixed(1)+'%;--z:'+(1+rnd()*2.2).toFixed(1)+'px;animation-delay:-'+(rnd()*6).toFixed(1)+'s;animation-duration:'+(2.5+rnd()*4).toFixed(1)+'s"></i>'}
+  mk('st','<div class="st-sky">'+s+'</div><i class="st-moon"></i><i class="st-shoot"></i><div class="st-glow"></div><div class="cu-txt st-txt">'+txt(d,t)+'</div>',t,cb,[500,2500,4300])}
+function introBloom(d,t,cb){var p='',i,a;for(i=0;i<8;i++){a=i*45;p+='<g class="bl-p bl-o" style="--r:'+a+'deg"><path d="M0 0C-34-26-40-98 0-142 40-98 34-26 0 0Z"/></g>'}
+  for(i=0;i<8;i++){a=i*45+22.5;p+='<g class="bl-p bl-i" style="--r:'+a+'deg"><path d="M0 0C-28-20-32-76 0-112 32-76 28-20 0 0Z"/></g>'}
+  var lv='';for(i=0;i<6;i++){lv+='<g class="bl-lf" style="--r:'+(i*60+30)+'deg"><path d="M0 0C-22-24-22-78 0-118 22-78 22-24 0 0Z"/></g>'}
+  mk('bl','<div class="bl-box"><svg viewBox="-160 -160 320 320" class="bl-svg"><defs><linearGradient id="blg" x1="0" y1="0" x2="0" y2="-1"><stop offset="0" stop-color="#f6e3dc"/><stop offset="1" stop-color="#fdf6f1"/></linearGradient></defs>'+lv+p+'<circle class="bl-c" r="62"/></svg><div class="cu-txt bl-txt">'+txt(d,t)+'</div></div>',t,cb,[500,2400,4000])}
 function envelope(d,t,th,cb){
+  if(th==='curtain')return introCurtain(d,t,cb);if(th==='gate')return introGate(d,t,cb);if(th==='mono')return introMono(d,t,cb);if(th==='stars')return introStars(d,t,cb);if(th==='bloom')return introBloom(d,t,cb);
   if(th==='wine')return envelopeWine(d,t,cb);
   if(th==='kraft')return envelopeKraft(d,t,cb);
   if(th==='noir')return envelopePhoto(d,t,cb);
