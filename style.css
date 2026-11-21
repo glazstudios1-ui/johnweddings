@@ -443,7 +443,8 @@ html{scroll-behavior:smooth}
 .bform .fld input[type=date]{min-width:0;max-width:100%;-webkit-appearance:none;appearance:none}
 @media(max-width:768px){
  .book-bg{position:fixed;inset:0;height:100svh;z-index:0}
- .book-bg img{opacity:1;filter:brightness(.8) saturate(.95);object-position:41% 62%}
+ .book-bg img{opacity:1;object-position:41% 62%}
+ .book-bg::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.2);pointer-events:none}
  .book-bg:after{background:linear-gradient(180deg,rgba(13,13,12,.72) 0,rgba(13,13,12,0) 26%,rgba(13,13,12,.12) 48%,rgba(13,13,12,.88) 100%)}
  .book.book2{padding-top:84px}
  .b-head{min-height:calc(100svh - 84px);display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:76px}
@@ -666,3 +667,4 @@ body:not(.menu-open) .hdr--over{--bone:#ece7de;--soft:#cfc9bf;color:#ece7de}
 .about2 .ab-cta:hover{background:#fff;color:#111}
 .about2 .ab-c{font-size:15px;margin:0 0 6px}
 @media(max-width:900px){.about2{display:block;margin-top:40px}.about2 .m{width:70vw;height:112vw;margin:0 auto 34px;position:static}.about2 .r{padding-top:0;font-size:16px}.about2 .what li{grid-template-columns:1fr;gap:4px}}
+

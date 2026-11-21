@@ -71,7 +71,7 @@ html.homeA,html.homeA body{overflow-x:clip}
 @media(max-width:899px){.hA .slider{grid-template-columns:1fr}
 .hA .slider .tx{min-height:330px}}
 .hA .cn2{position:relative;min-height:92svh;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
-.hA .cn2 .bg{position:absolute;inset:-6% 0;background:center/cover;filter:brightness(.42)}
+.hA .cn2 .bg{position:absolute;inset:-6% 0;background:center/cover;will-change:transform}.hA .cn2 .bg::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.58)}
 .hA .cn2 .mq{position:relative;font-family:var(--serif);font-size:clamp(70px,13vw,220px);line-height:1}
 .hA .cn2 .mq span{padding-right:.5em}
 .hA .cn2 .mq .o{-webkit-text-stroke:1px var(--bone);color:transparent}

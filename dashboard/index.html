@@ -161,6 +161,7 @@ td.n,th.n{text-align:right;white-space:nowrap}
  .we-tog{display:inline-block}.we-top .seg{display:none}.we-top .btn{padding:8px 10px}
  .we-top .hide-m{display:none}
 }
+.cbar{padding:10px 22px;background:#2b2411;border-bottom:1px solid #6b5a1f;color:#f1e3b0;font-size:13px;line-height:1.7}.cbar.late{background:#3a1717;border-color:#7a2d2d;color:#f6caca}.cbar a{color:inherit;text-decoration:underline}.cbar .btn{margin-left:8px}
 </style>
 </head><body>
 
@@ -182,6 +183,7 @@ td.n,th.n{text-align:right;white-space:nowrap}
       <button data-t="calendar" aria-selected="true">Calendar</button>
       <button data-t="requests" aria-selected="false">Requests<span class="badge" id="rb" hidden>0</span></button>
       <button data-t="finance" aria-selected="false">Money</button>
+      <button data-t="calls" aria-selected="false">Calls<span class="badge" id="cb" hidden>0</span></button>
       <button data-t="contacts" aria-selected="false">Contacts</button>
       <button data-t="links" aria-selected="false">Package links</button>
       <button data-t="shop" aria-selected="false">Shop<span class="badge" id="ob" hidden>0</span></button>
@@ -189,10 +191,12 @@ td.n,th.n{text-align:right;white-space:nowrap}
     </nav>
     <button class="btn ghost sm" id="out">Sign out</button>
   </header>
+  <div id="callbar" hidden></div>
   <main>
     <section id="t-calendar"></section>
     <section id="t-requests" hidden></section>
     <section id="t-finance" hidden></section>
+    <section id="t-calls" hidden></section>
     <section id="t-contacts" hidden></section>
     <section id="t-links" hidden></section>
     <section id="t-shop" hidden></section>
@@ -231,7 +235,7 @@ function toast(t) { var e = document.createElement('div'); e.className = 'toast'
 function paid(b) { return D.payments.filter(function (p) { return p.booking_id === b.id; }).reduce(function (a, p) { return a + p.amount; }, 0); }
 function fmtDate(s) { if (!s) return 'No date'; var d = new Date(s + 'T00:00:00'); return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }); }
 function waLink(ph) { var n = String(ph || '').replace(/[^\d]/g, ''); if (n.indexOf('0') === 0) n = '2' + n; return 'https://wa.me/' + n; }
-function tagOf(s) { return { pending: '<span class="tag p">Waiting</span>', confirmed: '<span class="tag c">Confirmed</span>', cancelled: '<span class="tag x">Cancelled</span>' }[s] || ''; }
+function tagOf(s) { return { lead: '<span class="tag p">Call lead</span>', pending: '<span class="tag p">Waiting</span>', confirmed: '<span class="tag c">Confirmed</span>', cancelled: '<span class="tag x">Cancelled</span>' }[s] || ''; }
 
 /* ---------- auth ---------- */
 async function start() {
@@ -245,7 +249,7 @@ $('#lf').addEventListener('submit', async function (e) {
   enter();
 });
 $('#out').addEventListener('click', async function () { await sb.auth.signOut(); location.reload(); });
-async function enter() { $('#login').hidden = true; $('#app').hidden = false; await load(); render(); }
+async function enter() { $('#login').hidden = true; $('#app').hidden = false; await load(); render(); setInterval(callTick, 30000); setTimeout(callTick, 1500); }
 
 async function load() {
   var r = await Promise.all([
@@ -257,6 +261,7 @@ async function load() {
   if (r[0].error) { toast('Could not load data: ' + r[0].error.message); }
   try { var ro = await sb.from('orders').select('*').order('created_at', { ascending: false }); D.orders = ro.data || []; D.ordersErr = ro.error ? ro.error.message : ''; } catch (x) { D.orders = []; D.ordersErr = String(x); }
   try { var rv = await sb.from('invite_voices').select('slug'); D.vc = {}; (rv.data || []).forEach(function (v) { D.vc[v.slug] = (D.vc[v.slug] || 0) + 1; }); } catch (x) { D.vc = {}; }
+  try { var rc = await sb.from('call_leads').select('*').order('call_at', { ascending: true }); D.calls = rc.data || []; D.callsErr = rc.error ? rc.error.message : ''; } catch (x) { D.calls = []; D.callsErr = 'error'; }
   D.bookings = r[0].data || []; D.payments = r[1].data || []; D.links = r[2].data || []; D.details = r[3] && r[3].data ? r[3].data : [];
 }
 
@@ -266,13 +271,15 @@ $('#tabs').addEventListener('click', function (e) {
 });
 function render() {
   [].forEach.call(document.querySelectorAll('#tabs button'), function (b) { b.setAttribute('aria-selected', String(b.dataset.t === tab)); });
-  ['calendar', 'requests', 'finance', 'contacts', 'links', 'shop', 'website'].forEach(function (t) { $('#t-' + t).hidden = t !== tab; });
+  ['calendar', 'requests', 'finance', 'calls', 'contacts', 'links', 'shop', 'website'].forEach(function (t) { $('#t-' + t).hidden = t !== tab; });
   var pend = D.bookings.filter(function (b) { return b.status === 'pending'; }).length;
   $('#rb').hidden = !pend; $('#rb').textContent = pend;
   if (tab === 'calendar') drawCalendar();
   if (tab === 'requests') drawRequests();
   if (tab === 'finance') drawFinance();
+  if (tab === 'calls') drawCalls();
   if (tab === 'contacts') drawContacts();
+  callBar();
   if (tab === 'links') drawLinks();
   var op = (D.orders || []).filter(function (o) { return o.status === 'pending'; }).length; $('#ob').hidden = !op; $('#ob').textContent = op;
   if (tab === 'shop') drawShop();
@@ -557,6 +564,126 @@ function drawFinance() {
 $('#t-finance').addEventListener('click', function (e) { var b = e.target.closest('[data-b]'); if (b) openBooking(b.dataset.b); });
 
 
+
+/* ---------- calls (phone appointments, reminders, saved numbers) ---------- */
+var CALL_STATUS = { scheduled: 'Scheduled', done: 'Done', no_answer: 'No answer', cancelled: 'Cancelled' };
+function fmtDT(iso) { return new Date(iso).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); }
+function toLocalInput(iso) { var d = new Date(iso); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); }
+function relT(iso) {
+  var m = Math.round((new Date(iso).getTime() - Date.now()) / 60000), a = Math.abs(m), t;
+  t = a < 60 ? a + ' min' : a < 1440 ? Math.floor(a / 60) + ' h ' + (a % 60 ? a % 60 + ' min' : '') : Math.round(a / 1440) + ' d';
+  return m >= 0 ? 'in ' + t : t + ' ago';
+}
+function callsMissing() { return D.callsErr && /call_leads|relation|schema cache|does not exist/i.test(D.callsErr); }
+function dueCalls() { return (D.calls || []).filter(function (c) { return c.status === 'scheduled' && new Date(c.call_at).getTime() < Date.now() + 3600000; }); }
+function callBar() {
+  var due = dueCalls().sort(function (a, b) { return a.call_at < b.call_at ? -1 : 1; });
+  var today = (D.calls || []).filter(function (c) { return c.status === 'scheduled' && new Date(c.call_at).toDateString() === new Date().toDateString(); }).length;
+  var lateOrToday = (D.calls || []).filter(function (c) { return c.status === 'scheduled' && (new Date(c.call_at).toDateString() === new Date().toDateString() || new Date(c.call_at).getTime() < Date.now()); }).length;
+  $('#cb').hidden = !lateOrToday; $('#cb').textContent = lateOrToday;
+  var el = $('#callbar');
+  if (!due.length) { el.hidden = true; el.innerHTML = ''; return; }
+  el.hidden = false;
+  el.innerHTML = due.slice(0, 3).map(function (c) {
+    var late = new Date(c.call_at).getTime() < Date.now();
+    return '<div class="cbar' + (late ? ' late' : '') + '"><b>' + (late ? 'Call due ' : 'Call ') + relT(c.call_at) + '</b> · ' + esc(c.name || 'Client') + ' · <a href="tel:' + esc(c.phone) + '">' + esc(c.phone) + '</a> · <a href="' + waLink(c.phone) + '" target="_blank" rel="noopener">WhatsApp</a>' + (c.notes ? ' · <span class="muted">' + esc(c.notes) + '</span>' : '') + ' <button class="btn ok sm" data-cdone="' + c.id + '">Done</button></div>';
+  }).join('');
+}
+$('#callbar').addEventListener('click', function (e) { var b = e.target.closest('[data-cdone]'); if (b) setCall(b.dataset.cdone, 'done'); });
+function callTick() {
+  callBar(); if (tab === 'calls' && !document.querySelector('#mask:not([hidden])')) { var f = document.activeElement; if (!f || !/INPUT|TEXTAREA|SELECT/.test(f.tagName)) drawCalls(); }
+  (D.calls || []).forEach(function (c) {
+    if (c.status !== 'scheduled') return;
+    var at = new Date(c.call_at).getTime(), now = Date.now(), rm = (c.remind_min == null ? 15 : c.remind_min) * 60000;
+    [['pre', at - rm, 'Call in ' + (c.remind_min == null ? 15 : c.remind_min) + ' min'], ['now', at, 'Call time']].forEach(function (s) {
+      if (s[0] === 'pre' && rm <= 0) return;
+      var k = 'callrem:' + c.id + ':' + s[0] + ':' + c.call_at;
+      if (now >= s[1] && now < s[1] + 20 * 60000 && !localStorage.getItem(k)) {
+        localStorage.setItem(k, '1');
+        var msg = s[2] + ': ' + (c.name || 'Client') + ' ' + c.phone;
+        toast(msg);
+        try { if (window.Notification && Notification.permission === 'granted') new Notification(s[2], { body: (c.name || 'Client') + ' · ' + c.phone + (c.notes ? '\n' + c.notes : '') }); } catch (x) {}
+        try { var ac = new (window.AudioContext || window.webkitAudioContext)(), o = ac.createOscillator(), g = ac.createGain(); o.connect(g); g.connect(ac.destination); o.frequency.value = 880; g.gain.value = .12; o.start(); setTimeout(function () { o.stop(); ac.close(); }, 450); } catch (x) {}
+      }
+    });
+  });
+}
+async function setCall(id, st) {
+  var u = await sb.from('call_leads').update({ status: st }).eq('id', id); if (u.error) return toast('Error: ' + u.error.message);
+  var c = D.calls.filter(function (x) { return String(x.id) === String(id); })[0]; if (c) c.status = st; render();
+}
+function callIcs(c) {
+  var z = function (d) { return d.toISOString().replace(/[-:]/g, '').replace(/\.\d+/, ''); };
+  var s = new Date(c.call_at), e = new Date(s.getTime() + 15 * 60000), rm = c.remind_min == null ? 15 : c.remind_min;
+  var L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//John Emad//Calls//EN', 'BEGIN:VEVENT', 'UID:call-' + c.id + '@johnemadweddings.com', 'DTSTAMP:' + z(new Date()), 'DTSTART:' + z(s), 'DTEND:' + z(e),
+    'SUMMARY:Call: ' + (c.name || 'Client'), 'DESCRIPTION:' + (c.phone || '') + (c.notes ? '\\n' + String(c.notes).replace(/\n/g, '\\n') : ''), 'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Call ' + (c.name || ''), 'TRIGGER:-PT' + rm + 'M', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'];
+  var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([L.join('\r\n')], { type: 'text/calendar;charset=utf-8' })); a.download = 'call-' + (c.name || 'client').replace(/\W+/g, '-') + '.ics'; document.body.appendChild(a); a.click(); a.remove();
+}
+function callRow(c, hist) {
+  return '<tr><td style="white-space:nowrap"><b>' + fmtDT(c.call_at) + '</b>' + (hist ? '' : '<br><span class="muted">' + relT(c.call_at) + '</span>') + '</td><td><b>' + esc(c.name || '—') + '</b></td><td><a href="tel:' + esc(c.phone) + '">' + esc(c.phone) + '</a><br><a class="muted" href="' + waLink(c.phone) + '" target="_blank" rel="noopener">WhatsApp</a></td><td>' + esc(c.notes || '') + '</td>' +
+    (hist ? '<td>' + esc(CALL_STATUS[c.status] || c.status) + '</td>' : '') +
+    '<td style="white-space:nowrap;text-align:right">' + (c.status === 'scheduled' ? '<button class="btn ok sm" data-cs="done" data-id="' + c.id + '">Done</button> <button class="btn ghost sm" data-cs="no_answer" data-id="' + c.id + '">No answer</button> <button class="btn ghost sm" data-cics="' + c.id + '">Phone alert</button> ' : '<button class="btn ghost sm" data-cs="scheduled" data-id="' + c.id + '">Reopen</button> ') + '<button class="btn ghost sm" data-cedit="' + c.id + '">Edit</button> <button class="btn bad sm" data-cdel="' + c.id + '">Delete</button></td></tr>';
+}
+function drawCalls() {
+  var el = $('#t-calls');
+  if (callsMissing()) { el.innerHTML = '<h2>Calls</h2><div class="card"><p style="line-height:1.7">One-time setup needed: open Supabase → SQL Editor, paste the contents of <b>calls.sql</b> (Claude sent it) and press Run. Then reload this page.</p></div>'; return; }
+  var now = Date.now(), all = D.calls || [];
+  var up = all.filter(function (c) { return c.status === 'scheduled'; }).sort(function (a, b) { return a.call_at < b.call_at ? -1 : 1; });
+  var hist = all.filter(function (c) { return c.status !== 'scheduled'; }).sort(function (a, b) { return a.call_at < b.call_at ? 1 : -1; });
+  var perm = window.Notification ? Notification.permission : 'unsupported';
+  var d0 = new Date(now + 3600000); d0.setMinutes(0, 0, 0);
+  el.innerHTML = '<h2>Calls (' + up.length + ' coming)</h2>' +
+    '<p class="muted" style="margin-bottom:16px">Write down a client who asked for a call. You get an alert on this page and on your browser before the call. Every number stays saved here, and it also shows up in the Contacts tab.</p>' +
+    '<div class="card" style="margin-bottom:14px"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px">' +
+    '<div><label>Name</label><input id="cl-name" placeholder="Client name"></div><div><label>Phone *</label><input id="cl-phone" inputmode="tel" placeholder="01xxxxxxxxx"></div>' +
+    '<div><label>Call date &amp; time *</label><input id="cl-at" type="datetime-local" value="' + toLocalInput(d0.toISOString()) + '"></div>' +
+    '<div><label>Alert before</label><select id="cl-rm"><option value="0">At the time</option><option value="10">10 min</option><option value="15" selected>15 min</option><option value="30">30 min</option><option value="60">1 hour</option></select></div></div>' +
+    '<div style="margin-top:12px"><label>Notes (what they want)</label><input id="cl-notes" placeholder="e.g. wedding 12 Feb, asked about the Gold package"></div>' +
+    '<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn ok" id="cl-save">Save call</button>' +
+    (perm === 'granted' ? '<span class="muted">Browser alerts are on</span>' : perm === 'denied' ? '<span class="muted">Browser alerts are blocked in this browser settings</span>' : perm === 'unsupported' ? '' : '<button class="btn ghost sm" id="cl-perm">Turn on browser alerts</button>') +
+    '<button class="btn ghost sm" id="cl-csv">Download all as CSV</button></div></div>' +
+    '<div class="card tw" style="margin-bottom:14px"><table><thead><tr><th>When</th><th>Name</th><th>Phone</th><th>Notes</th><th></th></tr></thead><tbody>' +
+    (up.length ? up.map(function (c) { return callRow(c, false); }).join('') : '<tr><td colspan="5" class="muted">No calls scheduled.</td></tr>') + '</tbody></table></div>' +
+    (hist.length ? '<h3 style="margin:18px 0 8px;font-size:14px">Past calls (' + hist.length + ')</h3><div class="card tw"><table><thead><tr><th>When</th><th>Name</th><th>Phone</th><th>Notes</th><th>Result</th><th></th></tr></thead><tbody>' + hist.map(function (c) { return callRow(c, true); }).join('') + '</tbody></table></div>' : '');
+}
+$('#t-calls').addEventListener('click', async function (e) {
+  var t = e.target, id;
+  if (t.id === 'cl-perm') { try { await Notification.requestPermission(); } catch (x) {} return drawCalls(); }
+  if (t.id === 'cl-csv') {
+    var q = function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
+    var lines = [['Name', 'Phone', 'Call time', 'Status', 'Notes'].map(q).join(',')].concat((D.calls || []).map(function (c) { return [c.name, c.phone, c.call_at, c.status, c.notes].map(q).join(','); }));
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' })); a.download = 'john-emad-calls.csv'; document.body.appendChild(a); a.click(); a.remove(); return;
+  }
+  if (t.id === 'cl-save') {
+    var ph = $('#cl-phone').value.trim(), at = $('#cl-at').value;
+    if (!ph || String(ph).replace(/\D/g, '').length < 7) return toast('Write the phone number');
+    if (!at) return toast('Choose the call date and time');
+    t.disabled = true;
+    var r = await sb.from('call_leads').insert({ name: $('#cl-name').value.trim() || null, phone: ph, call_at: new Date(at).toISOString(), remind_min: parseInt($('#cl-rm').value, 10), notes: $('#cl-notes').value.trim() || null, status: 'scheduled' }).select().single();
+    t.disabled = false; if (r.error) return toast('Error: ' + r.error.message);
+    D.calls.push(r.data); toast('Call saved'); try { if (window.Notification && Notification.permission === 'default') Notification.requestPermission(); } catch (x) {}
+    return render();
+  }
+  if ((id = t.dataset.cs && t.dataset.id)) return setCall(id, t.dataset.cs);
+  if (t.dataset.cics) { var c1 = D.calls.filter(function (x) { return String(x.id) === t.dataset.cics; })[0]; return c1 && callIcs(c1); }
+  if (t.dataset.cdel) {
+    if (!(await ask('Delete this call and its saved number?', 'Delete', true))) return;
+    var dd = await sb.from('call_leads').delete().eq('id', t.dataset.cdel); if (dd.error) return toast('Error: ' + dd.error.message);
+    D.calls = D.calls.filter(function (x) { return String(x.id) !== t.dataset.cdel; }); return render();
+  }
+  if (t.dataset.cedit) {
+    var c = D.calls.filter(function (x) { return String(x.id) === t.dataset.cedit; })[0]; if (!c) return;
+    modal('<h3 style="margin-bottom:14px">Edit call</h3><label>Name</label><input id="ce-name" value="' + esc(c.name || '') + '"><label style="margin-top:10px">Phone</label><input id="ce-phone" value="' + esc(c.phone) + '"><label style="margin-top:10px">Call date &amp; time</label><input id="ce-at" type="datetime-local" value="' + toLocalInput(c.call_at) + '"><label style="margin-top:10px">Notes</label><input id="ce-notes" value="' + esc(c.notes || '') + '"><div class="acts" style="margin-top:18px"><button class="btn ok" id="ce-ok">Save</button> <button class="btn ghost" id="ce-x">Cancel</button></div>');
+    $('#ce-x').onclick = function () { $('#mask').hidden = true; };
+    $('#ce-ok').onclick = async function () {
+      var n = { name: $('#ce-name').value.trim() || null, phone: $('#ce-phone').value.trim(), call_at: new Date($('#ce-at').value).toISOString(), notes: $('#ce-notes').value.trim() || null };
+      if (!n.phone) return toast('Write the phone number');
+      var u = await sb.from('call_leads').update(n).eq('id', c.id); if (u.error) return toast('Error: ' + u.error.message);
+      Object.assign(c, n); $('#mask').hidden = true; render();
+    };
+  }
+});
+
 /* ---------- contacts (emails and phones of everyone who booked or asked) ---------- */
 var cf = { q: '', offers: false };
 function contactRows() {
@@ -566,6 +693,11 @@ function contactRows() {
     var c = map[key] || (map[key] = { name: b.couple, email: (b.email || '').trim(), phone: b.phone || '', date: b.wedding_date, status: b.status, offers: false, n: 0, at: b.created_at });
     c.n++; if (b.marketing_ok) c.offers = true;
     if (b.created_at >= c.at) { c.at = b.created_at; c.name = b.couple; c.phone = b.phone || c.phone; c.date = b.wedding_date; c.status = b.status; }
+  });
+  (D.calls || []).forEach(function (l) {
+    var dg = String(l.phone || '').replace(/\D/g, '').slice(-9); if (!dg) return;
+    var dup = Object.keys(map).some(function (k) { return String(map[k].phone || '').replace(/\D/g, '').slice(-9) === dg; });
+    if (!dup) map['call:' + dg] = { name: l.name || 'Call lead', email: '', phone: l.phone, date: null, status: 'lead', offers: false, n: 1, at: l.created_at };
   });
   return Object.keys(map).map(function (k) { return map[k]; }).filter(function (c) {
     var q = cf.q.toLowerCase();
@@ -629,7 +761,7 @@ $('#t-links').addEventListener('click', async function (e) {
 });
 
 /* ---------- Website editor (Pixieset-style: Pages / Design / Settings + live preview) ---------- */
-var SITE_DEF = {"hero": [{"src": "/img/home/hero1.jpg", "pos": "50% 66%"}, {"src": "/img/home/hero2.jpg", "pos": "50% 31%"}, {"src": "/img/home/hero3.jpg", "pos": "50% 60%"}], "grid": [{"src": "/img/home/g/01.jpg"}, {"src": "/img/home/g/02.jpg"}, {"src": "/img/home/g/03.jpg"}, {"src": "/img/home/g/04.jpg"}, {"src": "/img/home/g/05.jpg"}, {"src": "/img/home/g/06.jpg"}, {"src": "/img/home/g/07.jpg"}, {"src": "/img/home/g/08.jpg"}, {"src": "/img/home/g/09.jpg"}, {"src": "/img/home/g/10.jpg"}, {"src": "/img/home/g/11.jpg"}, {"src": "/img/home/g/12.jpg"}, {"src": "/img/home/g/13.jpg"}, {"src": "/img/home/g/14.jpg"}, {"src": "/img/home/g/15.jpg"}, {"src": "/img/home/g/16.jpg"}, {"src": "/img/home/g/17.jpg"}, {"src": "/img/home/g/18.jpg"}, {"src": "/img/home/g/19.jpg"}, {"src": "/img/home/g/20.jpg"}, {"src": "/img/home/g/21.jpg"}, {"src": "/img/home/g/22.jpg"}, {"src": "/img/home/g/23.jpg"}, {"src": "/img/home/g/24.jpg"}, {"src": "/img/home/g/25.jpg"}, {"src": "/img/home/g/26.jpg"}, {"src": "/img/home/g/27.jpg"}, {"src": "/img/home/g/28.jpg"}, {"src": "/img/home/g/29.jpg"}, {"src": "/img/home/g/30.jpg"}], "t": {"hero1": "Genuine emotions,", "hero2": "timeless moments.", "story": "Your wedding day is more than an event. It is a collection of emotions, fleeting moments, and meaningful connections. My goal is to keep them in timeless images that feel real, elegant, and deeply personal.", "grid_title": "Selected frames", "connect_btn": "Check availability", "nav_home": "Home", "nav_about": "About", "nav_booking": "Booking", "nav_testimonials": "Testimonials", "plan_lab": "Planned around your day", "plan_h": "Your day, hour by hour.", "plan_p": "Once you book, we send you a private page where you write your wedding day by the clock: getting ready, the ceremony, the first look, the party. Add the people who worked on your wedding and the moments that matter most, so we arrive knowing your story, not just your schedule.", "plan_1": "Your timeline, by the clock", "plan_2": "Everyone who worked on your day, credited with your photos", "plan_3": "The moments and people we must not miss", "plan_btn": "Request availability", "ab_lab": "Meet the photographer", "ab_h": "Hi, I'm john emad", "ab_p1": "i, I’m John  a wedding photographer with a deep passion for capturing genuine emotions and timeless moments.", "ab_p2": "For me, photography is more than just taking pictures; it’s about telling your story in a way that feels authentic, elegant, and unforgettable.", "ab_p3": "I don’t look for stiff, posed images — I focus on real moments filled with true love, laughter, and connection. Your wedding isn’t just an event; it’s a living story, and I’m there to capture those fleeting seconds that mean everything.", "ab_p4": "Over the years, I’ve had the privilege of documenting countless love stories, each one unique and special in its own way. I combine an artistic eye with cinematic tones and documentary-style storytelling to create images that feel alive — images you’ll cherish for a lifetime.", "ab_p5": "Whether it’s an intimate celebration or a grand event, my approach is always the same: to capture the essence of your day with care, creativity, and attention to every detail.", "ab_p6": "If you’re looking for someone who will treat your memories as treasures, I would be honored to be part of your journey.", "ab_p7": "Let’s create something unforgettable together.", "ab_p8": "📧 Email: info@johnemadweddings.com", "ab_p9": "📞 Phone/WhatsApp: +201066600848", "tp_h": "Testimonials", "tp_sub": "Kind words from my amazing clients", "tp_btn": "Booking Now", "bk_h": "Request packages & availability", "bk_sub": "Tell us about your day and we will come back to you with availability.", "bk_note": "After you book, we send you a private page to write your day hour by hour, so we know every moment that matters to you.", "bk_go": "Start your request"}, "connect_text": "Let’s tell your story", "connect": {"src": "/img/home/connect.jpg"}, "tm": [{"name": "Mahomud & Hanaa", "text": "The photos look straight out of Pinterest. Every single image is absolutely breathtaking.", "src": "/img/home/t1.jpg", "pos": "50% 50%"}, {"name": "Marina & Kareem", "text": "You just caught each & every moment. The vibes are a gift. I watch them 90 times a day.", "src": "/img/home/t2.jpg", "pos": "50% 50%"}, {"name": "John & Mizo", "text": "Thanks for your fantastic shots and your perfect touch. You make the day the best.", "src": "/img/home/t3.jpg", "pos": "50% 50%"}, {"name": "Michael & Lucia", "text": "Your professionalism, kindness, and talent were beyond anything we expected. We could not have done our wedding without you.", "src": "/img/home/t4.jpg", "pos": "50% 50%"}, {"name": "Mario & Koka", "text": "Your photos and editing exceeded every expectation. You truly made our wedding day unforgettable.", "src": "/img/home/t5.jpg", "pos": "50% 50%"}, {"name": "Peter & Christeen", "text": "You made us feel completely relaxed all day. Knowing you were behind the camera gave us confidence that every moment would be beautifully captured.", "src": "/img/home/t6.jpg", "pos": "50% 50%"}], "img": {"ab_img": {"src": "../img/G0WPJJ__my-photo-800.jpg"}, "bk_img": {"src": "../img/bookbride-2000.jpg"}}, "pages": [], "tcards": [{"t": "video", "name": "John & Mizo", "ini": "", "text": "", "vid": {"src": "/img/testimonials/feedback.mp4"}, "poster": {"src": "/img/testimonials/feedback.jpg"}, "img": {"pos": "50% 25%"}}, {"t": "photo", "name": "Mahomud & Hanaa", "text": "The photos look straight out of Pinterest. Every single image is absolutely breathtaking.", "img": {"src": "/img/home/t1.jpg", "pos": "50% 50%"}}, {"t": "photo", "name": "Marina & Kareem", "text": "You just caught each & every moment. The vibes are a gift. I watch them 90 times a day.", "img": {"src": "/img/home/t2.jpg", "pos": "50% 50%"}}, {"t": "photo", "name": "John & Mizo", "text": "Thanks for your fantastic shots and your perfect touch. You make the day the best.", "img": {"src": "/img/home/t3.jpg", "pos": "50% 50%"}}, {"t": "photo", "name": "Michael & Lucia", "text": "Your professionalism, kindness, and talent were beyond anything we expected. We could not have done our wedding without you.", "img": {"src": "/img/home/t4.jpg", "pos": "50% 50%"}}, {"t": "photo", "name": "Mario & Koka", "text": "Your photos and editing exceeded every expectation. You truly made our wedding day unforgettable.", "img": {"src": "/img/home/t5.jpg", "pos": "50% 50%"}}, {"t": "photo", "name": "Peter & Christeen", "text": "You made us feel completely relaxed all day. Knowing you were behind the camera gave us confidence that every moment would be beautifully captured.", "img": {"src": "/img/home/t6.jpg", "pos": "50% 50%"}}], "design": {"bg": "#0d0d0c", "text": "#ece7de", "heading": "Instrument Serif", "body": "Jost", "space": "normal", "radius": 2, "logo": 60, "btn": "solid", "motion": true, "intro": "8h"}};
+var SITE_DEF = {"hero": [{"src": "/img/home/hero1.jpg", "pos": "50% 66%"}, {"src": "/img/home/hero2.jpg", "pos": "50% 31%"}, {"src": "/img/home/hero3.jpg", "pos": "50% 60%"}], "grid": [{"src": "/img/home/g/01.jpg"}, {"src": "/img/home/g/02.jpg"}, {"src": "/img/home/g/03.jpg"}, {"src": "/img/home/g/04.jpg"}, {"src": "/img/home/g/05.jpg"}, {"src": "/img/home/g/06.jpg"}, {"src": "/img/home/g/07.jpg"}, {"src": "/img/home/g/08.jpg"}, {"src": "/img/home/g/09.jpg"}, {"src": "/img/home/g/10.jpg"}, {"src": "/img/home/g/11.jpg"}, {"src": "/img/home/g/12.jpg"}, {"src": "/img/home/g/13.jpg"}, {"src": "/img/home/g/14.jpg"}, {"src": "/img/home/g/15.jpg"}, {"src": "/img/home/g/16.jpg"}, {"src": "/img/home/g/17.jpg"}, {"src": "/img/home/g/18.jpg"}, {"src": "/img/home/g/19.jpg"}, {"src": "/img/home/g/20.jpg"}, {"src": "/img/home/g/21.jpg"}, {"src": "/img/home/g/22.jpg"}, {"src": "/img/home/g/23.jpg"}, {"src": "/img/home/g/24.jpg"}, {"src": "/img/home/g/25.jpg"}, {"src": "/img/home/g/26.jpg"}, {"src": "/img/home/g/27.jpg"}, {"src": "/img/home/g/28.jpg"}, {"src": "/img/home/g/29.jpg"}, {"src": "/img/home/g/30.jpg"}], "t": {"hero1": "Genuine emotions,", "hero2": "timeless moments.", "story": "Your wedding day is more than an event. It is a collection of emotions, fleeting moments, and meaningful connections. My goal is to keep them in timeless images that feel real, elegant, and deeply personal.", "grid_title": "Selected frames", "connect_btn": "Check availability", "nav_home": "Home", "nav_about": "About", "nav_booking": "Booking", "nav_testimonials": "Testimonials", "plan_lab": "Planned around your day", "plan_h": "Your day, hour by hour.", "plan_p": "Once you book, we send you a private page where you write your wedding day by the clock: getting ready, the ceremony, the first look, the party. Add the people who worked on your wedding and the moments that matter most, so we arrive knowing your story, not just your schedule.", "plan_1": "Your timeline, by the clock", "plan_2": "Everyone who worked on your day, credited with your photos", "plan_3": "The moments and people we must not miss", "plan_btn": "Request availability", "ab_lab": "About John Emad", "ab_h": "Wedding photographer in Egypt", "ab_p1": "Hi, I’m John. I photograph weddings, engagements and mini weddings, and my job is simple: to catch the real moments of your day, the laughter, the tears and the quiet looks in between.", "ab_s1": "Weddings", "ab_s1d": "Your whole day, told the way it really happened.", "ab_s2": "Engagements", "ab_s2d": "A relaxed session for the two of you before the big day.", "ab_s3": "Mini weddings", "ab_s3d": "Small, intimate celebrations, photographed with the same care.", "ab_p2": "For me, photography is more than taking pictures; it’s about telling your story in a way that feels authentic, elegant and unforgettable.", "ab_p3": "I don’t look for stiff, posed images. I focus on real moments filled with true love, laughter and connection. Your wedding isn’t just an event; it’s a living story, and I’m there to capture the fleeting seconds that mean everything.", "ab_p4": "I combine an artistic eye with cinematic tones and documentary-style storytelling to create images that feel alive, images you’ll cherish for a lifetime.", "ab_p5": "Whether it’s an intimate celebration or a grand event, my approach is always the same: to capture the essence of your day with care, creativity and attention to every detail.", "ab_p6": "If you’re looking for someone who will treat your memories as treasures, I would be honored to be part of your journey.", "ab_cta": "Check my availability", "ab_p8": "📧 Email: info@johnemadweddings.com", "ab_p9": "📞 Phone/WhatsApp: +201066600848", "tp_h": "Testimonials", "tp_sub": "Kind words from my amazing clients", "tp_btn": "Booking Now", "bk_h": "Request packages & availability", "bk_sub": "Tell us about your day and we will come back to you with availability.", "bk_note": "After you book, we send you a private page to write your day hour by hour, so we know every moment that matters to you.", "bk_go": "Start your request"}, "connect_text": "Let’s tell your story", "connect": {"src": "/img/home/connect.jpg"}, "tm": [{"name": "Mahomud & Hanaa", "text": "The photos look straight out of Pinterest. Every single image is absolutely breathtaking.", "src": "/img/home/t1.jpg", "pos": "50% 50%"}, {"name": "Marina & Kareem", "text": "You just caught each & every moment. The vibes are a gift. I watch them 90 times a day.", "src": "/img/home/t2.jpg", "pos": "50% 50%"}, {"name": "John & Mizo", "text": "Thanks for your fantastic shots and your perfect touch. You make the day the best.", "src": "/img/home/t3.jpg", "pos": "50% 50%"}, {"name": "Michael & Lucia", "text": "Your professionalism, kindness, and talent were beyond anything we expected. We could not have done our wedding without you.", "src": "/img/home/t4.jpg", "pos": "50% 50%"}, {"name": "Mario & Koka", "text": "Your photos and editing exceeded every expectation. You truly made our wedding day unforgettable.", "src": "/img/home/t5.jpg", "pos": "50% 50%"}, {"name": "Peter & Christeen", "text": "You made us feel completely relaxed all day. Knowing you were behind the camera gave us confidence that every moment would be beautifully captured.", "src": "/img/home/t6.jpg", "pos": "50% 50%"}], "img": {"ab_img": {"src": "../img/G0WPJJ__my-photo-800.jpg"}, "bk_img": {"src": "../img/bookbride-2000.jpg"}}, "pages": [], "tcards": [{"t": "video", "name": "John & Mizo", "ini": "", "text": "", "vid": {"src": "/img/testimonials/feedback.mp4"}, "poster": {"src": "/img/testimonials/feedback.jpg"}, "img": {"pos": "50% 25%"}}, {"t": "photo", "name": "Mahomud & Hanaa", "text": "The photos look straight out of Pinterest. Every single image is absolutely breathtaking.", "img": {"src": "/img/home/t1.jpg", "pos": "50% 50%"}}, {"t": "photo", "name": "Marina & Kareem", "text": "You just caught each & every moment. The vibes are a gift. I watch them 90 times a day.", "img": {"src": "/img/home/t2.jpg", "pos": "50% 50%"}}, {"t": "photo", "name": "John & Mizo", "text": "Thanks for your fantastic shots and your perfect touch. You make the day the best.", "img": {"src": "/img/home/t3.jpg", "pos": "50% 50%"}}, {"t": "photo", "name": "Michael & Lucia", "text": "Your professionalism, kindness, and talent were beyond anything we expected. We could not have done our wedding without you.", "img": {"src": "/img/home/t4.jpg", "pos": "50% 50%"}}, {"t": "photo", "name": "Mario & Koka", "text": "Your photos and editing exceeded every expectation. You truly made our wedding day unforgettable.", "img": {"src": "/img/home/t5.jpg", "pos": "50% 50%"}}, {"t": "photo", "name": "Peter & Christeen", "text": "You made us feel completely relaxed all day. Knowing you were behind the camera gave us confidence that every moment would be beautifully captured.", "img": {"src": "/img/home/t6.jpg", "pos": "50% 50%"}}], "design": {"bg": "#0d0d0c", "text": "#ece7de", "heading": "Instrument Serif", "body": "Jost", "space": "normal", "radius": 2, "logo": 60, "btn": "solid", "motion": true, "intro": "8h"}};
 var W = { c: null, live: null, dirty: false, saving: false, loaded: false, err: '', slug: '', view: 'pages', tabK: 'pages', path: '/', dev: 'desktop', hasDraft: false, t: null };
 var W_PAGES = [
   { path: '/', name: 'Home', secs: [['hero', 'Hero photos & title'], ['story', 'Intro paragraph'], ['grid', 'Selected frames'], ['tm', 'Testimonials'], ['plan', 'Hour-by-hour section'], ['connect', 'Final call to action']] },
