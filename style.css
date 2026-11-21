@@ -647,3 +647,22 @@ body:not(.menu-open) .hdr--over{--bone:#ece7de;--soft:#cfc9bf;color:#ece7de}
 .rc-x{background:none;border:0;color:inherit;opacity:.7;text-decoration:underline;font-size:13px;cursor:pointer;padding:0}
 .rc-e{margin:6px 0 0;font-size:13px;color:#e7a39b}
 .rc-f{display:block;margin-top:6px;font-size:12px;opacity:.75;text-decoration:underline;cursor:pointer}.rc-f input{display:none}
+
+/* about v2 */
+.about2{display:grid;grid-template-columns:340px minmax(0,1fr);column-gap:clamp(40px,7vw,110px);align-items:start;margin-top:110px}
+.about2 .m{width:340px;height:640px;border-radius:999px;overflow:hidden;background:#2a2a2a;position:sticky;top:110px}
+.about2 .m img{width:100%;height:100%;object-fit:cover}
+.about2 .r{max-width:620px;padding-top:34px;font-size:17px;line-height:1.8;color:var(--soft)}
+.about2 .r .lab{display:block;margin-bottom:18px}
+.about2 .r .big{font-size:clamp(36px,4vw,56px);line-height:1.08;margin:0 0 28px}
+.about2 .r p{margin:0 0 16px}
+.about2 .r p.lead{font-size:clamp(19px,1.7vw,23px);line-height:1.6;color:var(--bone);margin-bottom:30px}
+.about2 .what{list-style:none;margin:0 0 34px;padding:0;border-top:1px solid rgba(255,255,255,.14)}
+.about2 .what li{display:grid;grid-template-columns:150px 1fr;gap:18px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.14)}
+.about2 .what b{font:500 15px/1.5 inherit;letter-spacing:.08em;text-transform:uppercase;color:var(--bone)}
+.about2 .what span{font-size:15.5px;line-height:1.6}
+.about2 p.gap{margin-top:26px}
+.about2 .ab-cta{display:inline-block;margin:6px 0 26px;padding:14px 30px;border:1px solid rgba(255,255,255,.55);border-radius:999px;color:#fff;text-decoration:none;font-size:13px;letter-spacing:.14em;text-transform:uppercase;transition:background .25s,color .25s}
+.about2 .ab-cta:hover{background:#fff;color:#111}
+.about2 .ab-c{font-size:15px;margin:0 0 6px}
+@media(max-width:900px){.about2{display:block;margin-top:40px}.about2 .m{width:70vw;height:112vw;margin:0 auto 34px;position:static}.about2 .r{padding-top:0;font-size:16px}.about2 .what li{grid-template-columns:1fr;gap:4px}}
